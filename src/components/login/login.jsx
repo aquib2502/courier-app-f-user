@@ -66,34 +66,7 @@ const Login = () => {
                                     required
                                 />
                             </div>
-
-                            {/* Phone and Specialization input fields for Sign Up
-                            {!isLogin && (
-                                <>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                                        <input
-                                            type="tel"
-                                            name="mobile"
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
-                                            placeholder="Mobile Number"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="relative">
-                                        <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                                        <input
-                                            type="text"
-                                            name="specialization"
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
-                                            placeholder="Specialization"
-                                            required
-                                        />
-                                    </div>
-                                </>
-                            )} */}
-
+                            
                             {/* Password input field */}
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
