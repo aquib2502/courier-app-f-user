@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { 
-  Home, Package, FileText, Wallet, ChevronDown, ChevronUp, Dot, LogOut, Settings 
-} from "lucide-react";
+  Home, Package, FileText, Wallet, ChevronDown, ChevronUp, Dot, LogOut, Settings, Calculator 
+} from "lucide-react"; // Import Calculator icon for Rate Calculator
 import Link from "next/link";
 import AddOrder from "../orders/addOrder";  // Import AddOrder component
 import Draft from "../orders/Drafts";
@@ -12,6 +12,7 @@ import Manifested from "../orders/Manifested";
 import Dispatched from "../orders/Dispatched";
 import Received from "../orders/Recieved";
 import Cancelled from "../orders/Cancelled";
+import RateCalculator from "../RateCalculator/RateCalculator";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false); // State for Orders dropdown
@@ -41,7 +42,7 @@ const HomePage = () => {
         <div>
           <div className="flex items-center justify-center mb-8">
             <Home className="w-8 h-8 text-emerald-400 mr-2" />
-            <h2 className="text-2xl font-bold">ShipGlobal</h2>
+            <h2 className="text-2xl font-bold">A.S Enterprise</h2>
           </div>
 
           <ul className="space-y-4">
@@ -80,6 +81,14 @@ const HomePage = () => {
                     </li>
                   ))}
                 </ul>
+              </div>
+            </li>
+
+            {/* Rate Calculator Tab - New Addition */}
+            <li>
+              <div onClick={() => handleActiveTab("rate-calculator")} className="flex items-center space-x-4 py-2 cursor-pointer">
+                <Calculator className="w-6 h-6 text-white" />
+                <span>Rate Calculator</span>
               </div>
             </li>
 
@@ -160,8 +169,8 @@ const HomePage = () => {
           </ul>
         </div>
 
-        {/* Logout Button */}
-        <div className="mt-4">
+        {/* Adjusted Logout Button */}
+        <div className="mt-2"> {/* Changed mt-4 to mt-2 */}
           <button className="flex items-center space-x-2 text-white py-2 px-4 hover:bg-emerald-800 rounded w-full">
             <LogOut className="w-6 h-6" />
             <span>Logout</span>
@@ -176,10 +185,11 @@ const HomePage = () => {
         {activeTab === "drafts" && <Draft />}
         {activeTab === "ready" && <Ready />}
         {activeTab === "packed" && <Packed />}
-        {activeTab === "manifested" && <Manifested /> }
+        {activeTab === "manifested" && <Manifested />}
         {activeTab === "dispatched" && <Dispatched />}
-        {activeTab === "received" && <Received /> }
-        {activeTab === "cancelled" && <Cancelled /> }
+        {activeTab === "received" && <Received />}
+        {activeTab === "cancelled" && <Cancelled />}
+        {activeTab === "rate-calculator" && <RateCalculator />} {/* Placeholder for the Rate Calculator Tab */}
       </div>
     </div>
   );
