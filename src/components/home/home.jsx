@@ -13,6 +13,7 @@ import Dispatched from "../orders/Dispatched";
 import Received from "../orders/Recieved";
 import Cancelled from "../orders/Cancelled";
 import RateCalculator from "../RateCalculator/RateCalculator";
+import Dashboard from "../dashboard/dashboard";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false); // State for Orders dropdown
@@ -48,10 +49,10 @@ const HomePage = () => {
           <ul className="space-y-4">
             {/* Dashboard Link */}
             <li>
-              <Link href="/dashboard" className="flex items-center space-x-4 py-2">
-                <Home className="w-6 h-6 text-white" />
+              <div onClick={() => handleActiveTab("dashboard")} className="flex items-center space-x-4 py-2 cursor-pointer">
+                <Calculator className="w-6 h-6 text-white" />
                 <span>Dashboard</span>
-              </Link>
+              </div>
             </li>
 
             {/* Orders Dropdown */}
@@ -181,6 +182,7 @@ const HomePage = () => {
       {/* Main Content */}
       <div className="flex-1 p-6">
         {/* Conditionally render Add Order form */}
+        {activeTab === "dashboard" && <Dashboard />}
         {activeTab === "add-order" && <AddOrder />}
         {activeTab === "drafts" && <Draft />}
         {activeTab === "ready" && <Ready />}
