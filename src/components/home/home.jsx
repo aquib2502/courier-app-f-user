@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {useRouter} from 'next/navigation'
 import { 
   Home, Package, FileText, Wallet, ChevronDown, ChevronUp, Dot, LogOut, Settings, Calculator 
 } from "lucide-react"; // Import Calculator icon for Rate Calculator
@@ -13,37 +14,68 @@ import Dispatched from "../orders/Dispatched";
 import Received from "../orders/Recieved";
 import Cancelled from "../orders/Cancelled";
 import RateCalculator from "../RateCalculator/RateCalculator";
-import Dashboard from "../dashboard/dashboard";
+import Dashboard from "../dashboard/dashboard"; 
+import Navbar from "../layout/navbar";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false); // State for Orders dropdown
   const [isMultiBoxOpen, setIsMultiBoxOpen] = useState(false); // State for MultiBox dropdown
   const [isWalletOpen, setIsWalletOpen] = useState(false); // State for Wallet dropdown
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // State for Settings dropdown
-  const [activeTab, setActiveTab] = useState("dashboard"); // State for active tab (for "Add Order")
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [isClient, setIsClient] = useState(false); // State for active tab (for "Add Order")
 
   const toggleOrders = () => setIsOrdersOpen(!isOrdersOpen);
   const toggleMultiBox = () => setIsMultiBoxOpen(!isMultiBoxOpen);
   const toggleWallet = () => setIsWalletOpen(!isWalletOpen);
   const toggleSettings = () => setIsSettingsOpen(!isSettingsOpen);
 
+
+    const router = useRouter();
+
+    useEffect(() => {
+      // This will run only on the client-side
+      setIsClient(true);
+  
+      // Check if JWT token exists in localStorage
+      const token = localStorage.getItem('token');
+      console.log("Token from localStorage:", token); // Debugging line
+  
+      if (!token) {
+          // If no token found, redirect to the login page
+          router.push('/');
+      }
+  }, [router]);  // The router object is used in the dependency array to ensure it works properly
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Remove the token from localStorage
+    router.push('/'); // Redirect to the login page
+  }
+
+
   // Active and inactive tab styles
-  const activeTabStyle = "bg-blue-600 text-white rounded-md";
-  const inactiveTabStyle = "text-gray-300 hover:bg-emerald-800 rounded-md";
+  const activeTabStyle = "bg-emerald-700 text-white rounded-md";
+  const inactiveTabStyle = "text-white hover:bg-emerald-800 rounded-md";
 
   const handleActiveTab = (tab) => {
     setActiveTab(tab); // Update activeTab state when a tab is clicked
+
+   
   };
 
   return (
+    <div>
+      <Navbar /> {/* Include the Navbar component */}
+ 
     <div className="flex">
+      
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-6 min-h-screen flex flex-col justify-between">
         
         <div>
           <div className="flex items-center justify-center mb-8">
             {/* <Home className="w-8 h-8 text-emerald-400 mr-2" /> */}
-            <h2 className="text-2xl font-bold">A.S Enterprise</h2>
+            
           </div>
 
           <ul className="space-y-4">
@@ -175,7 +207,9 @@ const HomePage = () => {
 
         {/* Adjusted Logout Button */}
         <div className="mt-2"> {/* Changed mt-4 to mt-2 */}
-          <button className="flex items-center space-x-2 text-white py-2 px-4 hover:bg-emerald-800 rounded w-full">
+          <button 
+          onClick={handleLogout}
+          className="flex items-center space-x-2 text-white py-2 px-4 hover:bg-emerald-800 rounded w-full">
             <LogOut className="w-6 h-6" />
             <span>Logout</span>
           </button>
@@ -196,6 +230,7 @@ const HomePage = () => {
         {activeTab === "cancelled" && <Cancelled />}
         {activeTab === "rate-calculator" && <RateCalculator />} {/* Placeholder for the Rate Calculator Tab */}
       </div>
+    </div>
     </div>
   );
 };
