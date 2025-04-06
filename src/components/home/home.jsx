@@ -50,7 +50,7 @@ const HomePage = () => {
             {/* Dashboard Link */}
             <li>
               <div onClick={() => handleActiveTab("dashboard")} className="flex items-center space-x-4 py-2 cursor-pointer">
-                <Calculator className="w-6 h-6 text-white" />
+                <Home className="w-6 h-6 text-white" />
                 <span>Dashboard</span>
               </div>
             </li>
