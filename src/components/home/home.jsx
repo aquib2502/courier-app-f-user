@@ -20,7 +20,7 @@ const HomePage = () => {
   const [isMultiBoxOpen, setIsMultiBoxOpen] = useState(false); // State for MultiBox dropdown
   const [isWalletOpen, setIsWalletOpen] = useState(false); // State for Wallet dropdown
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // State for Settings dropdown
-  const [activeTab, setActiveTab] = useState(""); // State for active tab (for "Add Order")
+  const [activeTab, setActiveTab] = useState("dashboard"); // State for active tab (for "Add Order")
 
   const toggleOrders = () => setIsOrdersOpen(!isOrdersOpen);
   const toggleMultiBox = () => setIsMultiBoxOpen(!isMultiBoxOpen);
@@ -42,14 +42,16 @@ const HomePage = () => {
         
         <div>
           <div className="flex items-center justify-center mb-8">
-            <Home className="w-8 h-8 text-emerald-400 mr-2" />
+            {/* <Home className="w-8 h-8 text-emerald-400 mr-2" /> */}
             <h2 className="text-2xl font-bold">A.S Enterprise</h2>
           </div>
 
           <ul className="space-y-4">
             {/* Dashboard Link */}
             <li>
-              <div onClick={() => handleActiveTab("dashboard")} className="flex items-center space-x-4 py-2 cursor-pointer">
+              <div onClick={() => handleActiveTab("dashboard")} className={`flex items-center space-x-4 py-2 cursor-pointer ${
+                          activeTab === "dashboard" ? activeTabStyle : inactiveTabStyle
+                        }`}>
                 <Home className="w-6 h-6 text-white" />
                 <span>Dashboard</span>
               </div>
@@ -87,7 +89,8 @@ const HomePage = () => {
 
             {/* Rate Calculator Tab - New Addition */}
             <li>
-              <div onClick={() => handleActiveTab("rate-calculator")} className="flex items-center space-x-4 py-2 cursor-pointer">
+              <div onClick={() => handleActiveTab("rate-calculator")} className={`flex items-center space-x-4 py-2 cursor-pointer ${
+                activeTab === "rate-calculator" ? activeTabStyle : inactiveTabStyle }`}>
                 <Calculator className="w-6 h-6 text-white" />
                 <span>Rate Calculator</span>
               </div>
