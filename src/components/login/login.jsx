@@ -10,7 +10,7 @@ const Login = () => {
     const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [fullName, setFullName] = useState('');
+    const [fullname, setfullname] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
@@ -52,20 +52,24 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:5000/api/user/registerUser', {
-                fullName,
+                fullname, // Ensure correct field name
                 email,
                 password,
-                confirmPassword,
+                confirmPassword, // Make sure you're passing `confirmPassword`
             });
+    
             setMessage(response.data.message); // Success message
             setError(''); // Clear error if successful
-
+            router.push('/home'); // Redirect to home page on successful registration
+    
         } catch (err) {
+            console.error('Registration error:', err); // Log the entire error for debugging
             setError(err.response?.data?.message || 'Something went wrong');
             setMessage(''); // Clear success message if error
         }
     };
 
+    
     return (
         <div className="min-h-screen flex">
             {/* Left Section - Form */}
@@ -98,8 +102,8 @@ const Login = () => {
                                         name="name"
                                         className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
                                         placeholder="Full Name"
-                                        value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
+                                        value={fullname}
+                                        onChange={(e) => setfullname(e.target.value)}
                                         required
                                     />
                                 </div>
@@ -138,14 +142,14 @@ const Login = () => {
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
                                     <input
-                                        type="password"
-                                        name="confirmPassword"
-                                        className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
-                                        placeholder="Confirm Password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                    />
+                                    type="password"
+                                    name="confirmPassword" // Ensure this matches the backend field name
+                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)} // Ensure it's bound to `confirmPassword`
+                                    required
+                                />
                                 </div>
                             )}
 
