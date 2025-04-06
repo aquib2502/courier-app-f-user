@@ -1,23 +1,69 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
-import { Sparkles, Mail, Lock, User, Phone, Briefcase, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Router from "next/router"; // Import useRouter from next/router
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+
+    const router = useRouter(); // Initialize the useRouter hook
 
     const handleToggleForm = () => {
         setIsLogin((prev) => !prev); // Toggle the form state between login and signup
     };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // Handle login logic
+        try {
+            // Send login request to backend
+            const response = await axios.post('http://localhost:5000/api/user/loginUser', {
+                email,
+                password,
+            });
+    
+            // Check if response is valid and contains the expected data
+            if (response.status === 200) {
+                setMessage(response.data.message); // Success message
+                setError(''); // Clear error if successful
+    
+                // Redirect to profile page on successful login
+                router.push('/home'); // Navigate to the /home page (or /profile, as needed)
+            } else {
+                setError('Login failed, please try again.'); // In case of an unexpected status
+            }
+        } catch (err) {
+            console.error('Login error:', err); // Log the full error in the console for debugging
+            setError(err.response?.data?.message || 'Something went wrong');
+            setMessage(''); // Clear success message if error
+        }
     };
+    
 
-    const handleRegister = (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
-        // Handle registration logic
+        try {
+            const response = await axios.post('http://localhost:5000/api/user/registerUser', {
+                fullName,
+                email,
+                password,
+                confirmPassword,
+            });
+            setMessage(response.data.message); // Success message
+            setError(''); // Clear error if successful
+
+        } catch (err) {
+            setError(err.response?.data?.message || 'Something went wrong');
+            setMessage(''); // Clear success message if error
+        }
     };
 
     return (
@@ -38,7 +84,9 @@ const Login = () => {
                             </h2>
                         </div>
 
-                        {/* Add your message and error handling here */}
+                        {/* Display error or success message */}
+                        {message && <div className="text-white/80 text-center mb-4">{message}</div>}
+                        {error && <div className="text-red-400 text-center mb-4">{error}</div>}
 
                         <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-6">
                             {/* Name input field for Sign Up */}
@@ -50,6 +98,8 @@ const Login = () => {
                                         name="name"
                                         className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
                                         placeholder="Full Name"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
                                         required
                                     />
                                 </div>
@@ -63,10 +113,12 @@ const Login = () => {
                                     name="email"
                                     className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
                                     placeholder="Email Address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
                             </div>
-                            
+
                             {/* Password input field */}
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
@@ -75,6 +127,8 @@ const Login = () => {
                                     name="password"
                                     className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
                                     placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
                             </div>
@@ -88,6 +142,8 @@ const Login = () => {
                                         name="confirmPassword"
                                         className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all"
                                         placeholder="Confirm Password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
                                     />
                                 </div>
@@ -127,9 +183,9 @@ const Login = () => {
                 transition={{ duration: 0.5 }}
                 className="hidden lg:block w-1/2 relative overflow-hidden"
             >
-                <div 
+                <div
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ 
+                    style={{
                         backgroundImage: "url('./Login-Image.jpg')",
                     }}
                 />
