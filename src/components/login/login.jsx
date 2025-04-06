@@ -32,16 +32,21 @@ const Login = () => {
     
             // Check if response is valid and contains the expected data
             if (response.status === 200) {
-                setMessage(response.data.message); // Success message
+                const { message, token } = response.data;
+    
+                // Store the token in localStorage (or sessionStorage, depending on your use case)
+                localStorage.setItem('token', token);
+                console.log('Token stored:', token); // Log the token for debugging
+    
+                setMessage(message); // Success message
                 setError(''); // Clear error if successful
     
-                // Redirect to profile page on successful login
-                router.push('/home'); // Navigate to the /home page (or /profile, as needed)
+                // Redirect to the home page or protected route
+                router.push('/home');
             } else {
-                setError('Login failed, please try again.'); // In case of an unexpected status
+                setError('Login failed, please try again.');
             }
         } catch (err) {
-            console.error('Login error:', err); // Log the full error in the console for debugging
             setError(err.response?.data?.message || 'Something went wrong');
             setMessage(''); // Clear success message if error
         }
@@ -69,7 +74,7 @@ const Login = () => {
         }
     };
 
-    
+
     return (
         <div className="min-h-screen flex">
             {/* Left Section - Form */}
