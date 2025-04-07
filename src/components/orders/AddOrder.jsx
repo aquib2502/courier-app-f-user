@@ -7,8 +7,43 @@ const AddOrder = () => {
   const [showOrder, setShowOrder] = useState(false);
   const [showItem, setShowItem] = useState(false);
 
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    mobile: "",
+    pickupAddress: "",
+    address1: "",
+    pincode: "",
+    city: "",
+    country: "",
+    state: ""
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setErrors({ ...errors, [field]: "" }); // Clear error on input
+  };
+
   const handleContinueShipment = () => {
-    setShowShipment(true); 
+    const newErrors = {};
+
+    if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
+    if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
+    if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
+    if (!formData.city.trim()) newErrors.city = "City is required";
+    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.state) newErrors.state = "State is required";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      setShowShipment(true);
+    }
   };
 
   const handleContinueOrder = () => {
@@ -27,35 +62,109 @@ const AddOrder = () => {
       <div className="space-y-6">
         <div>
           <label className="block text-emerald-600 mb-2">Select Pickup Address *</label>
-          <select className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <select 
+            className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            value={formData.pickupAddress}
+            onChange={(e) => handleInputChange("pickupAddress", e.target.value)}
+          >
             <option>Select Pickup Address</option>
             <option>Warehouse 1</option>
             <option>Warehouse 2</option>
           </select>
+          {errors.pickupAddress && <p className="text-red-500 text-sm mt-1">{errors.pickupAddress}</p>}
         </div>
 
         <h3 className="text-2xl font-semibold text-emerald-600">Buyer Shipping Details</h3>
         <div className="grid grid-cols-2 gap-6">
-          <input placeholder="First Name *" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <input placeholder="Last Name *" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <input placeholder="Mobile No. *" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <div>
+            <input 
+              placeholder="First Name *" 
+              required
+              value={formData.firstName}
+              onChange={(e) => handleInputChange("firstName", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+          </div>
+
+          <div>
+            <input
+              placeholder="Last Name *"
+              value={formData.lastName}
+              onChange={(e) => handleInputChange("lastName", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full"
+            />
+            {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+          </div>
+
+          <div>
+            <input
+              placeholder="Mobile No. *"
+              value={formData.mobile}
+              onChange={(e) => handleInputChange("mobile", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full"
+            />
+            {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
+          </div>
+
           <input placeholder="Alternate Mobile No." className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           <input placeholder="Email *" className="p-3 border border-emerald-300 rounded-lg col-span-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <select className="w-full p-3 border border-emerald-300 rounded-lg col-span-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option>Select Country</option>
-            <option>USA</option>
-            <option>Canada</option>
-          </select>
-          <input placeholder="Address 1 *" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <div>
+            <select 
+              value={formData.country}
+              onChange={(e) => handleInputChange("country", e.target.value)}
+              className="w-full p-3 border border-emerald-300 rounded-lg col-span-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option>Select Country</option>
+              <option>USA</option>
+              <option>Canada</option>
+            </select>
+            {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country}</p>}
+          </div>
+
+          <div>
+            <input
+              placeholder="Address 1 *"
+              value={formData.address1}
+              onChange={(e) => handleInputChange("address1", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full"
+            />
+            {errors.address1 && <p className="text-red-500 text-sm mt-1">{errors.address1}</p>}
+          </div>
+
           <input placeholder="Landmark" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           <input placeholder="Address 2" className="p-3 border border-emerald-300 rounded-lg col-span-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <input placeholder="Pincode *" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <input placeholder="City *" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <select className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option>Select State</option>
-            <option>California</option>
-            <option>New York</option>
-          </select>
+
+          <div>
+            <input
+              placeholder="Pincode *"
+              value={formData.pincode}
+              onChange={(e) => handleInputChange("pincode", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full"
+            />
+            {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
+          </div>
+
+          <div>
+            <input
+              placeholder="City *"
+              value={formData.city}
+              onChange={(e) => handleInputChange("city", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full"
+            />
+            {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+          </div>
+
+          <div>
+            <select
+              value={formData.state}
+              onChange={(e) => handleInputChange("state", e.target.value)}
+              className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option>Select State</option>
+              <option>California</option>
+              <option>New York</option>
+            </select>
+            {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+          </div>
         </div>
 
         <div className="flex items-center space-x-2 mt-4">
