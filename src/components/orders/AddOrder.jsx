@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Check } from "lucide-react"; // Use Lucide icon
+import axios from "axios";
 
 const AddOrder = () => {
   const [showShipment, setShowShipment] = useState(false);
@@ -13,10 +14,16 @@ const AddOrder = () => {
     mobile: "",
     pickupAddress: "",
     address1: "",
+    address2: "",
     pincode: "",
     city: "",
+    shipmentType: "CSB IV",
     country: "",
-    state: ""
+    state: "",
+    weight: "",
+    length: "",
+    width: "",
+    height: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -34,6 +41,7 @@ const AddOrder = () => {
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
     if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
+    if (!formData.address2.trim()) newErrors.address2 = "Address 2 is required";
     if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
     if (!formData.country) newErrors.country = "Country is required";
@@ -47,12 +55,36 @@ const AddOrder = () => {
   };
 
   const handleContinueOrder = () => {
-    setShowOrder(true); 
+    const newErrors = {};
+
+    if (!formData.weight) newErrors.actualWeight = "Actual Weight is required";
+    if (!formData.length) newErrors.length = "Length is required";
+    if (!formData.width) newErrors.width = "Width is required";
+    if (!formData.height) newErrors.height = "Height is required";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      setShowOrder(true); 
+    }
   };
 
   const handleContinueItem = () => {
     setShowItem(true); 
   };
+
+  const handleSubmitOrder = async () => {
+    try
+    {
+      const response = await axios.post('http://localhost:5000/api/orders/create', formData);
+      console.log(response);
+    }
+    catch (err) {
+      console.error('Submission error:', err); // Log the entire error for debugging
+      setError(err.response?.data?.message || 'Something went wrong');
+      setMessage(''); // Clear success message if error
+    }
+  }
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-8 max-w-4xl mx-auto">
@@ -79,7 +111,6 @@ const AddOrder = () => {
           <div>
             <input 
               placeholder="First Name *" 
-              required
               value={formData.firstName}
               onChange={(e) => handleInputChange("firstName", e.target.value)}
               className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -132,7 +163,15 @@ const AddOrder = () => {
           </div>
 
           <input placeholder="Landmark" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <input placeholder="Address 2" className="p-3 border border-emerald-300 rounded-lg col-span-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <div>
+            <input 
+              placeholder="Address 2 *"
+              value={formData.address2}
+              onChange={(e) => handleInputChange("address2", e.target.value)}
+              className="p-3 border border-emerald-300 rounded-lg col-span-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            {errors.address2 && <p className="text-red-500 text-sm mt-1">{errors.address2}</p>}
+          </div>
 
           <div>
             <input
@@ -187,11 +226,27 @@ const AddOrder = () => {
           <h3 className="text-2xl font-semibold text-emerald-600 mb-4">Shipment Type</h3>
           <div className="space-x-6">
             <label className="inline-flex items-center">
-              <input type="radio" name="shipmentType" value="CSB IV" className="form-radio text-emerald-600" />
+              <input
+                type="radio"
+                name="shipmentType"
+                value="CSB IV"
+                className="form-radio text-emerald-600"
+                onChange={(e) => {
+                  handleInputChange("shipmentType", e.target.value);
+                }}
+                defaultChecked />
               <span className="ml-2">CSB IV</span>
             </label>
             <label className="inline-flex items-center">
-              <input type="radio" name="shipmentType" value="CSB V" className="form-radio text-emerald-600" />
+              <input
+                type="radio"
+                name="shipmentType"
+                value="CSB V"
+                className="form-radio text-emerald-600" 
+                onChange={(e) => {
+                  handleInputChange("shipmentType", e.target.value);
+                }}
+                />
               <span className="ml-2">CSB V</span>
             </label>
           </div>
@@ -199,10 +254,44 @@ const AddOrder = () => {
           <div className="mt-6">
             <h4 className="text-xl font-semibold text-emerald-600">Shipment Details</h4>
             <div className="grid grid-cols-2 gap-6 mt-2">
-              <input placeholder="Actual Weight" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              <input placeholder="Length" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              <input placeholder="Width" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              <input placeholder="Height" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <div>
+                <input
+                  placeholder="Actual Weight *"
+                  value={formData.weight}
+                  onChange={(e) => {
+                    handleInputChange("weight", e.target.value);
+                  }}
+                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors.weight && <p className="text-red-500 text-sm mt-1">{errors.weight}</p>}
+              </div>
+              <div>
+                <input 
+                  placeholder="Length *"
+                  value={formData.length}
+                  onChange={(e) => handleInputChange("length", e.target.value)}
+                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors.length && <p className="text-red-500 text-sm mt-1">{errors.length}</p>}
+              </div>
+              <div>
+                <input
+                  placeholder="Width *"
+                  value={formData.width}
+                  onChange={(e) => handleInputChange("width", e.target.value)}
+                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors.width && <p className="text-red-500 text-sm mt-1">{errors.width}</p>}
+              </div>
+              <div>
+                <input
+                  placeholder="Height *"
+                  value={formData.height}
+                  onChange={(e) => handleInputChange("height", e.target.value)}
+                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors.height && <p className="text-red-500 text-sm mt-1">{errors.height}</p>}
+              </div>
             </div>
           </div>
 
@@ -249,7 +338,8 @@ const AddOrder = () => {
             <button className="bg-emerald-600 text-white py-3 px-6 rounded-lg hover:bg-emerald-700">+ Add</button>
           </div>
 
-          <button className="mt-6 w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center space-x-2">
+          <button onClick={handleSubmitOrder}
+            className="mt-6 w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center space-x-2">
             <Check className="w-5 h-5" />
             <span>Submit Order</span>
           </button>
