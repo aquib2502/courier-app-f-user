@@ -1,12 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import { Check } from "lucide-react"; // Use Lucide icon
+import { Check, X } from "lucide-react"; // Use Lucide icon
 import axios from "axios";
 
 const AddOrder = () => {
   const [showShipment, setShowShipment] = useState(false);
   const [showOrder, setShowOrder] = useState(false);
   const [showItem, setShowItem] = useState(false);
+
+  const [productItems, setProductItems] = useState([
+    { productName: "", productQuantity: "", productPrice: "" }
+  ]);
+  
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -23,7 +28,11 @@ const AddOrder = () => {
     weight: "",
     length: "",
     width: "",
-    height: ""
+    height: "",
+    invoiceNo: "",
+    invoiceDate: "",
+    invoiceCurrency: "",
+    productItems: productItems
   });
 
   const [errors, setErrors] = useState({});
@@ -36,16 +45,16 @@ const AddOrder = () => {
   const handleContinueShipment = () => {
     const newErrors = {};
 
-    if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
-    if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
-    if (!formData.address2.trim()) newErrors.address2 = "Address 2 is required";
-    if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
-    if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.country) newErrors.country = "Country is required";
-    if (!formData.state) newErrors.state = "State is required";
+    // if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
+    // if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    // if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    // if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
+    // if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
+    // if (!formData.address2.trim()) newErrors.address2 = "Address 2 is required";
+    // if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
+    // if (!formData.city.trim()) newErrors.city = "City is required";
+    // if (!formData.country) newErrors.country = "Country is required";
+    // if (!formData.state) newErrors.state = "State is required";
 
     setErrors(newErrors);
 
@@ -57,10 +66,10 @@ const AddOrder = () => {
   const handleContinueOrder = () => {
     const newErrors = {};
 
-    if (!formData.weight) newErrors.actualWeight = "Actual Weight is required";
-    if (!formData.length) newErrors.length = "Length is required";
-    if (!formData.width) newErrors.width = "Width is required";
-    if (!formData.height) newErrors.height = "Height is required";
+    // if (!formData.weight) newErrors.actualWeight = "Actual Weight is required";
+    // if (!formData.length) newErrors.length = "Length is required";
+    // if (!formData.width) newErrors.width = "Width is required";
+    // if (!formData.height) newErrors.height = "Height is required";
 
     setErrors(newErrors);
 
@@ -70,19 +79,64 @@ const AddOrder = () => {
   };
 
   const handleContinueItem = () => {
-    setShowItem(true); 
+    const newErrors = {};
+
+    // if (!formData.invoiceNo) newErrors.invoiceNo = "Invoice number is required";
+    // if (!formData.invoiceCurrency) newErrors.invoiceCurrency = "Invoice currency is required";
+    // if (!formData.invoiceDate) newErrors.invoiceDate = "Invoice date is required";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      setShowItem(true); 
+    }
+  };
+
+  const handleProductItemChange = (index, field, value) => {
+    const updatedItems = [...productItems];
+    updatedItems[index][field] = value;
+    setProductItems(updatedItems);
+  };
+
+  const handleRemoveProductItem = (index) => {
+    const updatedItems = [...productItems];
+    updatedItems.splice(index, 1);
+    setProductItems(updatedItems);
+  };
+  
+
+  const handleAddProductItem = () => {
+    setProductItems([...productItems, { productName: "", productQuantity: "", productPrice: "" }]);
   };
 
   const handleSubmitOrder = async () => {
-    try
-    {
-      const response = await axios.post('http://localhost:5000/api/orders/create', formData);
-      console.log(response);
-    }
-    catch (err) {
-      console.error('Submission error:', err); // Log the entire error for debugging
-      setError(err.response?.data?.message || 'Something went wrong');
-      setMessage(''); // Clear success message if error
+    const newErrors = {};
+
+    // if (!formData.productName) newErrors.productName = "Product name is required";
+    // if (!formData.productQuantity) newErrors.productQuantity = "Product Quantity is required";
+    // if (!formData.productPrice) newErrors.productPrice = "Product Price is required";
+
+    productItems.forEach((item, index) => {
+      if (!item.productName) newErrors[`productName_${index}`] = "Product name is required";
+      if (!item.productQuantity) newErrors[`productQuantity_${index}`] = "Product Quantity is required";
+      if (!item.productPrice) newErrors[`productPrice_${index}`] = "Product Price is required";
+    });
+    
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      try
+      {
+        const payload = { ...formData, productItems };
+        const response = await axios.post('http://localhost:5000/api/orders/create', payload);
+        console.log(response);
+      }
+      catch (err) {
+        console.error('Submission error:', err); // Log the entire error for debugging
+        setError(err.response?.data?.message || 'Something went wrong');
+        setMessage(''); // Clear success message if error
+      }
     }
   }
 
@@ -261,7 +315,7 @@ const AddOrder = () => {
                   onChange={(e) => {
                     handleInputChange("weight", e.target.value);
                   }}
-                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 {errors.weight && <p className="text-red-500 text-sm mt-1">{errors.weight}</p>}
               </div>
@@ -270,7 +324,7 @@ const AddOrder = () => {
                   placeholder="Length *"
                   value={formData.length}
                   onChange={(e) => handleInputChange("length", e.target.value)}
-                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 {errors.length && <p className="text-red-500 text-sm mt-1">{errors.length}</p>}
               </div>
@@ -279,7 +333,7 @@ const AddOrder = () => {
                   placeholder="Width *"
                   value={formData.width}
                   onChange={(e) => handleInputChange("width", e.target.value)}
-                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 {errors.width && <p className="text-red-500 text-sm mt-1">{errors.width}</p>}
               </div>
@@ -288,7 +342,7 @@ const AddOrder = () => {
                   placeholder="Height *"
                   value={formData.height}
                   onChange={(e) => handleInputChange("height", e.target.value)}
-                  className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 {errors.height && <p className="text-red-500 text-sm mt-1">{errors.height}</p>}
               </div>
@@ -310,10 +364,37 @@ const AddOrder = () => {
         <div className="mt-8">
           <h4 className="text-xl font-semibold text-emerald-600">Order Details</h4>
           <div className="grid grid-cols-2 gap-6 mt-2">
-            <input placeholder="Invoice No." className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <input placeholder="Invoice Currency" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <input placeholder="Order Date" type="date" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <input placeholder="ETN Number" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <div>
+              <input
+                placeholder="Invoice No.*"
+                value={formData.invoiceNo}
+                onChange={(e) => handleInputChange("invoiceNo", e.target.value)}
+                className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {errors.invoiceNo && <p className="text-red-500 text-sm mt-1">{errors.invoiceNo}</p>}
+            </div>
+            <div>
+              <input
+                placeholder="Invoice Currency*"
+                value={formData.invoiceCurrency}
+                onChange={(e) => handleInputChange("invoiceCurrency", e.target.value)}
+                className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {errors.invoiceCurrency && <p className="text-red-500 text-sm mt-1">{errors.invoiceCurrency}</p>}
+            </div>
+            <div>
+              <input
+                placeholder="Invoice Date*" 
+                type={formData.invoiceDate ? "date" : "text"}
+                onFocus={(e) => e.target.type = 'date'}
+                onBlur={(e) => !e.target.value && (e.target.type = 'text')}
+                value={formData.invoiceDate}
+                onChange={(e) => handleInputChange("invoiceDate", e.target.value)}
+                className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {errors.invoiceDate && <p className="text-red-500 text-sm mt-1">{errors.invoiceDate}</p>}
+            </div>
+            {/* <input placeholder="ETN Number" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" /> */}
           </div>
 
           <button
@@ -330,13 +411,75 @@ const AddOrder = () => {
       {showItem && (
         <div className="mt-8">
           <h4 className="text-xl font-semibold text-emerald-600">Item Details</h4>
-          <div className="flex items-center space-x-4 mt-4">
-            <input placeholder="Product Name" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <input placeholder="SKU" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <input placeholder="Quantity" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <input placeholder="Price" className="p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <button className="bg-emerald-600 text-white py-3 px-6 rounded-lg hover:bg-emerald-700">+ Add</button>
+          <div className="flex flex-col space-y-4 mt-4">
+          {productItems.map((item, index) => (
+            <div className="relative grid grid-cols-3 gap-6 mb-4" key={index}>
+              {index !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveProductItem(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <div>
+                <input
+                  placeholder="Product Name *"
+                  value={item.productName}
+                  onChange={(e) => handleProductItemChange(index, "productName", e.target.value)}
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors[`productName_${index}`] && <p className="text-red-500 text-sm mt-1">{errors[`productName_${index}`]}</p>}
+              </div>
+              <div>
+                <input
+                  placeholder="Product Quantity *"
+                  value={item.productQuantity}
+                  onChange={(e) => handleProductItemChange(index, "productQuantity", e.target.value)}
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors[`productQuantity_${index}`] && <p className="text-red-500 text-sm mt-1">{errors[`productQuantity_${index}`]}</p>}
+              </div>
+              <div>
+                <input
+                  placeholder="Product Price *"
+                  value={item.productPrice}
+                  onChange={(e) => handleProductItemChange(index, "productPrice", e.target.value)}
+                  className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                {errors[`productPrice_${index}`] && <p className="text-red-500 text-sm mt-1">{errors[`productPrice_${index}`]}</p>}
+              </div>
+            </div>
+          ))}
+            {/* <div>
+              <input
+                placeholder="Product Name*"
+                className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {errors.productName && <p className="text-red-500 text-sm mt-1">{errors.productName}</p>}
+            </div>
+            <div>
+              <input
+                placeholder="Quantity*"
+                className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {errors.productQuantity && <p className="text-red-500 text-sm mt-1">{errors.productQuantity}</p>}
+            </div>
+            <div>
+              <input
+                placeholder="Price*"
+                className="w-full p-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {errors.productPrice && <p className="text-red-500 text-sm mt-1">{errors.productPrice}</p>}
+            </div> */}
           </div>
+
+          <button
+            onClick={handleAddProductItem}
+            className="bg-emerald-600 text-white py-3 px-6 rounded-lg hover:bg-emerald-700 self-start">
+            + Add
+          </button>
 
           <button onClick={handleSubmitOrder}
             className="mt-6 w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center space-x-2">
