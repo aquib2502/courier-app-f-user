@@ -147,7 +147,7 @@ const AddOrder = () => {
         const payload = { ...formData, productItems, user };
         const response = await axios.post('http://localhost:5000/api/orders/create', payload);
         alert("Order submitted successfully!");
-        router.push('')
+        router.push('/home')
         console.log(response);
       }
       catch (err) {

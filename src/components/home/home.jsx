@@ -221,7 +221,9 @@ const HomePage = () => {
         {/* Conditionally render Add Order form */}
         {activeTab === "dashboard" && <Dashboard />}
         {activeTab === "add-order" && <AddOrder />}
-        {activeTab === "drafts" && <Draft />}
+        <div id="drafts-section">
+            {activeTab === "drafts" && <Draft />}
+          </div>
         {activeTab === "ready" && <Ready />}
         {activeTab === "packed" && <Packed />}
         {activeTab === "manifested" && <Manifested />}
