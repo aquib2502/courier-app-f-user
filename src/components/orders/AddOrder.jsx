@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Check, X } from "lucide-react"; // Use Lucide icon
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const AddOrder = () => {
   const [showShipment, setShowShipment] = useState(false);
@@ -11,6 +12,8 @@ const AddOrder = () => {
   const [productItems, setProductItems] = useState([
     { productName: "", productQuantity: "", productPrice: "" }
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+
   
 
   const [formData, setFormData] = useState({
@@ -35,12 +38,16 @@ const AddOrder = () => {
     productItems: productItems
   });
 
+  const [message, setMessage] = useState("");
+
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
     setErrors({ ...errors, [field]: "" }); // Clear error on input
   };
+
+  const router = useRouter();
 
   const handleContinueShipment = () => {
     const newErrors = {};
@@ -128,13 +135,24 @@ const AddOrder = () => {
     if (Object.keys(newErrors).length === 0) {
       try
       {
-        const payload = { ...formData, productItems };
+         // Get userId from localStorage token
+      const token = localStorage.getItem('token');
+      const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null; // Decoding JWT token
+      const user = decodedToken ? decodedToken.userId : null;
+
+      if (!user) {
+        throw new Error("User ID not found. Please log in again.");
+      }
+
+        const payload = { ...formData, productItems, user };
         const response = await axios.post('http://localhost:5000/api/orders/create', payload);
+        alert("Order submitted successfully!");
+        router.push('')
         console.log(response);
       }
       catch (err) {
         console.error('Submission error:', err); // Log the entire error for debugging
-        setError(err.response?.data?.message || 'Something went wrong');
+        setErrors(err.response?.data?.message || 'Something went wrong');
         setMessage(''); // Clear success message if error
       }
     }
@@ -481,11 +499,21 @@ const AddOrder = () => {
             + Add
           </button>
 
-          <button onClick={handleSubmitOrder}
-            className="mt-6 w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center space-x-2">
-            <Check className="w-5 h-5" />
-            <span>Submit Order</span>
-          </button>
+          <button 
+          onClick={handleSubmitOrder}
+          className="mt-6 w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center space-x-2"
+          disabled={isLoading}  // Disable the button while the order is being submitted
+        >
+          {isLoading ? (
+            // Show a spinner (or any loading indicator) while submitting
+            <div className="w-5 h-5 border-4 border-t-4 border-white border-solid rounded-full animate-spin"></div>
+          ) : (
+            <>
+              <Check className="w-5 h-5" />
+              <span>Submit Order</span>
+            </>
+          )}
+        </button>
         </div>
       )}
     </div>
