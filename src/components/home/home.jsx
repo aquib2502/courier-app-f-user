@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import { 
-  Home, Package, FileText, Wallet, ChevronDown, ChevronUp, Dot, LogOut, Settings, Calculator 
-} from "lucide-react"; // Import Calculator icon for Rate Calculator
+  Home, Package, FileText, Wallet, ChevronDown, ChevronUp, 
+  LogOut, Settings, Calculator, Activity, BarChart2
+} from "lucide-react";
 import Link from "next/link";
-import AddOrder from "../orders/addOrder";  // Import AddOrder component
+import AddOrder from "../orders/addOrder";
 import Draft from "../orders/Drafts";
 import Ready from "../orders/Ready";
 import Packed from "../orders/Packed";
@@ -14,225 +15,346 @@ import Dispatched from "../orders/Dispatched";
 import Received from "../orders/Recieved";
 import Cancelled from "../orders/Cancelled";
 import RateCalculator from "../RateCalculator/RateCalculator";
-import Dashboard from "../dashboard/dashboard"; 
+import Dashboard from "../dashboard/dashboard.jsx";
 import Navbar from "../layout/navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HomePage = () => {
-  const [isOrdersOpen, setIsOrdersOpen] = useState(false); // State for Orders dropdown
-  const [isMultiBoxOpen, setIsMultiBoxOpen] = useState(false); // State for MultiBox dropdown
-  const [isWalletOpen, setIsWalletOpen] = useState(false); // State for Wallet dropdown
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // State for Settings dropdown
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [isMultiBoxOpen, setIsMultiBoxOpen] = useState(false);
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isClient, setIsClient] = useState(false); // State for active tab (for "Add Order")
+  const [isClient, setIsClient] = useState(false);
 
   const toggleOrders = () => setIsOrdersOpen(!isOrdersOpen);
   const toggleMultiBox = () => setIsMultiBoxOpen(!isMultiBoxOpen);
   const toggleWallet = () => setIsWalletOpen(!isWalletOpen);
   const toggleSettings = () => setIsSettingsOpen(!isSettingsOpen);
 
+  const router = useRouter();
 
-    const router = useRouter();
-
-    useEffect(() => {
-      // This will run only on the client-side
-      setIsClient(true);
-  
-      // Check if JWT token exists in localStorage
-      const token = localStorage.getItem('token');
-      console.log("Token from localStorage:", token); // Debugging line
-  
-      if (!token) {
-          // If no token found, redirect to the login page
-          router.push('/');
-      }
-  }, [router]);  // The router object is used in the dependency array to ensure it works properly
+  useEffect(() => {
+    setIsClient(true);
+    const token = localStorage.getItem('token');
+    console.log("Token from localStorage:", token);
+    if (!token) {
+      router.push('/');
+    }
+  }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove the token from localStorage
-    router.push('/'); // Redirect to the login page
+    localStorage.removeItem('token');
+    router.push('/');
   }
 
-
-  // Active and inactive tab styles
-  const activeTabStyle = "bg-emerald-700 text-white rounded-md";
-  const inactiveTabStyle = "text-white hover:bg-emerald-800 rounded-md";
-
   const handleActiveTab = (tab) => {
-    setActiveTab(tab); // Update activeTab state when a tab is clicked
+    setActiveTab(tab);
 
-   
+    
+  };
+
+  // Dropdown animation variants
+  const dropdownVariants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: { opacity: 1, height: "auto" }
   };
 
   return (
-    <div>
-      <Navbar /> {/* Include the Navbar component */}
- 
-    <div className="flex">
-      
-      {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-6 min-h-screen flex flex-col justify-between">
-        
-        <div>
-          <div className="flex items-center justify-center mb-8">
-            {/* <Home className="w-8 h-8 text-emerald-400 mr-2" /> */}
-            
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="flex">
+        {/* Sidebar */}
+        <motion.div 
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="w-72 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white p-6 min-h-screen flex flex-col justify-between shadow-xl"
+        >
+          <div>
+            <div className="flex items-center justify-center mb-10">
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-2xl font-bold text-white px-4 py-2 rounded-lg bg-emerald-700/30 backdrop-blur-sm"
+              >
+                Order Management
+              </motion.div>
+            </div>
+
+            <ul className="space-y-2">
+              {/* Dashboard Link */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div 
+                  onClick={() => handleActiveTab("dashboard")} 
+                  className={`flex items-center space-x-4 py-3 px-4 cursor-pointer rounded-lg transition-all duration-200
+                    ${activeTab === "dashboard" 
+                      ? "bg-emerald-700/90 text-white shadow-md" 
+                      : "text-white hover:bg-emerald-800/50"}`}
+                >
+                  <BarChart2 className="w-5 h-5" />
+                  <span className="font-medium">Dashboard</span>
+                </div>
+              </motion.li>
+
+              {/* Orders Dropdown */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div 
+                  onClick={toggleOrders} 
+                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-4">
+                    <Package className="w-5 h-5" />
+                    <span className="font-medium">Orders</span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: isOrdersOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                </div>
+                <AnimatePresence>
+                  {isOrdersOpen && (
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={dropdownVariants}
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
+                    >
+                      <ul className="space-y-1">
+                        {["Add Order", "Drafts", "Ready", "Packed", "Manifested", "Dispatched", "Received", "Cancelled"].map((item) => (
+                          <motion.li 
+                            key={item} 
+                            whileHover={{ x: 3 }}
+                            className="my-1"
+                          >
+                            <button
+                              onClick={() => handleActiveTab(item.toLowerCase().replace(" ", "-"))}
+                              className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
+                                activeTab === item.toLowerCase().replace(" ", "-") 
+                                  ? "bg-emerald-600/80 text-white" 
+                                  : "text-gray-200 hover:bg-emerald-700/30"
+                              }`}
+                            >
+                              <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>{item}</span>
+                            </button>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.li>
+
+              {/* Rate Calculator Tab */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div 
+                  onClick={() => handleActiveTab("rate-calculator")} 
+                  className={`flex items-center space-x-4 py-3 px-4 cursor-pointer rounded-lg transition-all duration-200
+                    ${activeTab === "rate-calculator" 
+                      ? "bg-emerald-700/90 text-white shadow-md" 
+                      : "text-white hover:bg-emerald-800/50"}`}
+                >
+                  <Calculator className="w-5 h-5" />
+                  <span className="font-medium">Rate Calculator</span>
+                </div>
+              </motion.li>
+
+              {/* MultiBox Orders Dropdown */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div 
+                  onClick={toggleMultiBox} 
+                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-4">
+                    <FileText className="w-5 h-5" />
+                    <span className="font-medium">MultiBox Orders</span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: isMultiBoxOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                </div>
+                <AnimatePresence>
+                  {isMultiBoxOpen && (
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={dropdownVariants}
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
+                    >
+                      <ul className="space-y-1">
+                        {["Add Multibox Order", "Drafts", "Ready", "Packed", "Manifested", "Dispatched", "Processed", "Cancelled"].map((item) => (
+                          <motion.li 
+                            key={item} 
+                            whileHover={{ x: 3 }}
+                            className="my-1"
+                          >
+                            <Link 
+                              href={`/multibox-orders/${item.toLowerCase().replace(" ", "-")}`}
+                              className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
+                            >
+                              {item}
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.li>
+
+              {/* Wallet Dropdown */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div 
+                  onClick={toggleWallet} 
+                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-4">
+                    <Wallet className="w-5 h-5" />
+                    <span className="font-medium">Wallet</span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: isWalletOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                </div>
+                <AnimatePresence>
+                  {isWalletOpen && (
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={dropdownVariants}
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
+                    >
+                      <ul className="space-y-1">
+                        {["Recharge Wallet", "Wallet History", "Transactions"].map((item) => (
+                          <motion.li 
+                            key={item} 
+                            whileHover={{ x: 3 }}
+                            className="my-1"
+                          >
+                            <Link 
+                              href={`/wallet/${item.toLowerCase().replace(" ", "-")}`}
+                              className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
+                            >
+                              {item}
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.li>
+
+              {/* Settings Dropdown */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div 
+                  onClick={toggleSettings} 
+                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-4">
+                    <Settings className="w-5 h-5" />
+                    <span className="font-medium">Settings</span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: isSettingsOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                </div>
+                <AnimatePresence>
+                  {isSettingsOpen && (
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={dropdownVariants}
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
+                    >
+                      <ul className="space-y-1">
+                        {["Profile", "Pickup Addresses", "Preferences"].map((item) => (
+                          <motion.li 
+                            key={item} 
+                            whileHover={{ x: 3 }}
+                            className="my-1"
+                          >
+                            <Link 
+                              href={`/settings/${item.toLowerCase().replace(" ", "-")}`}
+                              className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
+                            >
+                              {item}
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.li>
+            </ul>
           </div>
 
-          <ul className="space-y-4">
-            {/* Dashboard Link */}
-            <li>
-              <div onClick={() => handleActiveTab("dashboard")} className={`flex items-center space-x-4 py-2 cursor-pointer ${
-                          activeTab === "dashboard" ? activeTabStyle : inactiveTabStyle
-                        }`}>
-                <Home className="w-6 h-6 text-white" />
-                <span>Dashboard</span>
-              </div>
-            </li>
+          {/* Logout Button */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="mt-6"
+          >
+            <button 
+              onClick={handleLogout}
+              className="flex items-center justify-center space-x-3 w-full py-3 px-4 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition-all duration-300"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </motion.div>
+        </motion.div>
 
-            {/* Orders Dropdown */}
-            <li>
-              <div onClick={toggleOrders} className="flex items-center space-x-4 py-2 cursor-pointer">
-                <Package className="w-6 h-6 text-white" />
-                <span>Orders</span>
-                {isOrdersOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-              <div
-                className={`ml-8 transition-all duration-300 ease-in-out overflow-hidden ${
-                  isOrdersOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                <ul className="mt-1 space-y-1 text-sm">
-                  {["Add Order", "Drafts", "Ready", "Packed", "Manifested", "Dispatched", "Received", "Cancelled"].map((item) => (
-                    <li key={item} className="flex items-center space-x-2 py-1 mr-16 font-bold">
-                      <Dot className="w-3 h-3 text-emerald-300" />
-                      <button
-                        onClick={() => handleActiveTab(item.toLowerCase().replace(" ", "-"))}
-                        className={`block w-full py-1 px-3 transition-all duration-300 ${
-                          activeTab === item.toLowerCase().replace(" ", "-") ? activeTabStyle : inactiveTabStyle
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-
-            {/* Rate Calculator Tab - New Addition */}
-            <li>
-              <div onClick={() => handleActiveTab("rate-calculator")} className={`flex items-center space-x-4 py-2 cursor-pointer ${
-                activeTab === "rate-calculator" ? activeTabStyle : inactiveTabStyle }`}>
-                <Calculator className="w-6 h-6 text-white" />
-                <span>Rate Calculator</span>
-              </div>
-            </li>
-
-            {/* MultiBox Orders Dropdown */}
-            <li>
-              <div onClick={toggleMultiBox} className="flex items-center space-x-4 py-2 cursor-pointer">
-                <FileText className="w-6 h-6 text-white" />
-                <span>MultiBox Orders</span>
-                {isMultiBoxOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-              <div
-                className={`ml-8 transition-all duration-300 ease-in-out overflow-hidden ${
-                  isMultiBoxOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                <ul className="mt-1 space-y-1 text-sm">
-                  {["Add Multibox Order", "Drafts", "Ready", "Packed", "Manifested", "Dispatched", "Processed", "Cancelled"].map((item) => (
-                    <li key={item} className="flex items-center space-x-2 py-1">
-                      <Dot className="w-3 h-3 text-emerald-300" />
-                      <Link href={`/multibox-orders/${item.toLowerCase().replace(" ", "-")}`} className="block">
-                        {item}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-
-            {/* Wallet Dropdown */}
-            <li>
-              <div onClick={toggleWallet} className="flex items-center space-x-4 py-2 cursor-pointer">
-                <Wallet className="w-6 h-6 text-white" />
-                <span>Wallet</span>
-                {isWalletOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-              <div
-                className={`ml-8 transition-all duration-300 ease-in-out overflow-hidden ${
-                  isWalletOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                <ul className="mt-1 space-y-1 text-sm">
-                  {["Recharge Wallet", "Wallet History", "Transactions"].map((item) => (
-                    <li key={item} className="flex items-center space-x-2 py-1">
-                      <Dot className="w-3 h-3 text-emerald-300" />
-                      <Link href={`/wallet/${item.toLowerCase().replace(" ", "-")}`} className="block">
-                        {item}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-
-            {/* Settings Dropdown */}
-            <li>
-              <div onClick={toggleSettings} className="flex items-center space-x-4 py-2 cursor-pointer">
-                <Settings className="w-6 h-6 text-white" />
-                <span>Settings</span>
-                {isSettingsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-              <div
-                className={`ml-8 transition-all duration-300 ease-in-out overflow-hidden ${
-                  isSettingsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                <ul className="mt-1 space-y-1 text-sm">
-                  {["Profile", "Pickup Addresses", "Preferences"].map((item) => (
-                    <li key={item} className="flex items-center space-x-2 py-1">
-                      <Dot className="w-3 h-3 text-emerald-300" />
-                      <Link href={`/settings/${item.toLowerCase().replace(" ", "-")}`} className="block">
-                        {item}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        {/* Adjusted Logout Button */}
-        <div className="mt-2"> {/* Changed mt-4 to mt-2 */}
-          <button 
-          onClick={handleLogout}
-          className="flex items-center space-x-2 text-white py-2 px-4 hover:bg-emerald-800 rounded w-full">
-            <LogOut className="w-6 h-6" />
-            <span>Logout</span>
-          </button>
-        </div>
+        {/* Main Content */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="flex-1 p-8 max-h-screen overflow-y-auto"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* {activeTab === "dashboard" && <Dashboard />} */}
+              {activeTab === "dashboard" && <Dashboard />}
+              {activeTab === "add-order" && <AddOrder />}
+              {activeTab === "drafts" && <Draft />}
+              {activeTab === "ready" && <Ready />}
+              {activeTab === "packed" && <Packed />}
+              {activeTab === "manifested" && <Manifested />}
+              {activeTab === "dispatched" && <Dispatched />}
+              {activeTab === "received" && <Received />}
+              {activeTab === "cancelled" && <Cancelled />}
+              {activeTab === "rate-calculator" && <RateCalculator />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-6">
-        {/* Conditionally render Add Order form */}
-        {activeTab === "dashboard" && <Dashboard />}
-        {activeTab === "add-order" && <AddOrder />}
-        <div id="drafts-section">
-            {activeTab === "drafts" && <Draft />}
-          </div>
-        {activeTab === "ready" && <Ready />}
-        {activeTab === "packed" && <Packed />}
-        {activeTab === "manifested" && <Manifested />}
-        {activeTab === "dispatched" && <Dispatched />}
-        {activeTab === "received" && <Received />}
-        {activeTab === "cancelled" && <Cancelled />}
-        {activeTab === "rate-calculator" && <RateCalculator />} {/* Placeholder for the Rate Calculator Tab */}
-      </div>
-    </div>
     </div>
   );
 };
