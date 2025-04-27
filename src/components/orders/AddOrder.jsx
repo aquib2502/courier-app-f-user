@@ -52,16 +52,16 @@ const AddOrder = () => {
   const handleContinueShipment = () => {
     const newErrors = {};
 
-    // if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
-    // if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    // if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    // if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
-    // if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
-    // if (!formData.address2.trim()) newErrors.address2 = "Address 2 is required";
-    // if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
-    // if (!formData.city.trim()) newErrors.city = "City is required";
-    // if (!formData.country) newErrors.country = "Country is required";
-    // if (!formData.state) newErrors.state = "State is required";
+    if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
+    if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
+    if (!formData.address2.trim()) newErrors.address2 = "Address 2 is required";
+    if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
+    if (!formData.city.trim()) newErrors.city = "City is required";
+    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.state) newErrors.state = "State is required";
 
     setErrors(newErrors);
 
@@ -73,10 +73,10 @@ const AddOrder = () => {
   const handleContinueOrder = () => {
     const newErrors = {};
 
-    // if (!formData.weight) newErrors.actualWeight = "Actual Weight is required";
-    // if (!formData.length) newErrors.length = "Length is required";
-    // if (!formData.width) newErrors.width = "Width is required";
-    // if (!formData.height) newErrors.height = "Height is required";
+    if (!formData.weight) newErrors.weight = "Actual Weight is required";
+    if (!formData.length) newErrors.length = "Length is required";
+    if (!formData.width) newErrors.width = "Width is required";
+    if (!formData.height) newErrors.height = "Height is required";
 
     setErrors(newErrors);
 
@@ -88,9 +88,9 @@ const AddOrder = () => {
   const handleContinueItem = () => {
     const newErrors = {};
 
-    // if (!formData.invoiceNo) newErrors.invoiceNo = "Invoice number is required";
-    // if (!formData.invoiceCurrency) newErrors.invoiceCurrency = "Invoice currency is required";
-    // if (!formData.invoiceDate) newErrors.invoiceDate = "Invoice date is required";
+    if (!formData.invoiceNo) newErrors.invoiceNo = "Invoice number is required";
+    if (!formData.invoiceCurrency) newErrors.invoiceCurrency = "Invoice currency is required";
+    if (!formData.invoiceDate) newErrors.invoiceDate = "Invoice date is required";
 
     setErrors(newErrors);
 
