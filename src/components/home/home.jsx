@@ -1,9 +1,18 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
-import { useRouter } from 'next/navigation';
-import { 
-  Home, Package, FileText, Wallet, ChevronDown, ChevronUp, 
-  LogOut, Settings, Calculator, Activity, BarChart2
+import React, { useEffect, useState, useRef} from "react";
+import { useRouter } from "next/navigation";
+import {
+  Home,
+  Package,
+  FileText,
+  Wallet,
+  ChevronDown,
+  ChevronUp,
+  LogOut,
+  Settings,
+  Calculator,
+  Activity,
+  BarChart2,
 } from "lucide-react";
 import Link from "next/link";
 import AddOrder from "../orders/addOrder";
@@ -37,35 +46,33 @@ const HomePage = () => {
 
   useEffect(() => {
     setIsClient(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     console.log("Token from localStorage:", token);
     if (!token) {
-      router.push('/');
+      router.push("/");
     }
   }, [router]);
 
   const scrollToDrafts = () => {
     setActiveTab("drafts"); // Change the tab
     setTimeout(() => {
-      draftsRef.current?.scrollIntoView({ behavior: 'smooth' });
+      draftsRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100); // Wait a bit to allow the tab to render
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    router.push('/');
-  }
+    localStorage.removeItem("token");
+    router.push("/");
+  };
 
   const handleActiveTab = (tab) => {
     setActiveTab(tab);
-
-    
   };
 
   // Dropdown animation variants
   const dropdownVariants = {
     hidden: { opacity: 0, height: 0 },
-    visible: { opacity: 1, height: "auto" }
+    visible: { opacity: 1, height: "auto" },
   };
 
   return (
@@ -73,7 +80,7 @@ const HomePage = () => {
       <Navbar />
       <div className="flex">
         {/* Sidebar */}
-        <motion.div 
+        <motion.div
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -81,7 +88,7 @@ const HomePage = () => {
         >
           <div>
             <div className="flex items-center justify-center mb-10">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="text-2xl font-bold text-white px-4 py-2 rounded-lg bg-emerald-700/30 backdrop-blur-sm"
@@ -93,12 +100,14 @@ const HomePage = () => {
             <ul className="space-y-2">
               {/* Dashboard Link */}
               <motion.li whileHover={{ x: 5 }}>
-                <div 
-                  onClick={() => handleActiveTab("dashboard")} 
+                <div
+                  onClick={() => handleActiveTab("dashboard")}
                   className={`flex items-center space-x-4 py-3 px-4 cursor-pointer rounded-lg transition-all duration-200
-                    ${activeTab === "dashboard" 
-                      ? "bg-emerald-700/90 text-white shadow-md" 
-                      : "text-white hover:bg-emerald-800/50"}`}
+                    ${
+                      activeTab === "dashboard"
+                        ? "bg-emerald-700/90 text-white shadow-md"
+                        : "text-white hover:bg-emerald-800/50"
+                    }`}
                 >
                   <BarChart2 className="w-5 h-5" />
                   <span className="font-medium">Dashboard</span>
@@ -107,8 +116,8 @@ const HomePage = () => {
 
               {/* Orders Dropdown */}
               <motion.li whileHover={{ x: 5 }}>
-                <div 
-                  onClick={toggleOrders} 
+                <div
+                  onClick={toggleOrders}
                   className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
                 >
                   <div className="flex items-center space-x-4">
@@ -133,21 +142,44 @@ const HomePage = () => {
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
                       <ul className="space-y-1">
-                        {["Add Order", "Drafts", "Ready", "Packed", "Manifested", "Dispatched", "Received", "Cancelled"].map((item) => (
-                          <motion.li 
-                            key={item} 
+                        {[
+                          "Add Order",
+                          "Drafts",
+                          "Ready",
+                          "Packed",
+                          "Manifested",
+                          "Dispatched",
+                          "Received",
+                          "Cancelled",
+                        ].map((item) => (
+                          <motion.li
+                            key={item}
                             whileHover={{ x: 3 }}
                             className="my-1"
                           >
                             <button
-                              onClick={() => handleActiveTab(item.toLowerCase().replace(" ", "-"))}
+                              onClick={() =>
+                                handleActiveTab(
+                                  item.toLowerCase().replace(" ", "-")
+                                )
+                              }
                               className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
-                                activeTab === item.toLowerCase().replace(" ", "-") 
-                                  ? "bg-emerald-600/80 text-white" 
+                                activeTab ===
+                                item.toLowerCase().replace(" ", "-")
+                                  ? "bg-emerald-600/80 text-white"
                                   : "text-gray-200 hover:bg-emerald-700/30"
                               }`}
                             >
-                              <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>{item}</span>
+                              <span
+                                className={
+                                  activeTab ===
+                                  item.toLowerCase().replace(" ", "-")
+                                    ? "font-medium"
+                                    : ""
+                                }
+                              >
+                                {item}
+                              </span>
                             </button>
                           </motion.li>
                         ))}
@@ -159,12 +191,14 @@ const HomePage = () => {
 
               {/* Rate Calculator Tab */}
               <motion.li whileHover={{ x: 5 }}>
-                <div 
-                  onClick={() => handleActiveTab("rate-calculator")} 
+                <div
+                  onClick={() => handleActiveTab("rate-calculator")}
                   className={`flex items-center space-x-4 py-3 px-4 cursor-pointer rounded-lg transition-all duration-200
-                    ${activeTab === "rate-calculator" 
-                      ? "bg-emerald-700/90 text-white shadow-md" 
-                      : "text-white hover:bg-emerald-800/50"}`}
+                    ${
+                      activeTab === "rate-calculator"
+                        ? "bg-emerald-700/90 text-white shadow-md"
+                        : "text-white hover:bg-emerald-800/50"
+                    }`}
                 >
                   <Calculator className="w-5 h-5" />
                   <span className="font-medium">Rate Calculator</span>
@@ -173,8 +207,8 @@ const HomePage = () => {
 
               {/* MultiBox Orders Dropdown */}
               <motion.li whileHover={{ x: 5 }}>
-                <div 
-                  onClick={toggleMultiBox} 
+                <div
+                  onClick={toggleMultiBox}
                   className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
                 >
                   <div className="flex items-center space-x-4">
@@ -199,14 +233,25 @@ const HomePage = () => {
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
                       <ul className="space-y-1">
-                        {["Add Multibox Order", "Drafts", "Ready", "Packed", "Manifested", "Dispatched", "Processed", "Cancelled"].map((item) => (
-                          <motion.li 
-                            key={item} 
+                        {[
+                          "Add Multibox Order",
+                          "Drafts",
+                          "Ready",
+                          "Packed",
+                          "Manifested",
+                          "Dispatched",
+                          "Processed",
+                          "Cancelled",
+                        ].map((item) => (
+                          <motion.li
+                            key={item}
                             whileHover={{ x: 3 }}
                             className="my-1"
                           >
-                            <Link 
-                              href={`/multibox-orders/${item.toLowerCase().replace(" ", "-")}`}
+                            <Link
+                              href={`/multibox-orders/${item
+                                .toLowerCase()
+                                .replace(" ", "-")}`}
                               className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
                             >
                               {item}
@@ -221,8 +266,8 @@ const HomePage = () => {
 
               {/* Wallet Dropdown */}
               <motion.li whileHover={{ x: 5 }}>
-                <div 
-                  onClick={toggleWallet} 
+                <div
+                  onClick={toggleWallet}
                   className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
                 >
                   <div className="flex items-center space-x-4">
@@ -247,14 +292,20 @@ const HomePage = () => {
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
                       <ul className="space-y-1">
-                        {["Recharge Wallet", "Wallet History", "Transactions"].map((item) => (
-                          <motion.li 
-                            key={item} 
+                        {[
+                          "Recharge Wallet",
+                          "Wallet History",
+                          "Transactions",
+                        ].map((item) => (
+                          <motion.li
+                            key={item}
                             whileHover={{ x: 3 }}
                             className="my-1"
                           >
-                            <Link 
-                              href={`/wallet/${item.toLowerCase().replace(" ", "-")}`}
+                            <Link
+                              href={`/wallet/${item
+                                .toLowerCase()
+                                .replace(" ", "-")}`}
                               className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
                             >
                               {item}
@@ -269,8 +320,8 @@ const HomePage = () => {
 
               {/* Settings Dropdown */}
               <motion.li whileHover={{ x: 5 }}>
-                <div 
-                  onClick={toggleSettings} 
+                <div
+                  onClick={toggleSettings}
                   className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
                 >
                   <div className="flex items-center space-x-4">
@@ -295,20 +346,24 @@ const HomePage = () => {
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
                       <ul className="space-y-1">
-                        {["Profile", "Pickup Addresses", "Preferences"].map((item) => (
-                          <motion.li 
-                            key={item} 
-                            whileHover={{ x: 3 }}
-                            className="my-1"
-                          >
-                            <Link 
-                              href={`/settings/${item.toLowerCase().replace(" ", "-")}`}
-                              className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
+                        {["Profile", "Pickup Addresses", "Preferences"].map(
+                          (item) => (
+                            <motion.li
+                              key={item}
+                              whileHover={{ x: 3 }}
+                              className="my-1"
                             >
-                              {item}
-                            </Link>
-                          </motion.li>
-                        ))}
+                              <Link
+                                href={`/settings/${item
+                                  .toLowerCase()
+                                  .replace(" ", "-")}`}
+                                className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
+                              >
+                                {item}
+                              </Link>
+                            </motion.li>
+                          )
+                        )}
                       </ul>
                     </motion.div>
                   )}
@@ -318,12 +373,12 @@ const HomePage = () => {
           </div>
 
           {/* Logout Button */}
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="mt-6"
           >
-            <button 
+            <button
               onClick={handleLogout}
               className="flex items-center justify-center space-x-3 w-full py-3 px-4 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition-all duration-300"
             >
@@ -334,7 +389,7 @@ const HomePage = () => {
         </motion.div>
 
         {/* Main Content */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.4 }}
@@ -351,13 +406,15 @@ const HomePage = () => {
               {/* {activeTab === "dashboard" && <Dashboard />} */}
               {activeTab === "dashboard" && <Dashboard />}
               <section>
-        {activeTab === "add-order" && <AddOrder scrollToDrafts={scrollToDrafts} />}
-        {activeTab === "drafts" && (
-          <section id="drafts" ref={draftsRef}>
-            <Draft />
-          </section>
-        )}
-      </section>
+                {activeTab === "addOrder" && (
+                 <AddOrder scrollToDrafts={scrollToDrafts}/>
+                )}
+                {activeTab === "drafts" && (
+                  <section id="drafts" ref={draftsRef}>
+                    <Draft />
+                  </section>
+                )}
+              </section>
               {activeTab === "ready" && <Ready />}
               {activeTab === "packed" && <Packed />}
               {activeTab === "manifested" && <Manifested />}
