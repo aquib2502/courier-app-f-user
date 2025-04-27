@@ -405,16 +405,8 @@ const HomePage = () => {
             >
               {/* {activeTab === "dashboard" && <Dashboard />} */}
               {activeTab === "dashboard" && <Dashboard />}
-              <section>
-                {activeTab === "addOrder" && (
-                 <AddOrder scrollToDrafts={scrollToDrafts}/>
-                )}
-                {activeTab === "drafts" && (
-                  <section id="drafts" ref={draftsRef}>
-                    <Draft />
-                  </section>
-                )}
-              </section>
+              {activeTab === "add-order" && <AddOrder />}
+              {activeTab === "drafts" && <Draft />}
               {activeTab === "ready" && <Ready />}
               {activeTab === "packed" && <Packed />}
               {activeTab === "manifested" && <Manifested />}
