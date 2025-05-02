@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import { Check, X } from "lucide-react"; // Use Lucide icon
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const AddOrder = () => {
   const [showShipment, setShowShipment] = useState(false);
@@ -146,13 +149,16 @@ const AddOrder = () => {
 
         const payload = { ...formData, productItems, user };
         const response = await axios.post('http://localhost:5000/api/orders/create', payload);
-        alert("Order submitted successfully!");
-        router.push('/home')
+        toast.success("Order submitted successfully!");
+
+        router.push("?tab=drafts", undefined, { shallow: true });
+
         console.log(response);
       }
       catch (err) {
         console.error('Submission error:', err); // Log the entire error for debugging
-        setErrors(err.response?.data?.message || 'Something went wrong');
+        toast.error("Something went wrong");
+
         setMessage(''); // Clear success message if error
       }
     }
@@ -161,6 +167,7 @@ const AddOrder = () => {
   return (
     <div className="bg-white shadow-lg rounded-xl p-8 max-w-4xl mx-auto">
       <h2 className="text-3xl font-semibold mb-6 text-emerald-700">Add Order</h2>
+      <ToastContainer position="top-right" autoClose={3000} />
 
       {/* First Section: Buyer Shipping Details */}
       <div className="space-y-6">

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef} from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   Home,
   Package,
@@ -27,6 +28,9 @@ import RateCalculator from "../RateCalculator/RateCalculator";
 import Dashboard from "../dashboard/dashboard.jsx";
 import Navbar from "../layout/navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import RechargeWallet from "../wallet/RechargeWallet";
+import WalletHistory from "../wallet/WalletHistory";
+import TransactionHistory from "../wallet/TransactionHistory";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -35,7 +39,8 @@ const HomePage = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isClient, setIsClient] = useState(false);
-  const draftsRef = useRef(null);
+  const [balance, setBalance] = useState(0);
+
 
   const toggleOrders = () => setIsOrdersOpen(!isOrdersOpen);
   const toggleMultiBox = () => setIsMultiBoxOpen(!isMultiBoxOpen);
@@ -43,6 +48,26 @@ const HomePage = () => {
   const toggleSettings = () => setIsSettingsOpen(!isSettingsOpen);
 
   const router = useRouter();
+  const searchParams = useSearchParams()
+
+   // 👇 Recharge handler
+   const handleRecharge = (amount) => {
+    setBalance((prev) => prev + amount);
+  };
+
+  useEffect(() => {
+    setIsClient(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/");
+    }
+
+    const tab = searchParams.get("tab"); // get tab from URL
+    if (tab) {
+      setActiveTab(tab); // set activeTab from URL
+    }
+  }, [router, searchParams]); // depend on searchParams
 
   useEffect(() => {
     setIsClient(true);
@@ -53,12 +78,7 @@ const HomePage = () => {
     }
   }, [router]);
 
-  const scrollToDrafts = () => {
-    setActiveTab("drafts"); // Change the tab
-    setTimeout(() => {
-      draftsRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100); // Wait a bit to allow the tab to render
-  };
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -67,6 +87,7 @@ const HomePage = () => {
 
   const handleActiveTab = (tab) => {
     setActiveTab(tab);
+    router.push(`?tab=${tab}`, { shallow: true });
   };
 
   // Dropdown animation variants
@@ -77,7 +98,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar balance = {balance}/>
       <div className="flex">
         {/* Sidebar */}
         <motion.div
@@ -291,28 +312,26 @@ const HomePage = () => {
                       transition={{ duration: 0.2 }}
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
-                      <ul className="space-y-1">
-                        {[
-                          "Recharge Wallet",
-                          "Wallet History",
-                          "Transactions",
-                        ].map((item) => (
-                          <motion.li
-                            key={item}
-                            whileHover={{ x: 3 }}
-                            className="my-1"
-                          >
-                            <Link
-                              href={`/wallet/${item
-                                .toLowerCase()
-                                .replace(" ", "-")}`}
-                              className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
-                            >
-                              {item}
-                            </Link>
-                          </motion.li>
-                        ))}
-                      </ul>
+                  <ul className="space-y-1">
+  {["Recharge Wallet", "Wallet History", "Transactions"].map((item) => (
+    <motion.li key={item} whileHover={{ x: 3 }} className="my-1">
+      <button
+        onClick={() =>
+          handleActiveTab(item.toLowerCase().replace(" ", "-"))
+        }
+        className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
+          activeTab === item.toLowerCase().replace(" ", "-")
+            ? "bg-emerald-600/80 text-white"
+            : "text-gray-200 hover:bg-emerald-700/30"
+        }`}
+      >
+        <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>
+          {item}
+        </span>
+      </button>
+    </motion.li>
+  ))}
+</ul>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -414,6 +433,13 @@ const HomePage = () => {
               {activeTab === "received" && <Received />}
               {activeTab === "cancelled" && <Cancelled />}
               {activeTab === "rate-calculator" && <RateCalculator />}
+             {/* 👇 RechargeWallet receives handleRecharge */}
+             {activeTab === "recharge-wallet" && (
+                <RechargeWallet onRecharge={handleRecharge} />
+              )}
+
+              {activeTab === "wallet-history" && <WalletHistory />}
+              {activeTab === "transactions" && <TransactionHistory />}
             </motion.div>
           </AnimatePresence>
         </motion.div>

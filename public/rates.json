@@ -1,0 +1,192 @@
+[
+    { "weight": 0.050, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 404 },
+    { "weight": 0.050, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 850 },
+    { "weight": 0.100, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 450 },
+    { "weight": 0.100, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 950 },
+    { "weight": 0.150, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 550 },
+    { "weight": 0.150, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1150 },
+    { "weight": 0.200, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 590 },
+    { "weight": 0.200, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1150 },
+    { "weight": 0.250, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 655 },
+    { "weight": 0.250, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1350 },
+    { "weight": 0.300, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 690 },
+    { "weight": 0.300, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1350 },
+    { "weight": 0.350, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 719 },
+    { "weight": 0.350, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1500 },
+    { "weight": 0.400, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 765 },
+    { "weight": 0.400, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1500 },
+    { "weight": 750, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 1350 },
+    { "weight": 750, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 1800 },
+    { "weight": 1000, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 1550 },
+    { "weight": 1000, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 2000 },
+    { "weight": 1250, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 1650 },
+    { "weight": 1250, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 2100 },
+    { "weight": 1500, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 1750 },
+    { "weight": 1500, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 2200 },
+    { "weight": 1750, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 1850 },
+    { "weight": 1750, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 2300 },
+    { "weight": 2000, "dest_country": "United States (USA)", "package": "Cheaper", "rate": 2050 },
+    { "weight": 2000, "dest_country": "United States (Remote)", "package": "Cheaper", "rate": 2500 },
+
+
+
+    { "weight": 0.050, "dest_country": "United States (USA)", "package": "Premium", "rate": 600 },
+    { "weight": 0.050, "dest_country": "United States (Remote)", "package": "Premium", "rate": 980 },
+    { "weight": 0.050, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 750 },
+    { "weight": 0.050, "dest_country": "Australia", "package": "Premium", "rate": 980 },
+    { "weight": 0.050, "dest_country": "Canada", "package": "Premium", "rate": 980 },
+    { "weight": 0.050, "dest_country": "Rest of World", "package": "Premium", "rate": 1140 },
+    
+    { "weight": 0.100, "dest_country": "United States (USA)", "package": "Premium", "rate": 700 },
+    { "weight": 0.100, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1130 },
+    { "weight": 0.100, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 840 },
+    { "weight": 0.100, "dest_country": "Australia", "package": "Premium", "rate": 1030 },
+    { "weight": 0.100, "dest_country": "Canada", "package": "Premium", "rate": 1030 },
+    { "weight": 0.100, "dest_country": "Rest of World", "package": "Premium", "rate": 1180 },
+    
+    { "weight": 0.150, "dest_country": "United States (USA)", "package": "Premium", "rate": 800 },
+    { "weight": 0.150, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1200 },
+    { "weight": 0.150, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 920 },
+    { "weight": 0.150, "dest_country": "Australia", "package": "Premium", "rate": 1270 },
+    { "weight": 0.150, "dest_country": "Canada", "package": "Premium", "rate": 1270 },
+    { "weight": 0.150, "dest_country": "Rest of World", "package": "Premium", "rate": 1220 },
+    
+    { "weight": 0.200, "dest_country": "United States (USA)", "package": "Premium", "rate": 900 },
+    { "weight": 0.200, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1220 },
+    { "weight": 0.200, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1000 },
+    { "weight": 0.200, "dest_country": "Australia", "package": "Premium", "rate": 1290 },
+    { "weight": 0.200, "dest_country": "Canada", "package": "Premium", "rate": 1290 },
+    { "weight": 0.200, "dest_country": "Rest of World", "package": "Premium", "rate": 1240 },
+    
+    { "weight": 0.250, "dest_country": "United States (USA)", "package": "Premium", "rate": 1000 },
+    { "weight": 0.250, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1260 },
+    { "weight": 0.250, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1070 },
+    { "weight": 0.250, "dest_country": "Australia", "package": "Premium", "rate": 1330 },
+    { "weight": 0.250, "dest_country": "Canada", "package": "Premium", "rate": 1330 },
+    { "weight": 0.250, "dest_country": "Rest of World", "package": "Premium", "rate": 1280 },
+    
+    { "weight": 0.300, "dest_country": "United States (USA)", "package": "Premium", "rate": 1100 },
+    { "weight": 0.300, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1300 },
+    { "weight": 0.300, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1140 },
+    { "weight": 0.300, "dest_country": "Australia", "package": "Premium", "rate": 1370 },
+    { "weight": 0.300, "dest_country": "Canada", "package": "Premium", "rate": 1370 },
+    { "weight": 0.300, "dest_country": "Rest of World", "package": "Premium", "rate": 1320 },
+    
+    { "weight": 0.350, "dest_country": "United States (USA)", "package": "Premium", "rate": 1200 },
+    { "weight": 0.350, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1330 },
+    { "weight": 0.350, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1210 },
+    { "weight": 0.350, "dest_country": "Australia", "package": "Premium", "rate": 1400 },
+    { "weight": 0.350, "dest_country": "Canada", "package": "Premium", "rate": 1400 },
+    { "weight": 0.350, "dest_country": "Rest of World", "package": "Premium", "rate": 1350 },
+    
+    { "weight": 0.400, "dest_country": "United States (USA)", "package": "Premium", "rate": 1300 },
+    { "weight": 0.400, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1360 },
+    { "weight": 0.400, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1280 },
+    { "weight": 0.400, "dest_country": "Australia", "package": "Premium", "rate": 1430 },
+    { "weight": 0.400, "dest_country": "Canada", "package": "Premium", "rate": 1430 },
+    { "weight": 0.400, "dest_country": "Rest of World", "package": "Premium", "rate": 1380 },
+    
+    { "weight": 0.450, "dest_country": "United States (USA)", "package": "Premium", "rate": 1400 },
+    { "weight": 0.450, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1460 },
+    { "weight": 0.450, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1350 },
+    { "weight": 0.450, "dest_country": "Australia", "package": "Premium", "rate": 1530 },
+    { "weight": 0.450, "dest_country": "Canada", "package": "Premium", "rate": 1530 },
+    { "weight": 0.450, "dest_country": "Rest of World", "package": "Premium", "rate": 1480 },
+    
+    { "weight": 0.500, "dest_country": "United States (USA)", "package": "Premium", "rate": 1500 },
+    { "weight": 0.500, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1570 },
+    { "weight": 0.500, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1430 },
+    { "weight": 0.500, "dest_country": "Australia", "package": "Premium", "rate": 1640 },
+    { "weight": 0.500, "dest_country": "Canada", "package": "Premium", "rate": 1640 },
+    { "weight": 0.500, "dest_country": "Rest of World", "package": "Premium", "rate": 1590 },
+    
+    { "weight": 0.600, "dest_country": "United States (USA)", "package": "Premium", "rate": 1600 },
+    { "weight": 0.600, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1630 },
+    { "weight": 0.600, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1550 },
+    { "weight": 0.600, "dest_country": "Australia", "package": "Premium", "rate": 1700 },
+    { "weight": 0.600, "dest_country": "Canada", "package": "Premium", "rate": 1700 },
+    { "weight": 0.600, "dest_country": "Rest of World", "package": "Premium", "rate": 1650 },
+    
+    { "weight": 0.700, "dest_country": "United States (USA)", "package": "Premium", "rate": 1700 },
+    { "weight": 0.700, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1680 },
+    { "weight": 0.700, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1670 },
+    { "weight": 0.700, "dest_country": "Australia", "package": "Premium", "rate": 1750 },
+    { "weight": 0.700, "dest_country": "Canada", "package": "Premium", "rate": 1750 },
+    { "weight": 0.700, "dest_country": "Rest of World", "package": "Premium", "rate": 1700 },
+    
+    { "weight": 0.800, "dest_country": "United States (USA)", "package": "Premium", "rate": 1800 },
+    { "weight": 0.800, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1740 },
+    { "weight": 0.800, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1790 },
+    { "weight": 0.800, "dest_country": "Australia", "package": "Premium", "rate": 1810 },
+    { "weight": 0.800, "dest_country": "Canada", "package": "Premium", "rate": 1810 },
+    { "weight": 0.800, "dest_country": "Rest of World", "package": "Premium", "rate": 1760 },
+    
+    { "weight": 0.900, "dest_country": "United States (USA)", "package": "Premium", "rate": 1900 },
+    { "weight": 0.900, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1790 },
+    { "weight": 0.900, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 1910 },
+    { "weight": 0.900, "dest_country": "Australia", "package": "Premium", "rate": 1860 },
+    { "weight": 0.900, "dest_country": "Canada", "package": "Premium", "rate": 1860 },
+    { "weight": 0.900, "dest_country": "Rest of World", "package": "Premium", "rate": 1810 },
+    
+    { "weight": 1.000, "dest_country": "United States (USA)", "package": "Premium", "rate": 2000 },
+    { "weight": 1.000, "dest_country": "United States (Remote)", "package": "Premium", "rate": 1850 },
+    { "weight": 1.000, "dest_country": "United Kingdom (UK)", "package": "Premium", "rate": 2030 },
+    { "weight": 1.000, "dest_country": "Australia", "package": "Premium", "rate": 1920 },
+    { "weight": 1.000, "dest_country": "Canada", "package": "Premium", "rate": 1920 },
+    { "weight": 1.000, "dest_country": "Rest of World", "package": "Premium", "rate": 1870 },
+
+
+
+
+    {
+        "weight": 0.5,
+        "dest_country": "United States (USA)",
+        "package": "UPS",
+        "rate": 2200
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "United Kingdom (UK)",
+        "package": "UPS",
+        "rate": 2300
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "Europe",
+        "package": "UPS",
+        "rate": 2300
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "Canada",
+        "package": "UPS",
+        "rate": 2300
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "United States (USA)",
+        "package": "DHL",
+        "rate": 2700
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "United Kingdom (UK)",
+        "package": "DHL",
+        "rate": 2800
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "Europe",
+        "package": "DHL",
+        "rate": 2800
+    },
+    {
+        "weight": 0.5,
+        "dest_country": "Canada",
+        "package": "DHL",
+        "rate": 2800
+    }
+      
+      
+  ]
+  

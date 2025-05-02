@@ -2,14 +2,16 @@
 import React, { useState } from "react";
 import { User, Wallet, Package, HelpCircle, Bell, ChevronDown, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
-const Navbar = () => {
+const Navbar = ({balance}) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
   const toggleNotifications = () => setShowNotifications(!showNotifications);
   const toggleProfileMenu = () => setShowProfileMenu(!showProfileMenu);
 
+  const router = useRouter()
   return (
     <div className="w-full bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-full px-6 py-3 flex items-center justify-between">
@@ -90,8 +92,9 @@ const Navbar = () => {
             whileTap={{ scale: 0.97 }}
             className="flex items-center space-x-2 cursor-pointer p-2 rounded-md bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-100 transition-all duration-200"
           >
-            <Wallet className="w-5 h-5 text-green-600" />
-            <span className="text-green-600 font-medium">Rs. 2,178.00</span>
+            <Wallet 
+            className="w-5 h-5 text-green-600" />
+            <span className="text-green-600 font-medium">Rs.{balance}</span>
           </motion.div>
 
           {/* Pickup Request */}

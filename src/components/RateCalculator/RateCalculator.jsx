@@ -1,95 +1,142 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const RateCalculator = () => {
-  const [weight, setWeight] = useState('0.1'); // Initial weight
+  const [weight, setWeight] = useState('0.1');
+  const [errors, setErrors] = useState({});
   const [pickUpCountry, setPickUpCountry] = useState('India');
   const [destinationCountry, setDestinationCountry] = useState('United States (USA)');
   const [postcode, setPostcode] = useState('');
   const [calculated, setCalculated] = useState(false);
+  const [rates, setRates] = useState([]);
+  const [filteredRates, setFilteredRates] = useState([]);
 
-  // Handle change in input fields
+  useEffect(() => {
+    fetch('/rates.json')
+      .then(res => res.json())
+      .then(data => setRates(data))
+      .catch(err => console.error('Error loading rates:', err));
+  }, []);
+
   const handleWeightChange = (e) => setWeight(e.target.value);
   const handlePostcodeChange = (e) => setPostcode(e.target.value);
 
-  // Handle calculation
-  const handleCalculate = () => setCalculated(true);
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleCalculate();
+    }
+  };
+
+  const handleCalculate = () => {
+    if (!weight || parseFloat(weight) <= 0) {
+      setErrors({weight: "Weight is required and must be greater than 0"});
+      setCalculated(false);
+      return;
+    } else if (!postcode) {
+      setErrors({postcode: "PostalCode cannot be empty"});
+      setCalculated(false);
+      return;
+    }
+
+    setErrors({});
+    setCalculated(true);
+    setFilteredRates(rates.filter(
+      (r) =>
+        r.dest_country === destinationCountry && Number(r.weight).toFixed(3) === Number(weight).toFixed(3)
+    ));
+  };
+  
 
   return (
-    <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-8 rounded-lg shadow-lg">
-      {/* Form Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
-            Pick-up Country <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={pickUpCountry}
-            onChange={(e) => setPickUpCountry(e.target.value)}
-            className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+    <div>
+      <h1 className="text-2xl font-extrabold mb-2 text-gray-800">Rate Calulator</h1>
+      <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-8 rounded-lg shadow-lg">
+        {/* Form Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <label className="block text-sm font-semibold text-gray-200 mb-2">
+              Pick-up Country <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={pickUpCountry}
+              onChange={(e) => setPickUpCountry(e.target.value)}
+              className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            >
+              <option value="India">India</option>
+              {/* Add more options here */}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-200 mb-2">
+              Country/Region <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={destinationCountry}
+              onChange={(e) => setDestinationCountry(e.target.value)}
+              className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            >
+              <option value="India">India</option>
+              <option value="United States (USA)">United States (USA)</option>
+              <option value="United States (Remote)">United States (Remote)</option>
+              <option value="United Kingdom (UK)">United Kingdom (UK)</option>
+              <option value="Europe">Europe</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="Rest of World">Rest of World</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <label className="block text-sm font-semibold text-gray-200 mb-2">
+              Weight <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              value={weight}
+              onChange={handleWeightChange}
+              onKeyDown={handleKeyDown}
+              className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              min="0.1"
+              step="0.1"
+            />
+            {errors.weight && (
+              <p className="text-red-500 text-md mt-1">{errors.weight}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-200 mb-2">
+              Postcode <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={postcode}
+              onKeyDown={handleKeyDown}
+              onChange={handlePostcodeChange}
+              className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              placeholder="Postcode"
+            />
+            {errors.postcode && (
+              <p className="text-red-500 text-md mt-1">{errors.postcode}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="text-center mb-8">
+          <button
+            onClick={handleCalculate}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-full w-1/2 md:w-1/3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
           >
-            <option value="India">India</option>
-            <option value="United States (USA)">United States (USA)</option>
-            {/* Add more options here */}
-          </select>
+            Calculate
+          </button>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
-            Country/Region <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={destinationCountry}
-            onChange={(e) => setDestinationCountry(e.target.value)}
-            className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-          >
-            <option value="United States (USA)">United States (USA)</option>
-            {/* Add more options here */}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
-            Weight <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            value={weight}
-            onChange={handleWeightChange}
-            className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            min="0.1"
-            step="0.1"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
-            Postcode <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={postcode}
-            onChange={handlePostcodeChange}
-            className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            placeholder="Postcode"
-          />
-        </div>
-      </div>
-
-      <div className="text-center mb-8">
-        <button
-          onClick={handleCalculate}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-full w-1/2 md:w-1/3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-        >
-          Calculate
-        </button>
-      </div>
-
-      {/* Results Section */}
-      {calculated && (
+        {/* Results Section */}
+        {calculated && filteredRates.length > 0 && (
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          {/* <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="text-center">
               <p className="text-lg font-bold text-gray-800">Dead Weight</p>
               <p className="text-xl font-semibold text-emerald-600">{weight} KG</p>
@@ -102,25 +149,23 @@ const RateCalculator = () => {
               <p className="text-lg font-bold text-gray-800">Billed Weight</p>
               <p className="text-xl font-semibold text-emerald-600">{weight} KG</p>
             </div>
-          </div>
+          </div> */}
 
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-lg text-emerald-600 font-extrabold mt-3.5">ShipGlobal Super Saver</p>
-              <p className="text-lg font-semibold text-emerald-600">Rs. 379</p>
+          {filteredRates.map((rate, index) => (
+            <div key={index} className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-lg text-emerald-600 font-extrabold mt-2">
+                  AS Enterprise {rate.package}
+                </p>
+                <p className="text-lg font-semibold text-emerald-600">Rs. {rate.rate}</p>
+              </div>
+              <p className="text-sm text-gray-600">Estimated Transit: 6 - 12 Days</p>
             </div>
-            <p className="text-sm text-gray-600">Estimated Transit: 8 - 12 Days</p>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-lg text-emerald-600 font-extrabold">ShipGlobal Direct</p>
-              <p className="text-lg font-semibold text-emerald-600">Rs. 447</p>
-            </div>
-            <p className="text-sm text-gray-600">Estimated Transit: 7 - 10 Days</p>
-          </div>
+          ))}
         </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 };

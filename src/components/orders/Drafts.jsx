@@ -309,7 +309,7 @@ const Draft = () => {
                       <td className="px-4 py-3 text-sm font-medium text-emerald-700">{order.invoiceNo}</td>
                       <td className="px-4 py-3">
                         <div className="text-sm text-gray-800 font-medium">{order.firstName} {order.lastName}</div>
-                        <div className="text-xs text-gray-500">{order.email || 'No email provided'}</div>
+                        {/* <div className="text-xs text-gray-500">{order.email || 'No email provided'}</div> */}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center">
