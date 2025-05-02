@@ -28,21 +28,41 @@ const RateCalculator = () => {
 
   const handleCalculate = () => {
     if (!weight || parseFloat(weight) <= 0) {
-      setErrors({weight: "Weight is required and must be greater than 0"});
+      setErrors({ weight: "Weight is required and must be greater than 0" });
       setCalculated(false);
       return;
     } else if (!postcode) {
-      setErrors({postcode: "PostalCode cannot be empty"});
+      setErrors({ postcode: "PostalCode cannot be empty" });
       setCalculated(false);
       return;
     }
-
+  
     setErrors({});
     setCalculated(true);
-    setFilteredRates(rates.filter(
-      (r) =>
-        r.dest_country === destinationCountry && Number(r.weight).toFixed(3) === Number(weight).toFixed(3)
-    ));
+  
+    const userWeight = parseFloat(weight);
+  
+    // Filter all rates for the selected destination country
+    const destinationRates = rates.filter(
+      (r) => r.dest_country === destinationCountry
+    );
+  
+    // Group by package and select the closest lower or equal weight for each package
+    const bestRates = [];
+  
+    const uniquePackages = [...new Set(destinationRates.map(r => r.package))];
+  
+    uniquePackages.forEach(pkg => {
+      const packageRates = destinationRates
+        .filter(r => r.package === pkg && parseFloat(r.weight) <= userWeight)
+        .sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight));
+  
+      if (packageRates.length > 0) {
+        bestRates.push(packageRates[0]);
+      }
+    });
+  
+    setFilteredRates(bestRates);
   };
   
 
@@ -136,21 +156,6 @@ const RateCalculator = () => {
         {/* Results Section */}
         {calculated && filteredRates.length > 0 && (
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          {/* <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">Dead Weight</p>
-              <p className="text-xl font-semibold text-emerald-600">{weight} KG</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">Volumetric Weight</p>
-              <p className="text-xl font-semibold text-emerald-600">0.00 KG</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">Billed Weight</p>
-              <p className="text-xl font-semibold text-emerald-600">{weight} KG</p>
-            </div>
-          </div> */}
-
           {filteredRates.map((rate, index) => (
             <div key={index} className="mb-4">
               <div className="flex justify-between items-center mb-2">
