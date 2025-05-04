@@ -18,12 +18,12 @@ const Dashboard = () => {
       {/* Alternative solution using Next.js Image */}
       
       <Image
-  src="/air_cargo_image.jpg"
+  src="/air_cargo_image_2.jpg"
   alt="Dashboard Background"
   fill
-  sizes="40vw"
+  sizes="100vw"
   priority
-  style={{ objectFit: "cover" }}
+  style={{ objectFit: "contain" }}
   className="opacity-90 py"
 />
      

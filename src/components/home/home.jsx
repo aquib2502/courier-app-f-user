@@ -41,7 +41,6 @@ const HomePage = () => {
   const [isClient, setIsClient] = useState(false);
   const [balance, setBalance] = useState(0);
 
-
   const toggleOrders = () => setIsOrdersOpen(!isOrdersOpen);
   const toggleMultiBox = () => setIsMultiBoxOpen(!isMultiBoxOpen);
   const toggleWallet = () => setIsWalletOpen(!isWalletOpen);
@@ -50,9 +49,14 @@ const HomePage = () => {
   const router = useRouter();
   const searchParams = useSearchParams()
 
-   // 👇 Recharge handler
-   const handleRecharge = (amount) => {
+  // Recharge handler
+  const handleRecharge = (amount) => {
     setBalance((prev) => prev + amount);
+  };
+
+  // Function to update balance when order is placed
+  const handleOrderPayment = (amount) => {
+    setBalance((prev) => prev - amount);
   };
 
   useEffect(() => {
@@ -61,24 +65,31 @@ const HomePage = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/");
+      return;
     }
 
-    const tab = searchParams.get("tab"); // get tab from URL
+    const tab = searchParams.get("tab");
     if (tab) {
-      setActiveTab(tab); // set activeTab from URL
+      setActiveTab(tab);
     }
-  }, [router, searchParams]); // depend on searchParams
 
-  useEffect(() => {
-    setIsClient(true);
-    const token = localStorage.getItem("token");
-    console.log("Token from localStorage:", token);
-    if (!token) {
-      router.push("/");
-    }
-  }, [router]);
+    // Fetch initial wallet balance
+    const fetchWalletBalance = async () => {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userId = decodedToken.userId;
 
+        // Fetch wallet balance from your API
+        const response = await fetch(`http://localhost:5000/api/wallet/balance/${userId}`);
+        const data = await response.json();
+        setBalance(data.balance || 0);
+      } catch (error) {
+        console.error('Error fetching wallet balance:', error);
+      }
+    };
 
+    fetchWalletBalance();
+  }, [router, searchParams]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -98,7 +109,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar balance = {balance}/>
+      <Navbar balance={balance} />
       <div className="flex">
         {/* Sidebar */}
         <motion.div
@@ -312,26 +323,26 @@ const HomePage = () => {
                       transition={{ duration: 0.2 }}
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
-                  <ul className="space-y-1">
-  {["Recharge Wallet", "Wallet History", "Transactions"].map((item) => (
-    <motion.li key={item} whileHover={{ x: 3 }} className="my-1">
-      <button
-        onClick={() =>
-          handleActiveTab(item.toLowerCase().replace(" ", "-"))
-        }
-        className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
-          activeTab === item.toLowerCase().replace(" ", "-")
-            ? "bg-emerald-600/80 text-white"
-            : "text-gray-200 hover:bg-emerald-700/30"
-        }`}
-      >
-        <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>
-          {item}
-        </span>
-      </button>
-    </motion.li>
-  ))}
-</ul>
+                      <ul className="space-y-1">
+                        {["Recharge Wallet", "Wallet History", "Transactions"].map((item) => (
+                          <motion.li key={item} whileHover={{ x: 3 }} className="my-1">
+                            <button
+                              onClick={() =>
+                                handleActiveTab(item.toLowerCase().replace(" ", "-"))
+                              }
+                              className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
+                                activeTab === item.toLowerCase().replace(" ", "-")
+                                  ? "bg-emerald-600/80 text-white"
+                                  : "text-gray-200 hover:bg-emerald-700/30"
+                              }`}
+                            >
+                              <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>
+                                {item}
+                              </span>
+                            </button>
+                          </motion.li>
+                        ))}
+                      </ul>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -422,9 +433,8 @@ const HomePage = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {/* {activeTab === "dashboard" && <Dashboard />} */}
               {activeTab === "dashboard" && <Dashboard />}
-              {activeTab === "add-order" && <AddOrder />}
+              {activeTab === "add-order" && <AddOrder walletBalance={balance} onOrderPayment={handleOrderPayment} />}
               {activeTab === "drafts" && <Draft />}
               {activeTab === "ready" && <Ready />}
               {activeTab === "packed" && <Packed />}
@@ -433,11 +443,9 @@ const HomePage = () => {
               {activeTab === "received" && <Received />}
               {activeTab === "cancelled" && <Cancelled />}
               {activeTab === "rate-calculator" && <RateCalculator />}
-             {/* 👇 RechargeWallet receives handleRecharge */}
-             {activeTab === "recharge-wallet" && (
+              {activeTab === "recharge-wallet" && (
                 <RechargeWallet onRecharge={handleRecharge} />
               )}
-
               {activeTab === "wallet-history" && <WalletHistory />}
               {activeTab === "transactions" && <TransactionHistory />}
             </motion.div>
