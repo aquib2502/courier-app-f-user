@@ -5,7 +5,7 @@ const RateCalculator = () => {
   const [errors, setErrors] = useState({});
   const [pickUpCountry, setPickUpCountry] = useState('India');
   const [destinationCountry, setDestinationCountry] = useState('United States (USA)');
-  const [postcode, setPostcode] = useState('');
+  const [postcode, setPostcode] = useState('400059');
   const [calculated, setCalculated] = useState(false);
   const [rates, setRates] = useState([]);
   const [filteredRates, setFilteredRates] = useState([]);
@@ -67,6 +67,7 @@ const RateCalculator = () => {
   
 
   return (
+    <div className="min-h-[calc(100vh-200px)] flex flex-col">
     <div>
       <h1 className="text-2xl font-extrabold mb-2 text-gray-800">Rate Calulator</h1>
       <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-8 rounded-lg shadow-lg">
@@ -171,6 +172,7 @@ const RateCalculator = () => {
         )}
 
       </div>
+    </div>
     </div>
   );
 };

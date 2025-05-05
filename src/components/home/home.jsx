@@ -16,7 +16,7 @@ import {
   BarChart2,
 } from "lucide-react";
 import Link from "next/link";
-import AddOrder from "../orders/addOrder";
+import AddOrder from "../orders/AddOrder/AddOrder";
 import Draft from "../orders/Drafts";
 import Ready from "../orders/Ready";
 import Packed from "../orders/Packed";
@@ -31,10 +31,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import RechargeWallet from "../wallet/RechargeWallet";
 import WalletHistory from "../wallet/WalletHistory";
 import TransactionHistory from "../wallet/TransactionHistory";
+import Footer from "../layout/Footer/Footer";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
-  const [isMultiBoxOpen, setIsMultiBoxOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -42,7 +42,6 @@ const HomePage = () => {
   const [balance, setBalance] = useState(0);
 
   const toggleOrders = () => setIsOrdersOpen(!isOrdersOpen);
-  const toggleMultiBox = () => setIsMultiBoxOpen(!isMultiBoxOpen);
   const toggleWallet = () => setIsWalletOpen(!isWalletOpen);
   const toggleSettings = () => setIsSettingsOpen(!isSettingsOpen);
 
@@ -88,7 +87,7 @@ const HomePage = () => {
       }
     };
 
-    fetchWalletBalance();
+    // fetchWalletBalance();
   }, [router, searchParams]);
 
   const handleLogout = () => {
@@ -108,15 +107,16 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar balance={balance} />
-      <div className="flex">
+      
+      <div className="flex flex-grow">
         {/* Sidebar */}
         <motion.div
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-72 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white p-6 min-h-screen flex flex-col justify-between shadow-xl"
+          className="w-72 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white p-6 flex flex-col justify-between shadow-xl"
         >
           <div>
             <div className="flex items-center justify-center mb-10">
@@ -235,65 +235,6 @@ const HomePage = () => {
                   <Calculator className="w-5 h-5" />
                   <span className="font-medium">Rate Calculator</span>
                 </div>
-              </motion.li>
-
-              {/* MultiBox Orders Dropdown */}
-              <motion.li whileHover={{ x: 5 }}>
-                <div
-                  onClick={toggleMultiBox}
-                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
-                >
-                  <div className="flex items-center space-x-4">
-                    <FileText className="w-5 h-5" />
-                    <span className="font-medium">MultiBox Orders</span>
-                  </div>
-                  <motion.div
-                    animate={{ rotate: isMultiBoxOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </motion.div>
-                </div>
-                <AnimatePresence>
-                  {isMultiBoxOpen && (
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      variants={dropdownVariants}
-                      transition={{ duration: 0.2 }}
-                      className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
-                    >
-                      <ul className="space-y-1">
-                        {[
-                          "Add Multibox Order",
-                          "Drafts",
-                          "Ready",
-                          "Packed",
-                          "Manifested",
-                          "Dispatched",
-                          "Processed",
-                          "Cancelled",
-                        ].map((item) => (
-                          <motion.li
-                            key={item}
-                            whileHover={{ x: 3 }}
-                            className="my-1"
-                          >
-                            <Link
-                              href={`/multibox-orders/${item
-                                .toLowerCase()
-                                .replace(" ", "-")}`}
-                              className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
-                            >
-                              {item}
-                            </Link>
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.li>
 
               {/* Wallet Dropdown */}
@@ -423,7 +364,7 @@ const HomePage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.4 }}
-          className="flex-1 p-8 max-h-screen overflow-y-auto"
+          className="flex-1 p-8 overflow-y-auto"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -452,6 +393,8 @@ const HomePage = () => {
           </AnimatePresence>
         </motion.div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

@@ -5,18 +5,19 @@ import { Fullscreen } from "lucide-react";
 
 const Dashboard = () => {
   return (
+      <div className="min-h-[calc(100vh-200px)] flex flex-col">
     <div className="relative w-full h-screen p-6 overflow-hidden">
       {/* Background Image - Fixed */}
-      {/* <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center opacity-90"
+      <div 
+        className="absolute inset-0 w-full h-full bg-auto bg-center opacity-90"
         style={{ 
-          backgroundImage: "url('/dashboard_image.png')", 
+          backgroundImage: "url('/air_cargo_image_2.jpg')", 
           zIndex: 0 
         }}
-      ></div> */}
+      ></div>
       
       {/* Alternative solution using Next.js Image */}
-      
+{/*       
       <Image
   src="/air_cargo_image_2.jpg"
   alt="Dashboard Background"
@@ -25,7 +26,7 @@ const Dashboard = () => {
   priority
   style={{ objectFit: "contain" }}
   className="opacity-90 py"
-/>
+/> */}
      
 
       {/* Content */}
@@ -35,6 +36,7 @@ const Dashboard = () => {
           This is the dashboard content section. You can display stats, graphs, or any information here.
         </p>
       </div> */}
+    </div>
     </div>
   );
 };

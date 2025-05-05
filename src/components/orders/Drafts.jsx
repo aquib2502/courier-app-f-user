@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Filter, Download, FilePlus, Search, RefreshCw, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Filter, Download, FilePlus, Search, RefreshCw,Package, ExternalLink } from "lucide-react";
 
 const Draft = () => {
   const [filterVisible, setFilterVisible] = useState(false);
@@ -25,10 +26,14 @@ const Draft = () => {
     setFilterVisible(!filterVisible);
   };
 
+  const router = useRouter()
+
   // Function to fetch orders
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      setError(null); // Reset error state before fetching
+      
       // Get userId from the JWT token stored in localStorage
       const token = localStorage.getItem('token');
       if (!token) {
@@ -49,14 +54,30 @@ const Draft = () => {
 
       // Make the API request
       const response = await axios.get(`http://localhost:5000/api/user/orders/${userId}`);
-      setOrders(response.data.data);
-      setFilteredOrders(response.data.data);
+      
+      // Check if the response has data
+      if (response.data && response.data.data) {
+        setOrders(response.data.data.filter(order => order.orderStatus === 'Drafts'));
+        setFilteredOrders(response.data.data);
+      } else {
+        // No orders found, but this is not an error
+        setOrders([]);
+        setFilteredOrders([]);
+      }
       
       // Set last updated time
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (error) {
-      setError("Error fetching orders");
-      console.error(error);
+      // Only set error for actual errors, not for empty results
+      if (error.response && error.response.status === 404) {
+        // 404 might mean no orders found
+        setOrders([]);
+        setFilteredOrders([]);
+      } else {
+        // This is a real error
+        setError("Unable to fetch orders. Please try again later.");
+        console.error("Error fetching orders:", error);
+      }
     } finally {
       setLoading(false);
     }
@@ -141,7 +162,8 @@ const Draft = () => {
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-md border border-gray-200">
+    <div className="min-h-[calc(100vh-200px)] flex flex-col">
+      <div className="flex-1 bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-md border border-gray-200">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
@@ -160,13 +182,25 @@ const Draft = () => {
           
           <button 
             onClick={exportToCsv}
-            className="flex items-center bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-all duration-300 shadow-sm"
+            disabled={orders.length === 0}
+            className={`flex items-center py-2 px-4 rounded-lg transition-all duration-300 shadow-sm ${
+              orders.length === 0 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-teal-600 text-white hover:bg-teal-700'
+            }`}
           >
             <Download className="w-4 h-4 mr-2" />
             <span className="font-medium">Export CSV</span>
           </button>
           
-          <button className="flex items-center bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-sm">
+          <button 
+            disabled={orders.length === 0}
+            className={`flex items-center py-2 px-4 rounded-lg transition-all duration-300 shadow-sm ${
+              orders.length === 0 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-emerald-600 text-white hover:bg-emerald-700'
+            }`}
+          >
             <FilePlus className="w-4 h-4 mr-2" />
             <span className="font-medium">Bulk Pay</span>
           </button>
@@ -309,7 +343,6 @@ const Draft = () => {
                       <td className="px-4 py-3 text-sm font-medium text-emerald-700">{order.invoiceNo}</td>
                       <td className="px-4 py-3">
                         <div className="text-sm text-gray-800 font-medium">{order.firstName} {order.lastName}</div>
-                        {/* <div className="text-xs text-gray-500">{order.email || 'No email provided'}</div> */}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center">
@@ -323,7 +356,7 @@ const Draft = () => {
                       </td>
                       <td className="px-4 py-3">
                         <span className="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full">
-                          {order.status}
+                          {order.paymentStatus}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -340,8 +373,20 @@ const Draft = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-4 py-6 text-center text-gray-500">
-                      No draft orders found
+                    <td colSpan="6" className="px-4 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                          <Package className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-1">No draft orders found</h3>
+                        <p className="text-sm text-gray-500 mb-4">You don't have any draft orders at the moment.</p>
+                        <button 
+                          onClick={() => router.push('http://localhost:3000/home?tab=add-order')}
+                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-all duration-300"
+                        >
+                          Create New Order
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -415,6 +460,7 @@ const Draft = () => {
           )}
         </div>
       )}
+    </div>
     </div>
   );
 };

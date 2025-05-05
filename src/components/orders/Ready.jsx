@@ -50,7 +50,7 @@ const Ready = () => {
       // Make the API request to fetch ready orders
       const response = await axios.get(`http://localhost:5000/api/user/orders/${userId}`);
       // Filter for only ready orders
-      const readyOrders = response.data.data.filter(order => order.status === 'Ready');
+      const readyOrders = response.data.data.filter(order => order.orderStatus === 'Ready');
       setOrders(readyOrders);
       setFilteredOrders(readyOrders);
       
@@ -142,6 +142,7 @@ const Ready = () => {
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   return (
+    <div className="min-h-[calc(100vh-200px)] flex flex-col">
     <div className="bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-md border border-gray-200">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -329,7 +330,7 @@ const Ready = () => {
                       <td className="px-4 py-3">
                         <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full flex items-center w-fit">
                           <Truck className="w-3 h-3 mr-1" />
-                          {order.status}
+                          {order.paymentStatus}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -421,6 +422,7 @@ const Ready = () => {
           )}
         </div>
       )}
+    </div>
     </div>
   );
 };
