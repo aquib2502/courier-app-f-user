@@ -98,7 +98,7 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center mb-4">
               <Package className="h-8 w-8 text-emerald-500" />
-              <span className="ml-2 text-2xl font-bold text-white">A.S Enterprise</span>
+              <span className="ml-2 text-2xl font-bold text-white">THE TRACE EXPRESS</span>
             </div>
             <p className="text-gray-400 mb-4">
               Your trusted partner for domestic and international shipping solutions. 
@@ -115,7 +115,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center">
                 <Mail size={16} className="text-emerald-500 mr-2" />
-                <span>support@A.S Enterprise.com</span>
+                <span>support@THE TRACE EXPRESS.com</span>
               </div>
             </div>
           </div>
@@ -199,7 +199,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-gray-400 mb-4 md:mb-0">
-            © {currentYear} A.S Enterprise. All rights reserved. | Made with ❤️ in India
+            © {currentYear} THE TRACE EXPRESS. All rights reserved. | Made with ❤️ in India
           </div>
           <div className="flex space-x-6">
             {socialLinks.map((social) => {
