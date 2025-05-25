@@ -20,7 +20,7 @@ import AddOrder from "../orders/AddOrder/AddOrder";
 import Draft from "../orders/Drafts";
 import Ready from "../orders/Ready";
 import Packed from "../orders/Packed";
-import Manifested from "../orders/Manifested";
+import Manifested from "../orders/Manifested/Manifested.jsx";
 import Dispatched from "../orders/Dispatched";
 import Received from "../orders/Recieved";
 import Cancelled from "../orders/Cancelled";
@@ -32,10 +32,12 @@ import RechargeWallet from "../wallet/RechargeWallet";
 import WalletHistory from "../wallet/WalletHistory";
 import TransactionHistory from "../wallet/TransactionHistory";
 import Footer from "../layout/Footer/Footer";
+import CreateManifest from "../orders/Manifested/CreateManifest";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [isManifestedOpen, setIsManifestedOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isClient, setIsClient] = useState(false);
@@ -220,7 +222,75 @@ const HomePage = () => {
                   )}
                 </AnimatePresence>
               </motion.li>
+             
+              {/* Manifested Dropdown */}
+              <motion.li whileHover={{ x: 5 }}>
+                <div
+                  onClick={() => setIsManifestedOpen(!isManifestedOpen)}
+                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-lg hover:bg-emerald-800/50 transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-4">
+                    <FileText className="w-5 h-5" />
+                    <span className="font-medium">Manifested</span>
+                  </div>
+                  <motion.div
 
+                    animate={{ rotate: isManifestedOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                </div>
+                <AnimatePresence>
+                  {isManifestedOpen && (
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={dropdownVariants}
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
+                    >
+                      <ul className="space-y-1">
+                        {["Manifest", "Pickup Request"].map((item) => (
+                          <motion.li
+                            key={item}
+                            whileHover={{ x: 3 }}
+                            className="my-1"
+                          >
+                            <button
+                              onClick={() =>
+                                handleActiveTab(
+                                  item.toLowerCase().replace(" ", "-")
+                                )
+                              }
+                              className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
+                                activeTab ===
+                                item.toLowerCase().replace(" ", "-")
+                                  ? "bg-emerald-600/80 text-white"
+                                  : "text-gray-200 hover:bg-emerald-700/30"
+                              }`}
+                            >
+                              <span
+                                className={
+                                  activeTab ===
+                                  item.toLowerCase().replace(" ", "-")
+
+                                    ? "font-medium"
+                                    : ""
+                                }
+                              >
+                                {item}
+                              </span>
+                            </button>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.li>
+             
               {/* Rate Calculator Tab */}
               <motion.li whileHover={{ x: 5 }}>
                 <div
@@ -379,11 +449,11 @@ const HomePage = () => {
               {activeTab === "drafts" && <Draft />}
               {activeTab === "ready" && <Ready />}
               {activeTab === "packed" && <Packed />}
-              {activeTab === "manifested" && <Manifested />}
+              {activeTab === "manifested" && <Manifested /> }
               {activeTab === "dispatched" && <Dispatched />}
               {activeTab === "received" && <Received />}
               {activeTab === "cancelled" && <Cancelled />}
-              {activeTab === "rate-calculator" && <RateCalculator />}
+              {activeTab === "rate-calculator" && <RateCalculator /> && <CreateManifest />}
               {activeTab === "recharge-wallet" && (
                 <RechargeWallet onRecharge={handleRecharge} />
               )}
