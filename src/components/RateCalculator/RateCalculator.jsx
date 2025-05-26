@@ -67,7 +67,7 @@ const RateCalculator = () => {
   
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex flex-col">
+    <div className="min-h-[calc(220vh-200px)] flex flex-col">
     <div>
       <h1 className="text-2xl font-extrabold mb-2 text-gray-800">Rate Calulator</h1>
       <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-8 rounded-lg shadow-lg">

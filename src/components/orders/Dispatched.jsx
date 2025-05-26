@@ -19,7 +19,7 @@ import {
   Navigation,
   AlertCircle
 } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const Dispatched = () => {
   const [filterVisible, setFilterVisible] = useState(false);
@@ -193,41 +193,43 @@ const Dispatched = () => {
     setCurrentPage(1);
   };
 
-  // Handle Mark as Received
-  const handleMarkAsReceived = async (order) => {
-    if (processingOrder === order._id) return; // Prevent multiple clicks
-    
-    try {
-      setProcessingOrder(order._id);
-      
-      const response = await axios.put(
-        `http://localhost:5000/api/orders/${order._id}/status`,
-        {
-          orderStatus: 'Delivered',
-          manifestStatus: 'received',
-          trackingStatus: 'Delivered',
-          deliveryConfirmation: {
-            type: 'In-Person',
-            confirmedBy: 'Customer',
-            timestamp: new Date()
-          }
-        }
-      );
+ // Handle Mark as Received
+const handleMarkAsReceived = async (order) => {
+  if (processingOrder === order._id) return;
 
-      if (response.status === 200) {
-        // Remove the order from current list
-        const updatedOrders = orders.filter(o => o._id !== order._id);
-        setOrders(updatedOrders);
-        setFilteredOrders(updatedOrders);
-        toast.success(`Order ${order.invoiceNo} marked as received successfully`);
+  try {
+    setProcessingOrder(order._id);
+    
+    const receivedTimestamp = new Date(); // Capture current date/time
+    
+    const response = await axios.put(
+      `http://localhost:5000/api/orders/${order._id}/status`,
+      {
+        orderStatus: 'Delivered',
+        manifestStatus: 'received',
+        trackingStatus: 'Delivered',
+        receivedAt: receivedTimestamp, // Add received timestamp
+        deliveryConfirmation: {
+          type: 'In-Person',
+          confirmedBy: 'Customer',
+          timestamp: receivedTimestamp // Use same timestamp here if needed
+        }
       }
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      toast.error("Unable to update order status. Please try again.");
-    } finally {
-      setProcessingOrder(null);
+    );
+
+    if (response.status === 200) {
+      const updatedOrders = orders.filter(o => o._id !== order._id);
+      setOrders(updatedOrders);
+      setFilteredOrders(updatedOrders);
+      toast.success(`Order ${order.invoiceNo} marked as received at ${receivedTimestamp.toLocaleString()}`);
     }
-  };
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    toast.error("Unable to update order status. Please try again.");
+  } finally {
+    setProcessingOrder(null);
+  }
+};
 
   // Handle Track Shipment
   const handleTrackShipment = (order) => {
@@ -293,7 +295,8 @@ const Dispatched = () => {
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex flex-col">
+    <div className="min-h-[calc(220vh-200px)] flex flex-col">
+      <ToastContainer />
       <div className="flex-1 bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-md border border-gray-200">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">

@@ -251,7 +251,7 @@ const Manifested = () => {
 
   // Main manifested orders listing view
   return (
-    <div className="min-h-[calc(100vh-200px)] flex flex-col">
+    <div className="min-h-[calc(220vh-200px)] flex flex-col">
       <div className="flex-1 bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-md border border-gray-200">
         {/* Enhanced Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">

@@ -5,7 +5,7 @@ import { Fullscreen } from "lucide-react";
 
 const Dashboard = () => {
   return (
-      <div className="min-h-[calc(100vh-200px)] flex flex-col">
+      <div className="min-h-[calc(220vh-200px)] flex flex-col">
     <div className="relative w-full h-screen p-6 overflow-hidden">
       {/* Background Image - Fixed */}
       <div 

@@ -138,12 +138,15 @@ const ManifestListing = () => {
   // Handle pickup request
   const handlePickupRequest = (manifest) => {
     setSelectedManifest(manifest);
-    setPickupDate("");
-    setPickupTime("");
+    // Set default pickup date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    // setPickupDate(tomorrow.toISOString().split('T')[0]);
+    // setPickupTime("09:00");
     setShowPickupModal(true);
   };
 
-  // Schedule pickup
+  // Schedule pickup with dynamic date/time
   const schedulePickup = async () => {
     if (!pickupDate || !pickupTime) {
       toast.error("Please select both date and time for pickup");
@@ -152,18 +155,23 @@ const ManifestListing = () => {
 
     try {
       setIsScheduling(true);
-
-      // Combine date and time
-      const pickupDateTime = new Date(`${pickupDate}T${pickupTime}`);
+console.log("payload", status, pickupDate, pickupTime, schedulePickup);
+      // Combine date and time to create full pickup datetime
+      const pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00`);
       
-      // Update manifest status to pickup_requested
+      // Update manifest with pickup information
       const response = await axios.put(
         `http://localhost:5000/api/manifests/${selectedManifest._id}/status`,
-        { status: 'pickup_requested' }
+        { 
+          status: 'pickup_requested',
+          scheduledPickup: pickupDateTime,
+          pickupDate: pickupDate,
+          pickupTime: pickupTime
+        }   
       );
 
       if (response.data.success) {
-        toast.success("Pickup scheduled successfully!");
+        toast.success(`Pickup scheduled for ${formatPickupDateTime(pickupDateTime)}`);
         setShowPickupModal(false);
         fetchManifests(); // Refresh the list
       }
@@ -173,6 +181,41 @@ const ManifestListing = () => {
     } finally {
       setIsScheduling(false);
     }
+  };
+
+  // Format pickup date and time for display
+  const formatPickupDateTime = (dateTime) => {
+    const date = new Date(dateTime);
+    return date.toLocaleDateString("en-GB", {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Get dynamic pickup time slots based on current time
+  const getAvailableTimeSlots = () => {
+    const now = new Date();
+    const selectedDate = new Date(pickupDate);
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    const currentHour = now.getHours();
+
+    const timeSlots = [
+      { value: "09:00", label: "09:00 AM - 12:00 PM", minHour: 9 },
+      { value: "12:00", label: "12:00 PM - 03:00 PM", minHour: 12 },
+      { value: "15:00", label: "03:00 PM - 06:00 PM", minHour: 15 },
+      { value: "18:00", label: "06:00 PM - 09:00 PM", minHour: 18 }
+    ];
+
+    if (isToday) {
+      // Filter out past time slots for today
+      return timeSlots.filter(slot => slot.minHour > currentHour + 2); // 2 hour buffer
+    }
+
+    return timeSlots;
   };
 
   // Get status badge
@@ -226,6 +269,24 @@ const ManifestListing = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
+  };
+
+  // Get maximum pickup date (30 days from now)
+  const getMaxPickupDate = () => {
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 30);
+    return maxDate.toISOString().split('T')[0];
+  };
+
+  // Get estimated pickup display text
+  const getEstimatedPickupText = (manifest) => {
+    if (manifest.scheduledPickup) {
+      return formatPickupDateTime(manifest.scheduledPickup);
+    } else if (manifest.estimatedPickup) {
+      return formatPickupDateTime(manifest.estimatedPickup);
+    } else {
+      return "Not scheduled";
+    }
   };
 
   // Pagination
@@ -466,6 +527,19 @@ const ManifestListing = () => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Dynamic Pickup Information */}
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Clock className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm font-medium text-blue-800">
+                              Pickup Schedule
+                            </span>
+                          </div>
+                          <p className="text-sm text-blue-700">
+                            {getEstimatedPickupText(manifest)}
+                          </p>
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -508,14 +582,14 @@ const ManifestListing = () => {
                       <div className="flex items-center gap-2">
                         <Hash className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600">
-                          AWB: {manifest.pickupAWB}
+                          AWB: {manifest.pickupAWB || 'Not assigned'}
                         </span>
                       </div>
                       
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600">
-                          {manifest.pickupAddress?.name}
+                          {manifest.pickupAddress?.name || 'Pickup location'}
                         </span>
                       </div>
                     </div>
@@ -614,7 +688,7 @@ const ManifestListing = () => {
         )}
       </div>
 
-      {/* Pickup Request Modal */}
+      {/* Enhanced Pickup Request Modal with Dynamic Time Slots */}
       <AnimatePresence>
         {showPickupModal && selectedManifest && (
           <motion.div
@@ -682,6 +756,7 @@ const ManifestListing = () => {
                       value={pickupDate}
                       onChange={(e) => setPickupDate(e.target.value)}
                       min={getTomorrowDate()}
+                      max={getMaxPickupDate()}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -696,17 +771,34 @@ const ManifestListing = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select time slot</option>
-                      <option value="09:00">09:00 AM - 12:00 PM</option>
-                      <option value="12:00">12:00 PM - 03:00 PM</option>
-                      <option value="15:00">03:00 PM - 06:00 PM</option>
-                      <option value="18:00">06:00 PM - 09:00 PM</option>
+                      {getAvailableTimeSlots().map((slot) => (
+                        <option key={slot.value} value={slot.value}>
+                          {slot.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
+
+                  {/* Dynamic Pickup Info */}
+                  {pickupDate && pickupTime && (
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-800">
+                          Pickup Scheduled
+                        </span>
+                      </div>
+                      <p className="text-sm text-green-700">
+                        {formatPickupDateTime(new Date(`${pickupDate}T${pickupTime}:00`))}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-sm text-blue-700">
                       <AlertCircle className="w-4 h-4 inline mr-1" />
-                      Once scheduled, the pickup request will be sent to the courier partner.
+                      Once scheduled, the pickup request will be sent to the courier partner. 
+                      You can reschedule up to 2 hours before the pickup time.
                     </p>
                   </div>
                 </div>

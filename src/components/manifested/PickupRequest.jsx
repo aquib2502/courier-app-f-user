@@ -224,22 +224,25 @@ const PickupRequest = () => {
     }
   };
 
-  // Format date
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    });
-  };
+  // Format date from pickupDate
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
 
-  // Format time
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  };
+// Format time from pickupTime
+const formatTime = (time) => {
+  const [hours, minutes] = time.split(':');
+  return new Date(0, 0, 0, hours, minutes).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+};
+
+
 
   // Get tomorrow's date for minimum pickup date
   const getTomorrowDate = () => {
@@ -248,15 +251,15 @@ const PickupRequest = () => {
     return tomorrow.toISOString().split('T')[0];
   };
 
-  // Get pickup time slot display
-  const getTimeSlotDisplay = (time) => {
-    const hour = parseInt(time.split(':')[0]);
-    if (hour === 9) return "09:00 AM - 12:00 PM";
-    if (hour === 12) return "12:00 PM - 03:00 PM";
-    if (hour === 15) return "03:00 PM - 06:00 PM";
-    if (hour === 18) return "06:00 PM - 09:00 PM";
-    return time;
-  };
+  // Get pickup time slot display from pickupTime
+const getTimeSlotDisplay = (time) => {
+  const hour = parseInt(time.split(':')[0]);
+  if (hour >= 9 && hour < 12) return "09:00 AM - 12:00 PM";
+  if (hour >= 12 && hour < 15) return "12:00 PM - 03:00 PM";
+  if (hour >= 15 && hour < 18) return "03:00 PM - 06:00 PM";
+  if (hour >= 18 && hour < 21) return "06:00 PM - 09:00 PM";
+  return time;
+};
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -454,26 +457,27 @@ const PickupRequest = () => {
                         </div>
 
                         {/* Pickup Details Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                          <div>
+                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div>
                             <div className="flex items-center gap-2 text-gray-500 mb-1">
-                              <Calendar className="w-4 h-4" />
-                              <p className="text-xs">Pickup Date</p>
+                            <Calendar className="w-4 h-4" />
+                            <p className="text-xs">Pickup Date</p>
                             </div>
                             <p className="text-sm font-medium">
-                              {formatDate(request.estimatedPickup)}
+                            {formatDate(request.pickupDate)}
                             </p>
-                          </div>
+                        </div>
 
-                          <div>
-                            <div className="flex items-center gap-2 text-gray-500 mb-1">
-                              <Clock className="w-4 h-4" />
-                              <p className="text-xs">Time Slot</p>
-                            </div>
-                            <p className="text-sm font-medium">
-                              {getTimeSlotDisplay(formatTime(request.estimatedPickup))}
-                            </p>
-                          </div>
+
+                           <div>
+    <div className="flex items-center gap-2 text-gray-500 mb-1">
+      <Clock className="w-4 h-4" />
+      <p className="text-xs">Time Slot</p>
+    </div>
+    <p className="text-sm font-medium">
+      {getTimeSlotDisplay(request.pickupTime)}
+    </p>
+  </div>
 
                           <div>
                             <div className="flex items-center gap-2 text-gray-500 mb-1">
