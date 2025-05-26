@@ -277,7 +277,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     }, 0);
     
     const shippingCost = selectedShippingPartner?.price || 0;
-    return productTotal + shippingCost;
+    return shippingCost;
   };
 
   const handlePlaceOrder = async (paymentStatus = 'Payment Pending', orderStatus = 'Drafts') => {

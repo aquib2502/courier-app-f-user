@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from 'react-toastify';
 import {
   RefreshCw,
   Clipboard,
@@ -24,6 +26,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
   const [manifestId, setManifestId] = useState("");
   const [sameAddressOrders, setSameAddressOrders] = useState([]);
   const [manifestedOrders, setManifestedOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Function to generate manifest ID
   const generateManifestId = () => {
@@ -180,7 +183,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
       .toFixed(2),
     estimatedPickup: "2025-05-11 10:00 AM",
     pickupService: "Standard Express",
-    pickupPartner: "ShipGlobal Express",
+    pickupPartner: "The Trace Express",
     pickupAWB: "AWB" + Math.random().toString(36).substr(2, 9).toUpperCase(),
   };
 
@@ -205,18 +208,84 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
   const handleSaveManifest = () => {
     // Implementation for saving manifest
     console.log("Saving manifest with", manifestedOrders.length, "orders");
-    // You can add API call here to save the manifest
-    alert(`Manifest saved with ${manifestedOrders.length} orders!`);
+    toast.info(`Manifest saved with ${manifestedOrders.length} orders!`);
   };
 
-  // Handle complete manifest
-  const handleCompleteManifest = () => {
-    // Implementation for completing manifest
-    console.log("Completing manifest with", manifestedOrders.length, "orders");
-    // You can add API call here to complete the manifest
-    alert(`Manifest completed with ${manifestedOrders.length} orders!`);
-    // Navigate back to main page
-    onBack();
+  // Handle complete manifest - API Integration
+  const handleCompleteManifest = async () => {
+    if (manifestedOrders.length === 0) {
+      toast.error("Please add at least one order to the manifest");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Get userId from token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('User is not authenticated');
+        return;
+      }
+
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      const userId = decodedToken.userId;
+
+      // Prepare pickup address data
+      const pickupAddressData = {
+        name: selectedPickupData?.name || "SAGBAG HUB",
+        address: selectedPickupData?.address || "1818 18TH FLOOR SAGBAG MAROL ANDHERI EAST, Marol Naka, Mumbai Suburban, 400059",
+        contactPerson: "HUSSAIN PATEL",
+        contactNumber: "+91 98765 43210"
+      };
+
+      // Get order IDs from manifested orders
+      const orderIds = manifestedOrders.map(order => order._id);
+
+      // Create manifest payload
+      const manifestPayload = {
+        orderIds,
+        pickupAddress: pickupAddressData,
+        userId,
+        courierPartner: 'The Trace Express'
+      };
+
+      console.log("Creating manifest with payload:", manifestPayload);
+
+      // Make API call to create manifest
+      const response = await axios.post(
+        'http://localhost:5000/api/manifests/create',
+        manifestPayload
+      );
+
+      if (response.data.success) {
+        toast.success(`Manifest ${response.data.data.manifestId} created successfully!`);
+        
+        // Wait a moment for the toast to show
+        setTimeout(() => {
+          // Navigate back to manifested orders page
+          onBack();
+        }, 1500);
+      } else {
+        toast.error(response.data.message || 'Failed to create manifest');
+      }
+
+    } catch (error) {
+      console.error('Error creating manifest:', error);
+      
+      if (error.response) {
+        // Server responded with error
+        toast.error(error.response.data.message || 'Failed to create manifest');
+      } else if (error.request) {
+        // Request was made but no response
+        toast.error('Server is not responding. Please try again.');
+      } else {
+        // Something else happened
+        toast.error('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -230,6 +299,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                 <button
                   onClick={onBack}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  disabled={isLoading}
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -246,6 +316,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                 <button 
                   onClick={() => window.location.reload()}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                  disabled={isLoading}
                 >
                   <RefreshCw className="w-4 h-4" />
                   Refresh
@@ -253,6 +324,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                 <button 
                   onClick={handleSaveManifest}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  disabled={isLoading}
                 >
                   <Clipboard className="w-4 h-4" />
                   Save Manifest
@@ -519,12 +591,14 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                                 handleRemoveFromManifest(order._id)
                               }
                               className="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                              disabled={isLoading}
                             >
                               Remove From Manifest
                             </button>
                             <button
                               className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 transition-colors"
                               title="View Details"
+                              disabled={isLoading}
                             >
                               View
                             </button>
@@ -554,10 +628,10 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                 <button
                   onClick={() => handleAddToManifest()}
                   disabled={
-                    !sameAddressOrders.some((order) => order.selected)
+                    !sameAddressOrders.some((order) => order.selected) || isLoading
                   }
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                    sameAddressOrders.some((order) => order.selected)
+                    sameAddressOrders.some((order) => order.selected) && !isLoading
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
@@ -583,6 +657,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                         }
                         onChange={handleSelectAll}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        disabled={isLoading}
                       />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -617,6 +692,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                           checked={order.selected || false}
                           onChange={() => handleSelectOrder(order._id)}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          disabled={isLoading}
                         />
                       </td>
                       <td className="px-6 py-4">
@@ -681,12 +757,14 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
                           <button
                             onClick={() => handleAddToManifest(order._id)}
                             className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+                            disabled={isLoading}
                           >
                             Add To Manifest
                           </button>
                           <button
                             className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 transition-colors"
                             title="View Details"
+                            disabled={isLoading}
                           >
                             View
                           </button>
@@ -746,12 +824,14 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
               <button
                 onClick={onBack}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSaveManifest}
                 className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
+                disabled={isLoading}
               >
                 Save as Draft
               </button>
@@ -764,10 +844,19 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
               <button
                 onClick={handleCompleteManifest}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                disabled={manifestedOrders.length === 0}
+                disabled={manifestedOrders.length === 0 || isLoading}
               >
-                Complete Manifest
-                <ChevronRight className="w-4 h-4" />
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating Manifest...</span>
+                  </>
+                ) : (
+                  <>
+                    Complete Manifest
+                    <ChevronRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
           </div>

@@ -33,6 +33,8 @@ import WalletHistory from "../wallet/WalletHistory";
 import TransactionHistory from "../wallet/TransactionHistory";
 import Footer from "../layout/Footer/Footer";
 import CreateManifest from "../orders/Manifested/CreateManifest";
+import ManifestListing from "../manifested/Manifest";
+import PickupRequest from "../manifested/PickupRequest";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -459,6 +461,8 @@ const HomePage = () => {
               )}
               {activeTab === "wallet-history" && <WalletHistory />}
               {activeTab === "transactions" && <TransactionHistory />}
+              {activeTab === "manifest" && <ManifestListing />}
+              {activeTab === "pickup-request" && <PickupRequest />}
             </motion.div>
           </AnimatePresence>
         </motion.div>
