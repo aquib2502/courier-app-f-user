@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import JsBarcode from "jsbarcode";
 import {
   Filter,
   Download,
@@ -67,6 +68,14 @@ const Manifested = () => {
       address: "Tech Park, Whitefield, Bangalore - 560066",
     },
   ]);
+
+  // Barcode modal state variables
+  const [showBarcodeModal, setShowBarcodeModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [printSuccess, setPrintSuccess] = useState(false);
+  const [serialNumber, setSerialNumber] = useState('');
+  const barcodeRef = useRef(null);
 
   // New state for manifest creation flow
   const [showManifestCreation, setShowManifestCreation] = useState(false);
@@ -138,6 +147,37 @@ const Manifested = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Generate serial number when modal opens
+  useEffect(() => {
+    if (showBarcodeModal && selectedOrder) {
+      // Generate a unique serial number (TE prefix + random 4 digits)
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const newSerialNumber = `TE-${randomNum}`;
+      setSerialNumber(newSerialNumber);
+    }
+  }, [showBarcodeModal, selectedOrder]);
+
+  // Generate barcode when serial number is available
+  useEffect(() => {
+    if (showBarcodeModal && serialNumber && barcodeRef.current) {
+      try {
+        // Generate barcode using the serial number
+        JsBarcode(barcodeRef.current, serialNumber, {
+          format: "CODE128",
+          width: 2,
+          height: 70,
+          displayValue: false, // Hide the text below barcode
+          font: "Arial",
+          fontSize: 12,
+          margin: 10,
+          background: "#ffffff"
+        });
+      } catch (error) {
+        console.error("Error generating barcode:", error);
+      }
+    }
+  }, [showBarcodeModal, serialNumber]);
 
   // Function to generate manifest ID
   const generateManifestId = () => {
@@ -287,6 +327,92 @@ const Manifested = () => {
         ...sameAddressOrders,
         { ...orderToMove, selected: false },
       ]);
+    }
+  };
+
+  // Handle Print Label - Show modal with the barcode
+  const handlePrintLabel = (order) => {
+    setSelectedOrder(order);
+    setShowBarcodeModal(true);
+    setPrintSuccess(false);
+    setIsPrinting(false);
+  };
+
+  // Close the barcode modal
+  const closeBarcodeModal = () => {
+    setShowBarcodeModal(false);
+    setTimeout(() => {
+      setSelectedOrder(null);
+      setIsPrinting(false);
+      setPrintSuccess(false);
+      setSerialNumber('');
+    }, 300); // Wait for animation to complete
+  };
+
+  // Print the barcode label
+  const printBarcode = () => {
+    if (isPrinting) return; // Prevent multiple clicks
+    
+    setIsPrinting(true);
+    
+    try {
+      const printContents = document.getElementById('barcode-print-area').innerHTML;
+      const printWindow = window.open('', '_blank');
+      
+      if (!printWindow) {
+        alert("Please allow pop-ups to print the label");
+        setIsPrinting(false);
+        return;
+      }
+      
+      // Write the print content to the new window
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Shipping Label - ${serialNumber}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+              @page { size: 105mm 148mm; margin: 0; }
+              .print-container { width: 100%; height: 100%; }
+              table { width: 100%; border-collapse: collapse; }
+              td, th { padding: 8px; border: 1px solid #ddd; }
+              .header { font-weight: bold; background-color: #f9f9f9; }
+              .barcode-container { text-align: center; padding: 15px 0; }
+              .serial-header { background-color: #dc2626; color: white; text-align: center; font-weight: bold; padding: 8px; }
+            </style>
+          </head>
+          <body>
+            <div class="print-container">
+              ${printContents}
+            </div>
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                };
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      
+      // Listen for the print window to close
+      const checkPrintWindowClosed = setInterval(() => {
+        if (printWindow.closed) {
+          clearInterval(checkPrintWindowClosed);
+          setIsPrinting(false);
+          setPrintSuccess(true);
+          setTimeout(() => {
+            setPrintSuccess(false);
+          }, 3000);
+        }
+      }, 500);
+      
+    } catch (error) {
+      console.error("Error printing:", error);
+      setIsPrinting(false);
+      alert("There was an error printing. Please try again.");
     }
   };
 
@@ -711,10 +837,12 @@ const Manifested = () => {
                                 Remove From Manifest
                               </button>
                               <button
-                                className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 transition-colors"
-                                title="View Details"
+                                onClick={() => handlePrintLabel(order)}
+                                className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors flex items-center gap-1"
+                                title="Print Label"
                               >
-                                View
+                                <Printer className="w-3 h-3" />
+                                Print
                               </button>
                             </div>
                           </td>
@@ -873,10 +1001,12 @@ const Manifested = () => {
                               Add To Manifest
                             </button>
                             <button
-                              className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 transition-colors"
-                              title="View Details"
+                              onClick={() => handlePrintLabel(order)}
+                              className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors flex items-center gap-1"
+                              title="Print Label"
                             >
-                              View
+                              <Printer className="w-3 h-3" />
+                              Print
                             </button>
                           </div>
                         </td>
@@ -1241,9 +1371,11 @@ const Manifested = () => {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center space-x-2">
-                            <button className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center">
+                            <button 
+                              onClick={() => handlePrintLabel(order)}
+                              className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center">
                               <Printer className="w-3 h-3 mr-1" />
-                              Reprint Label
+                              Print Label
                             </button>
                             <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                               View
@@ -1424,6 +1556,189 @@ const Manifested = () => {
                 >
                   Add New Manifest
                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Enhanced Barcode Modal with Serial Number */}
+      <AnimatePresence>
+        {showBarcodeModal && selectedOrder && (
+          <motion.div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-1"
+            style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div 
+              className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-auto overflow-hidden"
+              style={{ maxHeight: '98vh', overflowY: 'auto' }}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
+            >
+              {/* Modal Header */}
+              <div className="bg-blue-600 px-4 py-3 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-white flex items-center">
+                  <Printer className="w-5 h-5 mr-2" />
+                  Shipping Label - {serialNumber}
+                </h3>
+                <button 
+                  onClick={closeBarcodeModal}
+                  className="text-white hover:bg-blue-700 rounded-full p-1"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              {/* Order Summary */}
+              <div className="px-4 pt-4">
+                <div className="flex flex-wrap items-center gap-2 text-sm mb-2">
+                  <span className="font-medium text-gray-700">Order ID:</span> 
+                  <span className="text-blue-600 font-semibold">{selectedOrder.invoiceNo}</span>
+                  <span className="mx-2 text-gray-300">|</span>
+                  <span className="font-medium text-gray-700">Customer:</span> 
+                  <span>{selectedOrder.firstName} {selectedOrder.lastName}</span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full flex items-center">
+                    <Package className="w-3 h-3 mr-1" />
+                    {selectedOrder.weight || "0.5"} KG
+                  </div>
+                  <div className="px-2 py-1 bg-yellow-50 text-yellow-600 text-xs font-medium rounded-full flex items-center">
+                    <Truck className="w-3 h-3 mr-1" />
+                    CSB-{selectedOrder.shipmentType?.replace('CSB ', '') || 'IV'}
+                  </div>
+                  <div className="px-2 py-1 bg-red-50 text-red-600 text-xs font-medium rounded-full flex items-center">
+                    📦 {serialNumber}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Barcode Print Area */}
+              <div className="px-4">
+                <div id="barcode-print-area">
+                  {/* Serial Number Header */}
+                  <div className="bg-red-600 text-white text-center font-bold py-2 rounded-t-lg text-lg">
+                    {serialNumber}
+                  </div>
+                  
+                  <table className="w-full border-collapse border border-gray-200 rounded-b-lg overflow-hidden text-sm">
+                    <thead>
+                      <tr>
+                        <th className="w-1/2 text-left p-3 bg-gray-50 border-b border-r border-gray-200">
+                          <span className="text-blue-800 font-bold text-lg">ShipGlobal</span>
+                        </th>
+                        <th className="w-1/2 text-left p-3 bg-gray-50 border-b border-gray-200">
+                          <span className="font-semibold">ShipGlobal Direct</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="align-top p-3 border-r border-b border-gray-200" style={{ width: '65%' }}>
+                          <div className="font-semibold mb-1">Delivery Address</div>
+                          <div>{selectedOrder.firstName} {selectedOrder.lastName}</div>
+                          <div>{selectedOrder.address1 || 'Address Line 1'}</div>
+                          <div>{selectedOrder.address2 || 'Address Line 2'}</div>
+                          <div>{selectedOrder.city || 'City'}, {selectedOrder.state || 'State'}, {selectedOrder.pincode || 'Pincode'}</div>
+                          <div>{selectedOrder.country || 'Country'}</div>
+                          <div className="mt-1">+{selectedOrder.mobile || '91XXXXXXXXXX'}</div>
+                        </td>
+                        <td className="align-top p-3 border-b border-gray-200" style={{ width: '35%' }}>
+                          <div className="font-semibold mb-1 text-center bg-gray-100 py-1 rounded">CSB-IV</div>
+                          <div className="mt-2">
+                            <div className="text-xs text-gray-600">Invoice No:</div>
+                            <div className="font-medium text-blue-700">{selectedOrder.invoiceNo || 'INV001'}</div>
+                          </div>
+                          <div className="mt-2">
+                            <div className="text-xs text-gray-600">Date:</div>
+                            <div className="font-medium">{new Date().toISOString().split('T')[0]}</div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="2" className="p-3 border-b border-gray-200 bg-gray-50">
+                          <div className="font-semibold mb-1">Product Name</div>
+                          <div className="flex justify-between">
+                            <div>{selectedOrder.productItems?.[0]?.productName || "Product Item"}</div>
+                            <div>Qty: {selectedOrder.productItems?.[0]?.productQuantity || "1"}</div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="2" className="p-3 border-b border-gray-200 text-center">
+                          <svg 
+                            ref={barcodeRef} 
+                            className="mx-auto my-2 max-w-full"
+                          ></svg>
+                          {/* Serial number below barcode */}
+                          <div className="bg-gray-100 text-gray-700 text-sm font-mono py-1 px-2 rounded mt-2 inline-block">
+                            {serialNumber}
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="2" className="p-3 text-sm bg-gray-50">
+                          <div className="mb-1">
+                            61 - BW: {selectedOrder.weight || '0.5'} KG - LBH: {selectedOrder.length || '10'} x {selectedOrder.width || '10'} x {selectedOrder.height || '10'} cm - VW: 0.00 KG - DW: {selectedOrder.weight || '0.5'} KG
+                          </div>
+                          <div className="mt-2">
+                            <div className="text-xs text-gray-600">Sender & Return Details</div>
+                            <div>Mumbai Suburban {selectedOrder.pincode || '400059'}, Maharashtra, India</div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Modal Footer */}
+              <div className="px-4 py-3 flex justify-between items-center mt-2">
+                <div className="text-xs text-gray-400">
+                  This label will be printed on standard A6 paper (105 x 148mm)
+                </div>
+                
+                <div>
+                  {printSuccess ? (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-green-100 text-green-700 px-3 py-1.5 rounded flex items-center text-sm"
+                    >
+                      <Check className="w-3.5 h-3.5 mr-1.5" />
+                      Label Printed
+                    </motion.div>
+                  ) : (
+                    <button 
+                      onClick={printBarcode} 
+                      disabled={isPrinting}
+                      className={`flex items-center justify-center px-5 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isPrinting 
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                      }`}
+                    >
+                      {isPrinting ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin mr-1.5"></div>
+                          <span>Printing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Printer className="w-3.5 h-3.5 mr-1.5" />
+                          <span>Print Label</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </motion.div>
           </motion.div>

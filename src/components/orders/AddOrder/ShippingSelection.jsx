@@ -10,6 +10,12 @@ const ShippingSelection = ({
   handleSelectShippingPartner, 
   handleContinueToPlaceOrder 
 }) => {
+  // Function to calculate price with 18% GST
+  const calculatePriceWithGST = (basePrice) => {
+    const gstAmount = basePrice * 0.18;
+    return (basePrice + gstAmount).toFixed(2);
+  };
+
   return (
     <div className="mt-8">
       <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -77,8 +83,8 @@ const ShippingSelection = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-emerald-600">₹{partner.price}</p>
-                  <p className="text-sm text-gray-500">+taxes</p>
+                  <p className="text-3xl font-bold text-emerald-600">₹{calculatePriceWithGST(partner.price)}</p>
+                  <p className="text-sm text-gray-500">Inclusive of 18% GST</p>
                 </div>
               </div>
               {selectedShippingPartner?.id === partner.id && (

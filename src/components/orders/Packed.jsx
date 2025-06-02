@@ -25,6 +25,7 @@ const Packed = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isPrinting, setIsPrinting] = useState(false);
   const [printSuccess, setPrintSuccess] = useState(false);
+  const [serialNumber, setSerialNumber] = useState('');
   const barcodeRef = useRef(null);
   
   // Pagination state
@@ -110,16 +111,26 @@ const Packed = () => {
     }
   }, [searchQuery, orders]);
 
-  // Generate barcode when modal opens
+  // Generate serial number when modal opens
   useEffect(() => {
-    if (showBarcodeModal && selectedOrder && barcodeRef.current) {
+    if (showBarcodeModal && selectedOrder) {
+      // Generate a unique serial number (TE prefix + random 4 digits)
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const newSerialNumber = `TE-${randomNum}`;
+      setSerialNumber(newSerialNumber);
+    }
+  }, [showBarcodeModal, selectedOrder]);
+
+  // Generate barcode when serial number is available
+  useEffect(() => {
+    if (showBarcodeModal && serialNumber && barcodeRef.current) {
       try {
-        // Generate barcode using JSBarcode
-        JsBarcode(barcodeRef.current, selectedOrder.invoiceNo || "SAMPLE", {
+        // Generate barcode using the serial number
+        JsBarcode(barcodeRef.current, serialNumber, {
           format: "CODE128",
           width: 2,
           height: 70,
-          displayValue: true,
+          displayValue: false, // Hide the text below barcode
           font: "Arial",
           fontSize: 12,
           margin: 10,
@@ -129,7 +140,7 @@ const Packed = () => {
         console.error("Error generating barcode:", error);
       }
     }
-  }, [showBarcodeModal, selectedOrder]);
+  }, [showBarcodeModal, serialNumber]);
 
   // Apply filters function
   const applyFilters = () => {
@@ -232,6 +243,7 @@ const Packed = () => {
       setSelectedOrder(null);
       setIsPrinting(false);
       setPrintSuccess(false);
+      setSerialNumber('');
     }, 300); // Wait for animation to complete
   };
 
@@ -255,7 +267,7 @@ const Packed = () => {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Shipping Label</title>
+            <title>Shipping Label - ${serialNumber}</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
               @page { size: 105mm 148mm; margin: 0; }
@@ -264,6 +276,7 @@ const Packed = () => {
               td, th { padding: 8px; border: 1px solid #ddd; }
               .header { font-weight: bold; background-color: #f9f9f9; }
               .barcode-container { text-align: center; padding: 15px 0; }
+              .serial-header { background-color: #dc2626; color: white; text-align: center; font-weight: bold; padding: 8px; }
             </style>
           </head>
           <body>
@@ -526,7 +539,7 @@ const Packed = () => {
                               className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center"
                             >
                               <Printer className="w-3 h-3 mr-1" />
-                              Reprint Label
+                              Print Label
                             </button>
                             <div className="relative action-dropdown">
                               <button
@@ -653,7 +666,7 @@ const Packed = () => {
         )}
       </div>
 
-      {/* Enhanced Barcode Modal with Animations */}
+      {/* Enhanced Barcode Modal with Serial Number */}
       <AnimatePresence>
         {showBarcodeModal && selectedOrder && (
           <motion.div 
@@ -676,7 +689,7 @@ const Packed = () => {
               <div className="bg-blue-600 px-4 py-3 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-white flex items-center">
                   <Printer className="w-5 h-5 mr-2" />
-                  Shipping Label
+                  Shipping Label - {serialNumber}
                 </h3>
                 <button 
                   onClick={closeBarcodeModal}
@@ -705,13 +718,21 @@ const Packed = () => {
                     <Truck className="w-3 h-3 mr-1" />
                     CSB-{selectedOrder.shipmentType?.replace('CSB ', '') || 'IV'}
                   </div>
+                  <div className="px-2 py-1 bg-red-50 text-red-600 text-xs font-medium rounded-full flex items-center">
+                    📦 {serialNumber}
+                  </div>
                 </div>
               </div>
               
               {/* Barcode Print Area */}
               <div className="px-4">
                 <div id="barcode-print-area">
-                  <table className="w-full border-collapse border border-gray-200 rounded-lg overflow-hidden text-sm">
+                  {/* Serial Number Header */}
+                  <div className="bg-red-600 text-white text-center font-bold py-2 rounded-t-lg text-lg">
+                    {serialNumber}
+                  </div>
+                  
+                  <table className="w-full border-collapse border border-gray-200 rounded-b-lg overflow-hidden text-sm">
                     <thead>
                       <tr>
                         <th className="w-1/2 text-left p-3 bg-gray-50 border-b border-r border-gray-200">
@@ -760,6 +781,10 @@ const Packed = () => {
                             ref={barcodeRef} 
                             className="mx-auto my-2 max-w-full"
                           ></svg>
+                          {/* Serial number below barcode */}
+                          <div className="bg-gray-100 text-gray-700 text-sm font-mono py-1 px-2 rounded mt-2 inline-block">
+                            {serialNumber}
+                          </div>
                         </td>
                       </tr>
                       <tr>

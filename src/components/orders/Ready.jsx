@@ -25,6 +25,7 @@ const Ready = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isPrinting, setIsPrinting] = useState(false);
   const [printSuccess, setPrintSuccess] = useState(false);
+  const [serialNumber, setSerialNumber] = useState('');
   const barcodeRef = useRef(null);
   
   // Pagination state
@@ -95,26 +96,53 @@ const Ready = () => {
     }
   }, [searchQuery, orders]);
 
-  // Generate barcode when modal opens
+  // Generate serial number based on total order count
+  const generateSerialNumber = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/orders/count/total');
+      if (response.data.success) {
+        const totalCount = response.data.data.totalCount;
+        // Add 1 to count since this will be the next order
+        const nextOrderNumber = totalCount + 1;
+        const paddedNumber = String(nextOrderNumber).padStart(4, '0');
+        const serial = `TE-${paddedNumber}`;
+        setSerialNumber(serial);
+      }
+    } catch (error) {
+      console.error('Error generating serial number:', error);
+      // Fallback serial number
+      setSerialNumber('TE-0001');
+    }
+  };
+
+  // Generate barcode when modal opens with A7 optimized settings
   useEffect(() => {
     if (showBarcodeModal && selectedOrder && barcodeRef.current) {
+      // Generate serial number first
+      generateSerialNumber();
+    }
+  }, [showBarcodeModal, selectedOrder]);
+
+  // Generate barcode after serial number is available
+  useEffect(() => {
+    if (serialNumber && barcodeRef.current) {
       try {
-        // Generate barcode using JSBarcode
-        JsBarcode(barcodeRef.current, selectedOrder.invoiceNo || "SAMPLE", {
+        // Generate barcode using serial number instead of invoice number
+        JsBarcode(barcodeRef.current, serialNumber, {
           format: "CODE128",
-          width: 2,
-          height: 70,
-          displayValue: true,
+          width: 1.5, // Reduced from 2 for smaller size
+          height: 40, // Reduced from 70 for A7 paper
+          displayValue: false, // Hide the text below barcode since we'll show it separately
           font: "Arial",
-          fontSize: 12,
-          margin: 10,
+          fontSize: 10,
+          margin: 5,
           background: "#ffffff"
         });
       } catch (error) {
         console.error("Error generating barcode:", error);
       }
     }
-  }, [showBarcodeModal, selectedOrder]);
+  }, [serialNumber]);
 
   // Apply filters function
   const applyFilters = () => {
@@ -168,10 +196,11 @@ const Ready = () => {
       setSelectedOrder(null);
       setIsPrinting(false);
       setPrintSuccess(false);
+      setSerialNumber('');
     }, 300); // Wait for animation to complete
   };
 
-  // Print the barcode label
+  // Print the barcode label - Updated for A7 paper
   const printBarcode = () => {
     if (isPrinting) return; // Prevent multiple clicks
     
@@ -187,19 +216,60 @@ const Ready = () => {
         return;
       }
       
-      // Write the print content to the new window
+      // A7 paper size is 74mm x 105mm
       printWindow.document.write(`
         <html>
           <head>
-            <title>Shipping Label</title>
+            <title>Shipping Label - ${serialNumber}</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-              @page { size: 105mm 148mm; margin: 0; }
-              .print-container { width: 100%; height: 100%; }
-              table { width: 100%; border-collapse: collapse; }
-              td, th { padding: 8px; border: 1px solid #ddd; }
-              .header { font-weight: bold; background-color: #f9f9f9; }
-              .barcode-container { text-align: center; padding: 15px 0; }
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 0; 
+                padding: 0; 
+                font-size: 10px;
+              }
+              @page { 
+                size: 74mm 105mm; 
+                margin: 2mm; 
+              }
+              .print-container { 
+                width: 100%; 
+                height: 100%; 
+                font-size: 10px;
+              }
+              table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-size: 9px;
+              }
+              td, th { 
+                padding: 2px; 
+                border: 1px solid #ddd; 
+                font-size: 9px;
+                line-height: 1.2;
+              }
+              .header { 
+                font-weight: bold; 
+                background-color: #f9f9f9; 
+                font-size: 10px;
+              }
+              .barcode-container { 
+                text-align: center; 
+                padding: 5px 0; 
+              }
+              .company-logo {
+                font-size: 11px;
+                font-weight: bold;
+                color: #1e40af;
+              }
+              .serial-number {
+                font-size: 12px;
+                font-weight: bold;
+                color: #dc2626;
+                text-align: center;
+                padding: 3px;
+                background-color: #fef2f2;
+              }
             </style>
           </head>
           <body>
@@ -593,19 +663,19 @@ const Ready = () => {
         )}
       </div>
 
-      {/* Enhanced Barcode Modal with Animations */}
+      {/* Enhanced Barcode Modal with Serial Number and A7 Optimization */}
       <AnimatePresence>
         {showBarcodeModal && selectedOrder && (
           <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-1"
-            style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
             <motion.div 
-              className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-auto overflow-hidden"
+              className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden"
               style={{ maxHeight: '98vh', overflowY: 'auto' }}
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -613,100 +683,131 @@ const Ready = () => {
               transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
             >
               {/* Modal Header */}
-              <div className="bg-blue-600 px-4 py-2 flex justify-between items-center">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-white flex items-center">
                   <Printer className="w-5 h-5 mr-2" />
-                  Shipping Label
+                  A7 Shipping Label
                 </h3>
                 <button 
                   onClick={closeBarcodeModal}
-                  className="text-white hover:bg-blue-700 rounded-full p-1"
+                  className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
               
               {/* Order Summary */}
-              <div className="px-6 pt-4">
-                <div className="flex flex-wrap items-center gap-2 text-sm mb-2">
-                  <span className="font-medium text-gray-700">Order ID:</span> 
+              <div className="px-6 pt-4 bg-gray-50">
+                <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
+                  <span className="font-medium text-gray-700">Order:</span> 
                   <span className="text-blue-600 font-semibold">{selectedOrder.invoiceNo}</span>
-                  <span className="mx-2 text-gray-300">|</span>
-                  <span className="font-medium text-gray-700">Customer:</span> 
-                  <span>{selectedOrder.firstName} {selectedOrder.lastName}</span>
+                  <span className="mx-1 text-gray-300">•</span>
+                  <span className="font-medium text-gray-700">Serial:</span>
+                  <span className="text-red-600 font-bold">{serialNumber}</span>
                 </div>
                 
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <div className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full flex items-center">
+                  <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
                     <Package className="w-3 h-3 mr-1" />
                     {selectedOrder.weight || "0.5"} KG
                   </div>
-                  <div className="px-2 py-1 bg-yellow-50 text-yellow-600 text-xs font-medium rounded-full flex items-center">
+                  <div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center">
                     <Truck className="w-3 h-3 mr-1" />
-                    CSB-{selectedOrder.shipmentType?.replace('CSB ', '') || 'IV'}
+                    {selectedOrder.shipmentType || 'CSB IV'}
                   </div>
                 </div>
               </div>
               
-              {/* Barcode Print Area */}
-              <div className="px-4">
+              {/* Barcode Print Area - Optimized for A7 */}
+              <div className="px-4 py-2">
                 <div id="barcode-print-area">
-                  <table className="w-full border-collapse border border-gray-200 rounded-lg overflow-hidden text-sm">
+                  <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden text-xs">
+                    {/* Header with Company and Serial */}
                     <thead>
                       <tr>
-                        <th className="w-1/2 text-left p-3 bg-gray-50 border-b border-gray-200">
-                          <span className="font-semibold">THE TRACE EXPRESS DIRECT</span>
+                        <th colSpan="2" className="text-center p-2 bg-blue-50 border-b border-gray-300" 
+                            style={{fontSize: '11px', fontWeight: 'bold', color: '#1e40af'}}>
+                          THE TRACE EXPRESS
+                        </th>
+                      </tr>
+                      <tr>
+                        <th colSpan="2" className="border-b border-gray-300" 
+                            style={{fontSize: '12px', fontWeight: 'bold', color: '#dc2626', 
+                                   textAlign: 'center', padding: '3px', backgroundColor: '#fef2f2'}}>
+                          {serialNumber}
                         </th>
                       </tr>
                     </thead>
+                    
                     <tbody>
+                      {/* Delivery Address - Compact */}
                       <tr>
-                        <td className="align-top p-3 border-r border-b border-gray-200" style={{ width: '65%' }}>
-                          <div className="font-semibold mb-1">Delivery Address</div>
-                          <div>{selectedOrder.firstName} {selectedOrder.lastName}</div>
-                          <div>{selectedOrder.address1 || 'Address Line 1'}</div>
-                          <div>{selectedOrder.address2 || 'Address Line 2'}</div>
-                          <div>{selectedOrder.city || 'City'}, {selectedOrder.state || 'State'}, {selectedOrder.pincode || 'Pincode'}</div>
-                          <div>{selectedOrder.country || 'Country'}</div>
-                          <div className="mt-1">+{selectedOrder.mobile || '91XXXXXXXXXX'}</div>
-                        </td>
-                        <td className="align-top p-3 border-b border-gray-200" style={{ width: '35%' }}>
-                          <div className="font-semibold mb-1 text-center bg-gray-100 py-1 rounded">CSB-IV</div>
-                          <div className="mt-2">
-                            <div className="text-xs text-gray-600">Invoice No:</div>
-                            <div className="font-medium text-blue-700">{selectedOrder.invoiceNo || 'INV001'}</div>
-                          </div>
-                          <div className="mt-2">
-                            <div className="text-xs text-gray-600">Date:</div>
-                            <div className="font-medium">{new Date().toISOString().split('T')[0]}</div>
+                        <td className="align-top p-2 border-r border-b border-gray-300" style={{ width: '70%' }}>
+                          <div className="font-semibold text-xs mb-1">TO:</div>
+                          <div className="text-xs leading-tight">
+                            <div className="font-medium">{selectedOrder.firstName} {selectedOrder.lastName}</div>
+                            <div>{selectedOrder.address1}</div>
+                            {selectedOrder.address2 && <div>{selectedOrder.address2}</div>}
+                            <div>{selectedOrder.city}, {selectedOrder.state}</div>
+                            <div>{selectedOrder.pincode}, {selectedOrder.country}</div>
+                            <div className="mt-1 font-medium">📞 {selectedOrder.mobile}</div>
                           </div>
                         </td>
-                      </tr>
-                      <tr>
-                        <td colSpan="2" className="p-3 border-b border-gray-200 bg-gray-50">
-                          <div className="font-semibold mb-1">Product Name</div>
-                          <div className="flex justify-between">
-                            <div>{selectedOrder.productItems?.[0]?.productName || "Product Item"}</div>
-                            <div>Qty: {selectedOrder.productItems?.[0]?.productQuantity || "1"}</div>
+                        <td className="align-top p-2 border-b border-gray-300" style={{ width: '30%' }}>
+                          <div className="text-center">
+                            <div className="text-xs font-semibold mb-1 bg-yellow-100 py-1 rounded">
+                              {selectedOrder.shipmentType || 'CSB-IV'}
+                            </div>
+                            <div className="mt-1">
+                              <div className="text-xs text-gray-600">Weight:</div>
+                              <div className="font-medium text-xs">{selectedOrder.weight || '0.5'} KG</div>
+                            </div>
+                            <div className="mt-1">
+                              <div className="text-xs text-gray-600">Date:</div>
+                              <div className="font-medium text-xs">{new Date().toLocaleDateString('en-GB')}</div>
+                            </div>
                           </div>
                         </td>
                       </tr>
+
+                      {/* Product Info - Compact */}
                       <tr>
-                        <td colSpan="2" className="p-3 border-b border-gray-200 text-center">
-                          <svg 
-                            ref={barcodeRef} 
-                            className="mx-auto my-2 max-w-full"
-                          ></svg>
+                        <td colSpan="2" className="p-2 border-b border-gray-300 bg-gray-50">
+                          <div className="text-xs">
+                            <span className="font-semibold">Item: </span>
+                            <span>{selectedOrder.productItems?.[0]?.productName || "Product"}</span>
+                            <span className="ml-2 font-medium">Qty: {selectedOrder.productItems?.[0]?.productQuantity || "1"}</span>
+                          </div>
                         </td>
                       </tr>
+
+                      {/* Barcode with Serial Number Below */}
                       <tr>
-                        <td colSpan="2" className="p-3 text-sm bg-gray-50">
-                          <div className="mb-1">
-                            61 - BW: {selectedOrder.weight || '0.5'} KG - LBH: {selectedOrder.length || '10'} x {selectedOrder.width || '10'} x {selectedOrder.height || '10'} cm - VW: 0.00 KG - DW: {selectedOrder.weight || '0.5'} KG
+                        <td colSpan="2" className="p-3 border-b border-gray-300 text-center bg-white">
+                          <div className="space-y-2">
+                            <svg 
+                              ref={barcodeRef} 
+                              className="mx-auto"
+                              style={{ maxWidth: '100%', height: 'auto' }}
+                            ></svg>
+                            <div className="text-center">
+                              <div className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded inline-block">
+                                {serialNumber}
+                              </div>
+                            </div>
                           </div>
-                          <div className="mt-2">
-                            <div className="text-xs text-gray-600">Sender & Return Details</div>
-                            <div>Mumbai Suburban {selectedOrder.pincode || '400059'}, Maharashtra, India</div>
+                        </td>
+                      </tr>
+
+                      {/* Footer Info - Compact */}
+                      <tr>
+                        <td colSpan="2" className="p-2 text-xs bg-gray-50">
+                          <div className="flex justify-between text-xs">
+                            <span>BW: {selectedOrder.weight || '0.5'}KG</span>
+                            <span>DIM: {selectedOrder.length || '10'}×{selectedOrder.width || '10'}×{selectedOrder.height || '10'}cm</span>
+                          </div>
+                          <div className="mt-1 text-center">
+                            <div className="text-xs text-gray-600">Return: Mumbai, MH 400059, India</div>
                           </div>
                         </td>
                       </tr>
@@ -716,40 +817,40 @@ const Ready = () => {
               </div>
               
               {/* Modal Footer */}
-              <div className="px-4 py-2 flex justify-between items-center mt-2">
-                <div className="text-xs text-gray-400">
-                  This label will be printed on standard A6 paper (105 x 148mm)
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                <div className="text-xs text-gray-500">
+                  A7 Label (74×105mm)
                 </div>
                 
-                <div>
+                <div className="flex gap-2">
                   {printSuccess ? (
                     <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-green-100 text-green-700 px-3 py-1.5 rounded flex items-center text-sm"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-green-100 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm font-medium"
                     >
-                      <Check className="w-3.5 h-3.5 mr-1.5" />
-                      Label Printed
+                      <Check className="w-4 h-4 mr-1" />
+                      Printed!
                     </motion.div>
                   ) : (
                     <button 
                       onClick={printBarcode} 
                       disabled={isPrinting}
-                      className={`flex items-center justify-center px-5 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         isPrinting 
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
                       }`}
                     >
                       {isPrinting ? (
                         <>
-                          <div className="w-3.5 h-3.5 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin mr-1.5"></div>
+                          <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin mr-2"></div>
                           <span>Printing...</span>
                         </>
                       ) : (
                         <>
-                          <Printer className="w-3.5 h-3.5 mr-1.5" />
-                          <span>Print Label</span>
+                          <Printer className="w-4 h-4 mr-2" />
+                          <span>Print A7 Label</span>
                         </>
                       )}
                     </button>
