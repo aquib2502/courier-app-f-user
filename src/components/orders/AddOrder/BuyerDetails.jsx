@@ -11,16 +11,16 @@ const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipm
       </h3>
       
       <div className="mb-6">
-        <label className="block text-gray-700 font-medium mb-2">Select Pickup Address *</label>
-        <select 
-          className="w-full p-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+        <label className="block text-gray-700 font-medium mb-2">Pickup Address *</label>
+        <textarea
+          placeholder="Enter complete pickup address"
           value={formData.pickupAddress}
           onChange={(e) => handleInputChange("pickupAddress", e.target.value)}
-        >
-          <option value="">Select Pickup Address</option>
-          <option value="warehouse1">Warehouse 1</option>
-          <option value="warehouse2">Warehouse 2</option>
-        </select>
+          className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${
+            errors.pickupAddress ? 'border-red-300' : 'border-gray-300'
+          }`}
+          rows={3}
+        />
         {errors.pickupAddress && <p className="text-red-500 text-sm mt-1">{errors.pickupAddress}</p>}
       </div>
 
