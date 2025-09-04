@@ -60,7 +60,7 @@ const Received = () => {
   const fetchReceivedOrders = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("userToken");
       if (!token) {
         setError("User is not authenticated");
         return;

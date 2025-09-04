@@ -35,7 +35,9 @@ import Footer from "../layout/Footer/Footer";
 import CreateManifest from "../orders/Manifested/CreateManifest";
 import ManifestListing from "../manifested/Manifest";
 import PickupRequest from "../manifested/PickupRequest";
-
+import MyProfile from "../Settings/MyProfile";
+import KYCDetails from "../Settings/KycDetails";
+import PickupAddresses from "../Settings/PickupAddress";
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
@@ -65,7 +67,7 @@ const HomePage = () => {
   useEffect(() => {
     setIsClient(true);
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("userToken");
     if (!token) {
       router.push("/");
       return;
@@ -389,22 +391,24 @@ const HomePage = () => {
                       className="ml-4 pl-4 border-l border-emerald-600/50 mt-1"
                     >
                       <ul className="space-y-1">
-                        {["Profile", "Pickup Addresses", "Preferences"].map(
+                        {["Profile", "Pickup Addresses", "KYC Details"].map(
                           (item) => (
-                            <motion.li
-                              key={item}
-                              whileHover={{ x: 3 }}
-                              className="my-1"
+                 <motion.li key={item} whileHover={{ x: 3 }} className="my-1">
+                            <button
+                              onClick={() =>
+                                handleActiveTab(item.toLowerCase().replace(" ", "-"))
+                              }
+                              className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-200 ${
+                                activeTab === item.toLowerCase().replace(" ", "-")
+                                  ? "bg-emerald-600/80 text-white"
+                                  : "text-gray-200 hover:bg-emerald-700/30"
+                              }`}
                             >
-                              <Link
-                                href={`/settings/${item
-                                  .toLowerCase()
-                                  .replace(" ", "-")}`}
-                                className="flex items-center w-full py-2 px-3 rounded-md text-sm text-gray-200 hover:bg-emerald-700/30 transition-all duration-200"
-                              >
+                              <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>
                                 {item}
-                              </Link>
-                            </motion.li>
+                              </span>
+                            </button>
+                          </motion.li>
                           )
                         )}
                       </ul>
@@ -455,7 +459,7 @@ const HomePage = () => {
               {activeTab === "dispatched" && <Dispatched />}
               {activeTab === "received" && <Received />}
               {activeTab === "cancelled" && <Cancelled />}
-              {activeTab === "rate-calculator" && <RateCalculator /> && <CreateManifest />}
+              {activeTab === "rate-calculator" && <RateCalculator />}
               {activeTab === "recharge-wallet" && (
                 <RechargeWallet onRecharge={handleRecharge} />
               )}
@@ -463,6 +467,9 @@ const HomePage = () => {
               {activeTab === "transactions" && <TransactionHistory />}
               {activeTab === "manifest" && <ManifestListing />}
               {activeTab === "pickup-request" && <PickupRequest />}
+              {activeTab === "profile" && <MyProfile />}
+              {activeTab === "pickup-addresses" && <PickupAddresses />}
+              {activeTab === "kyc-details" && <KYCDetails />} 
             </motion.div>
           </AnimatePresence>
         </motion.div>

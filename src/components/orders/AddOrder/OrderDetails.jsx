@@ -10,7 +10,7 @@ const OrderDetails = ({ formData, errors, handleInputChange, handleContinueItem 
         Order Information
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+        {/* <div>
           <label className="block text-gray-700 font-medium mb-2">Invoice Number *</label>
           <input
             placeholder="Enter invoice number"
@@ -21,7 +21,7 @@ const OrderDetails = ({ formData, errors, handleInputChange, handleContinueItem 
             }`}
           />
           {errors.invoiceNo && <p className="text-red-500 text-sm mt-1">{errors.invoiceNo}</p>}
-        </div>
+        </div> */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">Invoice Currency *</label>
           <input

@@ -38,23 +38,8 @@ const Manifested = () => {
   // Modal state variables
   const [showNewManifestModal, setShowNewManifestModal] = useState(false);
   const [selectedPickupAddress, setSelectedPickupAddress] = useState("");
-  const [pickupAddresses, setPickupAddresses] = useState([
-    {
-      id: 1,
-      name: "Warehouse Mumbai",
-      address: "A-101, Industrial Area, Andheri East, Mumbai - 400059",
-    },
-    {
-      id: 2,
-      name: "Office Delhi",
-      address: "42 Commercial Complex, Connaught Place, New Delhi - 110001",
-    },
-    {
-      id: 3,
-      name: "Distribution Center Bangalore",
-      address: "Tech Park, Whitefield, Bangalore - 560066",
-    },
-  ]);
+  const [pickupAddresses, setPickupAddresses] = useState([]);
+  const [selectedPickupData, setSelectedPickupData] = useState(null);
 
   // Navigation state
   const [showCreateManifest, setShowCreateManifest] = useState(false);
@@ -74,7 +59,7 @@ const Manifested = () => {
       setError(null);
 
       // Get userId from the JWT token stored in localStorage
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("userToken");
       if (!token) {
         setError("User is not authenticated");
         setLoading(false);
@@ -117,9 +102,47 @@ const Manifested = () => {
     }
   };
 
+  const fetchPickupAddresses = async () => {
+    try {
+      // Get userId from token
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        setError("User is not authenticated");
+        return;
+      }
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const userId = decodedToken.userId;
+  
+      const response = await axios.get(`http://localhost:5000/api/user/pickupadresses/${userId}`);
+      // The response contains an array of pickup addresses
+      setPickupAddresses(response.data.pickupAddress || []);
+    } catch (error) {
+      console.error("Error fetching pickup addresses:", error);
+      setError("Unable to fetch pickup addresses. Please try again.");
+    }
+  };
+  
+  
+  const formatAddress = (address) => {
+    const parts = [
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.city,
+      address.state,
+      address.postalCode,
+      address.country,
+      address.contactPerson,
+      address.contactNumber
+
+    ];
+    return parts.filter(part => part && part.trim() !== '').join(', ');
+  };
+  
   // Fetch orders when component mounts
   useEffect(() => {
     fetchOrders();
+    fetchPickupAddresses();
   }, []);
 
   // Search functionality
@@ -141,22 +164,33 @@ const Manifested = () => {
     setSelectedPickupAddress("");
   };
 
-  // Handle Create Manifest - Navigate to CreateManifest component
-  const handleCreateManifest = async () => {
-    if (!selectedPickupAddress) {
-      alert("Please select a pickup address");
-      return;
-    }
+ const handleCreateManifest = async () => {
+  if (!selectedPickupAddress) {
+    alert("Please select a pickup address");
+    return;
+  }
 
-    // Get the selected pickup address data
-    const pickupData = pickupAddresses.find(
-      (addr) => addr.id === Number(selectedPickupAddress)
-    );
+  // Corrected logic to find selected address
+  const pickupData = pickupAddresses.find(
+    (addr) => addr._id === selectedPickupAddress
+  );
 
-    // Close modal and show create manifest component
-    setShowNewManifestModal(false);
-    setShowCreateManifest(true);
-  };
+  if (pickupData) {
+    // Store selected pickup address in sessionStorage
+    sessionStorage.setItem("selectedPickupAddress", JSON.stringify(pickupData));
+    setSelectedPickupData(pickupData);
+    console.log("Pickup data saved:", pickupData);
+  } else {
+    console.error("Pickup address not found!");
+  }
+
+  console.log("bhadwe chal rha hai");
+  
+
+  // Close modal and show CreateManifest component
+  setShowNewManifestModal(false);
+  setShowCreateManifest(true);
+};
 
   // Handle back from create manifest
   const handleBackFromCreateManifest = () => {
@@ -240,10 +274,13 @@ const Manifested = () => {
 
   // Show CreateManifest component if needed
   if (showCreateManifest) {
+    console.log("Rendering CreateManifest with orders:", orders);
+    console.log("Selected Pickup Address:", selectedPickupAddress);
+
     return (
       <CreateManifest 
-        orders={orders}
-        selectedPickupData={pickupAddresses.find(addr => addr.id === Number(selectedPickupAddress))}
+  orders={orders} 
+  selectedPickupData={selectedPickupData} // Make sure this is the correct object
         onBack={handleBackFromCreateManifest}
       />
     );
@@ -680,20 +717,19 @@ const Manifested = () => {
               {/* Modal Content */}
               <div className="p-6">
                 <div className="relative">
-                  <select
-                    value={selectedPickupAddress}
-                    onChange={(e) =>
-                      setSelectedPickupAddress(Number(e.target.value))
-                    }
-                    className="appearance-none w-full p-3 pr-10 text-gray-700 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  >
-                    <option value="">Select Pickup Address</option>
-                    {pickupAddresses.map((address) => (
-                      <option key={address.id} value={address.id}>
-                        {address.name} - {address.address}
-                      </option>
-                    ))}
-                  </select>
+                <select
+  value={selectedPickupAddress}
+  onChange={(e) => setSelectedPickupAddress(e.target.value)}
+  className="appearance-none w-full p-3 pr-10 text-gray-700 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+>
+  <option value="">Select Pickup Address</option>
+  {pickupAddresses.map((address) => (
+    <option key={address._id} value={address._id}>
+      {formatAddress(address)}
+    </option>
+  ))}
+</select>
+
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 </div>
               </div>

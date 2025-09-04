@@ -39,7 +39,7 @@ const Navbar = ({ balance }) => {
     const fetchUserData = async () => {
       try {
         setIsLoading(true);
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("userToken");
         
         if (!token) {
           console.log("No token found, redirecting to login");
@@ -127,7 +127,7 @@ const Navbar = ({ balance }) => {
         </div>
 
         {/* Center - Search bar */}
-        <div className="hidden md:flex items-center relative max-w-md w-full mx-4">
+        {/* <div className="hidden md:flex items-center relative max-w-md w-full mx-4">
           <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
             <input
@@ -136,7 +136,7 @@ const Navbar = ({ balance }) => {
               className="pl-10 pr-4 py-2 w-full rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Right Section - Icons and Info */}
         <div className="flex items-center space-x-1 md:space-x-4">
@@ -248,7 +248,13 @@ const Navbar = ({ balance }) => {
                     )}
                   </div>
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
+                    <button 
+                    onClick={() => {
+                      router.push('/home?tab=profile');
+                      setShowProfileMenu(false);
+
+                    }}
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
                       <User className="w-4 h-4 mr-2" />
                       Profile Settings
                     </button>

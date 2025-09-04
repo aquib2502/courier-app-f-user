@@ -35,7 +35,7 @@ const Draft = () => {
       setError(null); // Reset error state before fetching
       
       // Get userId from the JWT token stored in localStorage
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         setError('User is not authenticated');
         setLoading(false);

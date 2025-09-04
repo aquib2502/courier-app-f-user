@@ -204,6 +204,24 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
     });
   };
 
+
+  // Add this function inside your component, before the return statement
+const formatAddress = (address) => {
+  if (!address) return "No address selected";
+  
+  const parts = [
+    address.addressLine1,
+    address.addressLine2,
+    address.addressLine3,
+    address.city,
+    address.state,
+    address.postalCode,
+    address.country
+  ];
+  
+  return parts.filter(part => part && part.trim() !== '').join(', ');
+};
+
   // Handle save manifest
   const handleSaveManifest = () => {
     // Implementation for saving manifest
@@ -222,33 +240,27 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
       setIsLoading(true);
       
       // Get userId from token
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         toast.error('User is not authenticated');
-        return;
+        return; 
       }
 
       const decodedToken = JSON.parse(atob(token.split('.')[1]));
       const userId = decodedToken.userId;
 
-      // Prepare pickup address data
-      const pickupAddressData = {
-        name: selectedPickupData?.name || "SAGBAG HUB",
-        address: selectedPickupData?.address || "1818 18TH FLOOR SAGBAG MAROL ANDHERI EAST, Marol Naka, Mumbai Suburban, 400059",
-        contactPerson: "HUSSAIN PATEL",
-        contactNumber: "+91 98765 43210"
-      };
+  
 
       // Get order IDs from manifested orders
       const orderIds = manifestedOrders.map(order => order._id);
 
-      // Create manifest payload
-      const manifestPayload = {
-        orderIds,
-        pickupAddress: pickupAddressData,
-        userId,
-        courierPartner: 'The Trace Express'
-      };
+     // Update the manifestPayload in handleCompleteManifest function
+const manifestPayload = {
+  orderIds,
+  pickupAddress: selectedPickupData, // Use the selected pickup data
+  userId,
+  courierPartner: 'The Trace Express'
+};
 
       console.log("Creating manifest with payload:", manifestPayload);
 
@@ -334,52 +346,56 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
           </div>
         </div>
 
-        {/* Enhanced Pickup Address Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-blue-100">
-            <div className="flex items-center gap-3">
-              <Building2 className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-800">
-                Selected Pickup Location
-              </h2>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-gray-800">
-                      {selectedPickupData?.name || "SAGBAG HUB"}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {selectedPickupData?.address ||
-                        "1818 18TH FLOOR SAGBAG MAROL ANDHERI EAST, Marol Naka"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Mumbai Suburban, 400059
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-500">Contact Person</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    HUSSAIN PATEL
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-500">Contact Number</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    +91 98765 43210
-                  </p>
-                </div>
-              </div>
-            </div>
+    {/* Enhanced Pickup Address Card */}
+<div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-blue-100">
+    <div className="flex items-center gap-3">
+      <Building2 className="w-5 h-5 text-blue-600" />
+      <h2 className="text-lg font-semibold text-gray-800">
+        Selected Pickup Location 
+      </h2>
+    </div>
+  </div>
+  <div className="p-6">
+    <div className="grid md:grid-cols-2 gap-6">
+      <div>
+        <div className="flex items-start gap-3">
+          <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-gray-800">
+              {selectedPickupData?.addressLine1 || "No address selected"}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              {selectedPickupData?.addressLine2 || ""}
+              {selectedPickupData?.addressLine2 && selectedPickupData?.addressLine3 && ", "}
+              {selectedPickupData?.addressLine3 || ""}
+            </p>
+            <p className="text-sm text-gray-500">
+              {selectedPickupData?.city || ""}, {selectedPickupData?.state || ""} {selectedPickupData?.postalCode || ""}
+            </p>
+            <p className="text-sm text-gray-500">
+              {selectedPickupData?.country || ""}
+            </p>
           </div>
         </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-xs text-gray-500">Contact Person</p>
+          <p className="text-sm font-medium text-gray-800">
+            {selectedPickupData?.contactPerson || " "}
+          </p>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-xs text-gray-500">Contact Number</p>
+          <p className="text-sm font-medium text-gray-800">
+            {selectedPickupData?.contactNumber || " "}
+          </p>  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Enhanced Manifest Details */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">

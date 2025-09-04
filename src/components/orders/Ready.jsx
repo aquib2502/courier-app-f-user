@@ -43,7 +43,7 @@ const Ready = () => {
       setError(null);
       
       // Get userId from the JWT token stored in localStorage
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         setError('User is not authenticated');
         setLoading(false);
@@ -318,7 +318,7 @@ const Ready = () => {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
 
       if (!token) {
         setError('User is not authenticated');
@@ -702,8 +702,8 @@ const Ready = () => {
                   <span className="font-medium text-gray-700">Order:</span> 
                   <span className="text-blue-600 font-semibold">{selectedOrder.invoiceNo}</span>
                   <span className="mx-1 text-gray-300">•</span>
-                  <span className="font-medium text-gray-700">Serial:</span>
-                  <span className="text-red-600 font-bold">{serialNumber}</span>
+                  {/* <span className="font-medium text-gray-700">Serial:</span>
+                  <span className="text-red-600 font-bold">{selectedOrder.invoiceNo}</span> */}
                 </div>
                 
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -734,7 +734,7 @@ const Ready = () => {
                         <th colSpan="2" className="border-b border-gray-300" 
                             style={{fontSize: '12px', fontWeight: 'bold', color: '#dc2626', 
                                    textAlign: 'center', padding: '3px', backgroundColor: '#fef2f2'}}>
-                          {serialNumber}
+                          {selectedOrder.invoiceNo}
                         </th>
                       </tr>
                     </thead>
@@ -792,7 +792,7 @@ const Ready = () => {
                             ></svg>
                             <div className="text-center">
                               <div className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded inline-block">
-                                {serialNumber}
+                                {selectedOrder.invoiceNo}
                               </div>
                             </div>
                           </div>

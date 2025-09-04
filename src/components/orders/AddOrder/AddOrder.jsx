@@ -1,7 +1,7 @@
 // components/orders/AddOrder/AddOrder.jsx
 "use client";
 import React, { useState, useEffect } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
@@ -17,11 +17,8 @@ import ShippingSelection from './ShippingSelection';
 import OrderReview from './OrderReview';
 
 const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
-  const [showShipment, setShowShipment] = useState(false);
-  const [showOrder, setShowOrder] = useState(false);
-  const [showItem, setShowItem] = useState(false);
-  const [showShippingPackage, setShowShippingPackage] = useState(false);
-  const [showPlaceOrder, setShowPlaceOrder] = useState(false);
+  // Step management - simplified to use a single currentStep state
+  const [currentStep, setCurrentStep] = useState(1);
   const [selectedShippingPartner, setSelectedShippingPartner] = useState(null);
   const [availableRates, setAvailableRates] = useState([]);
   const [allRates, setAllRates] = useState([]);
@@ -49,7 +46,6 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     length: "",
     width: "",
     height: "",
-    invoiceNo: "",
     invoiceDate: new Date().toISOString().split('T')[0],
     invoiceCurrency: "INR",
     productItems: productItems,
@@ -124,46 +120,31 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setAvailableRates(formattedRates);
   };
 
-  // Determine current step for sidebar
-  const getCurrentStep = () => {
-    if (showPlaceOrder) return 4;
-    if (showShippingPackage) return 3;
-    if (showItem || showOrder || showShipment) return 2;
-    return 1;
-  };
-
-  const currentStep = getCurrentStep();
-
   // Navigation function for sidebar clicks
   const navigateToStep = (step) => {
+    // Only allow navigation to completed steps or next step
+    if (step <= currentStep || isStepAccessible(step)) {
+      setCurrentStep(step);
+    }
+  };
+
+  // Check if a step is accessible based on form completion
+  const isStepAccessible = (step) => {
     switch(step) {
       case 1:
-        setShowShipment(false);
-        setShowOrder(false);
-        setShowItem(false);
-        setShowShippingPackage(false);
-        setShowPlaceOrder(false);
-        break;
+        return true;
       case 2:
-        if (formData.firstName && formData.lastName && formData.mobile && formData.address1) {
-          setShowShipment(true);
-          setShowOrder(false);
-          setShowItem(false);
-          setShowShippingPackage(false);
-          setShowPlaceOrder(false);
-        }
-        break;
+        return formData.firstName && formData.lastName && formData.mobile && formData.address1;
       case 3:
-        if (showItem) {
-          setShowShippingPackage(true);
-          setShowPlaceOrder(false);
-        }
-        break;
+        return isStepAccessible(2) && formData.weight && formData.length && formData.width && formData.height;
       case 4:
-        if (selectedShippingPartner) {
-          setShowPlaceOrder(true);
-        }
-        break;
+        return isStepAccessible(3) && productItems.every(item => item.productName && item.productQuantity && item.productPrice);
+      case 5:
+        return isStepAccessible(4) && selectedShippingPartner;
+      case 6:
+        return isStepAccessible(5);
+      default:
+        return false;
     }
   };
 
@@ -172,7 +153,8 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setErrors({ ...errors, [field]: "" });
   };
 
-  const handleContinueShipment = () => {
+  // Step 1: Buyer Details validation and navigation
+  const handleContinueFromBuyer = () => {
     const newErrors = {};
 
     if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
@@ -189,11 +171,12 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      setShowShipment(true);
+      setCurrentStep(2);
     }
   };
 
-  const handleContinueOrder = () => {
+  // Step 2: Shipment Details validation and navigation
+  const handleContinueFromShipment = () => {
     const newErrors = {};
 
     if (!formData.weight) newErrors.weight = "Actual Weight is required";
@@ -204,28 +187,29 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      setShowOrder(true);
+      setCurrentStep(3);
       // Clear shipping selection if weight changes
       setSelectedShippingPartner(null);
       setAvailableRates([]);
     }
   };
 
-  const handleContinueItem = () => {
+  // Step 3: Order Details validation and navigation
+  const handleContinueFromOrder = () => {
     const newErrors = {};
 
-    if (!formData.invoiceNo) newErrors.invoiceNo = "Invoice number is required";
     if (!formData.invoiceCurrency) newErrors.invoiceCurrency = "Invoice currency is required";
     if (!formData.invoiceDate) newErrors.invoiceDate = "Invoice date is required";
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      setShowItem(true);
+      setCurrentStep(4);
     }
   };
 
-  const handleContinueToShipping = () => {
+  // Step 4: Item Details validation and navigation
+  const handleContinueFromItems = () => {
     const newErrors = {};
 
     productItems.forEach((item, index) => {
@@ -238,21 +222,23 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
 
     if (Object.keys(newErrors).length === 0) {
       calculateShippingRates(); // Calculate rates when moving to shipping selection
-      setShowShippingPackage(true);
+      setCurrentStep(5);
     }
+  };
+
+  // Step 5: Shipping Selection validation and navigation
+  const handleContinueFromShipping = () => {
+    if (!selectedShippingPartner) {
+      setErrors({ shippingPartner: "Please select a shipping partner" });
+      return;
+    }
+    setCurrentStep(6);
   };
 
   const handleSelectShippingPartner = (partner) => {
     setSelectedShippingPartner(partner);
     setFormData({ ...formData, shippingPartner: partner });
-  };
-
-  const handleContinueToPlaceOrder = () => {
-    if (!selectedShippingPartner) {
-      setErrors({ shippingPartner: "Please select a shipping partner" });
-      return;
-    }
-    setShowPlaceOrder(true);
+    setErrors({ ...errors, shippingPartner: "" });
   };
 
   const handleProductItemChange = (index, field, value) => {
@@ -283,7 +269,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
   const handlePlaceOrder = async (paymentStatus = 'Payment Pending', orderStatus = 'Drafts') => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null;
       const user = decodedToken ? decodedToken.userId : null;
 
@@ -307,16 +293,37 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
       if (paymentStatus === 'Payment Received' && orderStatus === 'Ready' && onOrderPayment) {
         await onOrderPayment(calculateTotalAmount());
       }
+      toast.success("Order placed successfully!");
 
       // Redirect to appropriate tab
       router.push(`?tab=${orderStatus.toLowerCase()}`, undefined, { shallow: true });
 
     } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
       console.error('Submission error:', err);
-      toast.error("Something went wrong");
       throw err; // Re-throw to be handled by the calling function
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Go to previous step
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Get step titles
+  const getStepTitle = () => {
+    switch(currentStep) {
+      case 1: return "Buyer Details";
+      case 2: return "Shipment Details";
+      case 3: return "Order Details";
+      case 4: return "Item Details";
+      case 5: return "Shipping Selection";
+      case 6: return "Order Review";
+      default: return "Order Form";
     }
   };
 
@@ -324,22 +331,24 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Enhanced Sidebar */}
       <Sidebar currentStep={currentStep} navigateToStep={navigateToStep} />
-
+      
+      <ToastContainer position="top-right" autoClose={3000} />
+      
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="bg-white shadow-xl rounded-2xl p-8 max-w-4xl mx-auto">
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold text-gray-800">New Order</h2>
+              <h2 className="text-3xl font-bold text-gray-800">{getStepTitle()}</h2>
               <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium">
-                Step {currentStep} of 4
+                Step {currentStep} of 6
               </div>
             </div>
             <div className="w-full bg-gray-200 h-2 rounded-full">
               <div 
                 className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${(currentStep / 4) * 100}%` }}
+                style={{ width: `${(currentStep / 6) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -356,78 +365,114 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
             </div>
           )}
 
-          {/* First Section: Buyer Shipping Details */}
-          {!showShippingPackage && !showPlaceOrder && (
-            <div className="space-y-8">
+          {/* Step Content */}
+          <div className="min-h-96">
+            {/* Step 1: Buyer Details */}
+            {currentStep === 1 && (
               <BuyerDetails 
                 formData={formData}
                 errors={errors}
                 handleInputChange={handleInputChange}
-                handleContinueShipment={handleContinueShipment}
+                handleContinueShipment={handleContinueFromBuyer}
               />
-              
+            )}
+
+            {/* Step 2: Shipment Details */}
+            {currentStep === 2 && (
+              <ShipmentDetails 
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                handleContinueOrder={handleContinueFromShipment}
+              />
+            )}
+
+            {/* Step 3: Order Details */}
+            {currentStep === 3 && (
+              <OrderDetails 
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                handleContinueItem={handleContinueFromOrder}
+              />
+            )}
+
+            {/* Step 4: Item Details */}
+            {currentStep === 4 && (
+              <ItemDetails 
+                productItems={productItems}
+                errors={errors}
+                handleProductItemChange={handleProductItemChange}
+                handleRemoveProductItem={handleRemoveProductItem}
+                handleAddProductItem={handleAddProductItem}
+                handleContinueToShipping={handleContinueFromItems}
+              />
+            )}
+
+            {/* Step 5: Shipping Selection */}
+            {currentStep === 5 && (
+              <ShippingSelection 
+                formData={formData}
+                availableRates={availableRates}
+                selectedShippingPartner={selectedShippingPartner}
+                errors={errors}
+                handleSelectShippingPartner={handleSelectShippingPartner}
+                handleContinueToPlaceOrder={handleContinueFromShipping}
+              />
+            )}
+
+            {/* Step 6: Order Review */}
+            {currentStep === 6 && (
+              <OrderReview 
+                formData={formData}
+                productItems={productItems}
+                selectedShippingPartner={selectedShippingPartner}
+                calculateTotalAmount={calculateTotalAmount}
+                handlePlaceOrder={handlePlaceOrder}
+                isLoading={isLoading}
+              />
+            )}
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center mt-8 pt-6 border-t">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${
+                currentStep === 1 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+
+            <div className="flex space-x-2">
+              {[1, 2, 3, 4, 5, 6].map((step) => (
+                <button
+                  key={step}
+                  onClick={() => navigateToStep(step)}
+                  disabled={!isStepAccessible(step) && step > currentStep}
+                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                    step === currentStep
+                      ? 'bg-emerald-600'
+                      : step < currentStep
+                      ? 'bg-emerald-400 hover:bg-emerald-500'
+                      : isStepAccessible(step)
+                      ? 'bg-gray-300 hover:bg-gray-400'
+                      : 'bg-gray-200 cursor-not-allowed'
+                  }`}
+                />
+              ))}
             </div>
-          )}
 
-          {/* Shipment Section */}
-          {showShipment && !showShippingPackage && !showPlaceOrder && (
-            <ShipmentDetails 
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              handleContinueOrder={handleContinueOrder}
-            />
-          )}
-
-          {/* Order Details Section */}
-          {showOrder && !showShippingPackage && !showPlaceOrder && (
-            <OrderDetails 
-              formData={formData}
-              errors={errors}
-              handleInputChange={handleInputChange}
-              handleContinueItem={handleContinueItem}
-            />
-          )}
-
-          {/* Item Details Section */}
-          {showItem && !showShippingPackage && !showPlaceOrder && (
-            <ItemDetails 
-              productItems={productItems}
-              errors={errors}
-              handleProductItemChange={handleProductItemChange}
-              handleRemoveProductItem={handleRemoveProductItem}
-              handleAddProductItem={handleAddProductItem}
-              handleContinueToShipping={handleContinueToShipping}
-            />
-          )}
-
-          {/* Shipping Package Selection Section */}
-          {showShippingPackage && !showPlaceOrder && (
-            <ShippingSelection 
-              formData={formData}
-              availableRates={availableRates}
-              selectedShippingPartner={selectedShippingPartner}
-              errors={errors}
-              handleSelectShippingPartner={handleSelectShippingPartner}
-              handleContinueToPlaceOrder={handleContinueToPlaceOrder}
-            />
-          )}
-
-          {/* Place Order Section */}
-          {showPlaceOrder && (
-            <OrderReview 
-              formData={formData}
-              productItems={productItems}
-              selectedShippingPartner={selectedShippingPartner}
-              calculateTotalAmount={calculateTotalAmount}
-              handlePlaceOrder={handlePlaceOrder}
-              isLoading={isLoading}
-            />
-          )}
+            {/* The Next button functionality is handled by each step's continue function */}
+            <div className="w-24"></div> {/* Spacer for centering */}
+          </div>
         </div>
       </div>
-      
-      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

@@ -51,7 +51,7 @@ const Dispatched = () => {
       setLoading(true);
       setError(null);
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         setError('User is not authenticated');
         setLoading(false);
@@ -193,43 +193,43 @@ const Dispatched = () => {
     setCurrentPage(1);
   };
 
- // Handle Mark as Received
-const handleMarkAsReceived = async (order) => {
-  if (processingOrder === order._id) return;
+//  // Handle Mark as Received
+// const handleMarkAsReceived = async (order) => {
+//   if (processingOrder === order._id) return;
 
-  try {
-    setProcessingOrder(order._id);
+//   try {
+//     setProcessingOrder(order._id);
     
-    const receivedTimestamp = new Date(); // Capture current date/time
+//     const receivedTimestamp = new Date(); // Capture current date/time
     
-    const response = await axios.put(
-      `http://localhost:5000/api/orders/${order._id}/status`,
-      {
-        orderStatus: 'Delivered',
-        manifestStatus: 'received',
-        trackingStatus: 'Delivered',
-        receivedAt: receivedTimestamp, // Add received timestamp
-        deliveryConfirmation: {
-          type: 'In-Person',
-          confirmedBy: 'Customer',
-          timestamp: receivedTimestamp // Use same timestamp here if needed
-        }
-      }
-    );
+//     const response = await axios.put(
+//       `http://localhost:5000/api/orders/${order._id}/status`,
+//       {
+//         orderStatus: 'Delivered',
+//         manifestStatus: 'received',
+//         trackingStatus: 'Delivered',
+//         receivedAt: receivedTimestamp, // Add received timestamp
+//         deliveryConfirmation: {
+//           type: 'In-Person',
+//           confirmedBy: 'Customer',
+//           timestamp: receivedTimestamp // Use same timestamp here if needed
+//         }
+//       }
+//     );
 
-    if (response.status === 200) {
-      const updatedOrders = orders.filter(o => o._id !== order._id);
-      setOrders(updatedOrders);
-      setFilteredOrders(updatedOrders);
-      toast.success(`Order ${order.invoiceNo} marked as received at ${receivedTimestamp.toLocaleString()}`);
-    }
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    toast.error("Unable to update order status. Please try again.");
-  } finally {
-    setProcessingOrder(null);
-  }
-};
+//     if (response.status === 200) {
+//       const updatedOrders = orders.filter(o => o._id !== order._id);
+//       setOrders(updatedOrders);
+//       setFilteredOrders(updatedOrders);
+//       toast.success(`Order ${order.invoiceNo} marked as received at ${receivedTimestamp.toLocaleString()}`);
+//     }
+//   } catch (error) {
+//     console.error("Error updating order status:", error);
+//     toast.error("Unable to update order status. Please try again.");
+//   } finally {
+//     setProcessingOrder(null);
+//   }
+// };
 
   // Handle Track Shipment
   const handleTrackShipment = (order) => {
@@ -549,7 +549,7 @@ const handleMarkAsReceived = async (order) => {
                               <Navigation className="w-3 h-3 mr-1" />
                               Track
                             </button>
-                            <button 
+                            {/* <button 
                               onClick={() => handleMarkAsReceived(order)}
                               disabled={processingOrder === order._id}
                               className={`px-3 py-1 text-xs font-medium rounded-md flex items-center ${
@@ -570,7 +570,7 @@ const handleMarkAsReceived = async (order) => {
                                   Received
                                 </>
                               )}
-                            </button>
+                            </button> */}
                             <button 
                               onClick={() => handleContactSupport(order)}
                               className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center"
