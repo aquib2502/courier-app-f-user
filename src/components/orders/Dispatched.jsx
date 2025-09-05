@@ -67,7 +67,7 @@ const Dispatched = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5000/api/user/orders/${userId}`);
+      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
       
       // Filter for dispatched orders (Shipped status with dispatched manifest status)
       const dispatchedOrders = response.data.data.filter(order => 
@@ -203,7 +203,7 @@ const Dispatched = () => {
 //     const receivedTimestamp = new Date(); // Capture current date/time
     
 //     const response = await axios.put(
-//       `http://localhost:5000/api/orders/${order._id}/status`,
+//       `${NEXT_PUBLIC_API_URL}/api/orders/${order._id}/status`,
 //       {
 //         orderStatus: 'Delivered',
 //         manifestStatus: 'received',

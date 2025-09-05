@@ -72,7 +72,7 @@ const ManifestListing = () => {
       const userId = decodedToken.userId;
 
       const response = await axios.get(
-        `http://localhost:5000/api/manifests/user/${userId}`
+        `${NEXT_PUBLIC_API_URL}/api/manifests/user/${userId}`
       );
 
       setManifests(response.data.data);
@@ -161,7 +161,7 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
       
       // Update manifest with pickup information
       const response = await axios.put(
-        `http://localhost:5000/api/manifests/${selectedManifest._id}/status`,
+        `${NEXT_PUBLIC_API_URL}/api/manifests/${selectedManifest._id}/status`,
         { 
           status: 'pickup_requested',
           scheduledPickup: pickupDateTime,

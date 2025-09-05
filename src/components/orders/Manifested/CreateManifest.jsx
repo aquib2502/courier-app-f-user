@@ -266,7 +266,7 @@ const manifestPayload = {
 
       // Make API call to create manifest
       const response = await axios.post(
-        'http://localhost:5000/api/manifests/create',
+        `${NEXT_PUBLIC_API_URL}/api/manifests/create`,
         manifestPayload
       );
 

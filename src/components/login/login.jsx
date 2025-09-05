@@ -18,7 +18,7 @@ const Login = ({ onToggleToSignup }) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/user/loginUser', {
+            const response = await axios.post(`${NEXT_PUBLIC_API_URL}/api/user/loginUser`, {
                 email,
                 password,
             });

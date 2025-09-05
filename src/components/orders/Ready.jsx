@@ -61,7 +61,7 @@ const Ready = () => {
       }
 
       // Make the API request to fetch ready orders
-      const response = await axios.get(`http://localhost:5000/api/user/orders/${userId}`);
+      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
       
       // Filter for only ready orders
       const readyOrders = response.data.data.filter(order => order.orderStatus === 'Ready');
@@ -99,7 +99,7 @@ const Ready = () => {
   // Generate serial number based on total order count
   const generateSerialNumber = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/orders/count/total');
+      const response = await axios.get('${NEXT_PUBLIC_API_URL}/api/orders/count/total');
       if (response.data.success) {
         const totalCount = response.data.data.totalCount;
         // Add 1 to count since this will be the next order
@@ -329,7 +329,7 @@ const Ready = () => {
       console.log("Processing order with ID:", order._id);
 
       const response = await axios.put(
-        `http://localhost:5000/api/orders/${order._id}/status`,
+        `${NEXT_PUBLIC_API_URL}/api/orders/${order._id}/status`,
         {
           orderStatus: 'Packed'
         }

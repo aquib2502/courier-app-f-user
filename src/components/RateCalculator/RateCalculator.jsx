@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/rates"; // Replace with your actual backend URL
+const API_URL = `${NEXT_PUBLIC_API_URL}/api/rates`; // Replace with your actual backend URL
 
 const RateCalculator = () => {
   const [weight, setWeight] = useState("0.1");

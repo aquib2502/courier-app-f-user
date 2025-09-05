@@ -67,7 +67,7 @@ const PickupRequest = () => {
       const userId = decodedToken.userId;
 
       const response = await axios.get(
-        `http://localhost:5000/api/manifests/user/${userId}`
+        `${NEXT_PUBLIC_API_URL}/api/manifests/user/${userId}`
       );
 
       // Filter manifests that have pickup requested or closed status
@@ -169,7 +169,7 @@ const PickupRequest = () => {
     try {
       // Update manifest status back to open
       const response = await axios.put(
-        `http://localhost:5000/api/manifests/${manifestId}/status`,
+        `${NEXT_PUBLIC_API_URL}/api/manifests/${manifestId}/status`,
         { status: 'open' }
       );
 
@@ -188,7 +188,7 @@ const PickupRequest = () => {
     try {
       // Update manifest status to closed
       const response = await axios.put(
-        `http://localhost:5000/api/manifests/${manifestId}/status`,
+        `${NEXT_PUBLIC_API_URL}/api/manifests/${manifestId}/status`,
         { status: 'closed' }
       );
 

@@ -53,7 +53,7 @@ const Draft = () => {
       }
 
       // Make the API request
-      const response = await axios.get(`http://localhost:5000/api/user/orders/${userId}`);
+      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
       
       // Check if the response has data
       if (response.data && response.data.data) {
@@ -381,7 +381,7 @@ const Draft = () => {
                         <h3 className="text-lg font-semibold text-gray-700 mb-1">No draft orders found</h3>
                         <p className="text-sm text-gray-500 mb-4">You don't have any draft orders at the moment.</p>
                         <button 
-                          onClick={() => router.push('http://localhost:3000/home?tab=add-order')}
+                          onClick={() => router.push('https://thetraceexpress.com/home?tab=add-order')}
                           className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-all duration-300"
                         >
                           Create New Order

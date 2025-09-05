@@ -85,7 +85,7 @@ const HomePage = () => {
         const userId = decodedToken.userId;
 
         // Fetch wallet balance from your API
-        const response = await fetch(`http://localhost:5000/api/wallet/balance/${userId}`);
+        const response = await fetch(`${NEXT_PUBLIC_API_URL}/api/wallet/balance/${userId}`);
         const data = await response.json();
         setBalance(data.balance || 0);
       } catch (error) {

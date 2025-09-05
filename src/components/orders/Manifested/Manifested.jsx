@@ -78,7 +78,7 @@ const Manifested = () => {
 
       // Make the API request to fetch orders
       const response = await axios.get(
-        `http://localhost:5000/api/user/orders/${userId}`
+        `${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`
       );
 
       // Filter for only packed orders and add manifestStatus field
@@ -113,7 +113,7 @@ const Manifested = () => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
   
-      const response = await axios.get(`http://localhost:5000/api/user/pickupadresses/${userId}`);
+      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/pickupadresses/${userId}`);
       // The response contains an array of pickup addresses
       setPickupAddresses(response.data.pickupAddress || []);
     } catch (error) {

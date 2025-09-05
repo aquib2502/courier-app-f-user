@@ -60,7 +60,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/rates`);
+        const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/rates`);
         setAllRates(response.data); // API returns array of rates
       } catch (error) {
         console.error(
@@ -106,7 +106,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/user/getuser/${userId}`
+        `${NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`
       );
       if (response.data && response.data.user.discountRate) {
         setDiscountPercent(response.data.user.discountRate);
@@ -433,7 +433,7 @@ const countryStateMap = {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/orders/create",
+        `${NEXT_PUBLIC_API_URL}/api/orders/create`,
         payload
       );
 

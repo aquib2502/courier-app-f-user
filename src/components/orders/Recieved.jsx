@@ -70,7 +70,7 @@ const Received = () => {
       const userId = decodedToken.userId;
 
       const response = await axios.get(
-        `http://localhost:5000/api/user/orders/${userId}`
+        `${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`
       );
 
       // Filter for only delivered orders
@@ -155,7 +155,7 @@ const Received = () => {
   const submitFeedback = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/orders/${selectedOrder._id}/feedback`,
+        `${NEXT_PUBLIC_API_URL}/api/orders/${selectedOrder._id}/feedback`,
         {
           rating: feedback.rating,
           comment: feedback.comment
