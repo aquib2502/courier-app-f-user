@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Login from "./Login";
+import Login from "./login";
 import SignUp from "./SignUp";
 
 const AuthContainer = () => {
