@@ -2,7 +2,8 @@
 import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
 
-const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipment }) => {
+const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipment,countryStateMap }) => {
+   const states = countryStateMap[formData.country] || [];
   return (
     <div>
       <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -80,50 +81,62 @@ const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipm
           />
         </div>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">Country *</label>
-          <select 
-            value={formData.country}
-            onChange={(e) => handleInputChange("country", e.target.value)}
-            className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-              errors.country ? 'border-red-300' : 'border-gray-300'
-            }`}
-          >
-            <option value="">Select Country</option>
-            <option value="USA">USA</option>
-            <option value="Canada">Canada</option>
-          </select>
-          {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country}</p>}
-        </div>
+         {/* Country Dropdown */}
+<div>
+  <label className="block text-gray-700 font-medium mb-2">
+    Country *
+  </label>
+  <select
+    value={formData.country}
+    onChange={(e) => {
+      console.log("Selected country:", e.target.value); // Debugging
+      handleInputChange("country", e.target.value);
+      handleInputChange("state", ""); // Reset state when country changes
+    }}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.country ? "border-red-300" : "border-gray-300"
+    }`}
+  >
+    <option value="">Select Country</option>
+    <option value="USA">USA</option>
+    <option value="USA Remote">USA (Remote)</option>
+    <option value="UK">UK</option>
+    <option value="Australia">Australia</option>
+    <option value="Rest of the World">Rest of the World</option>
+    <option value="Canada">Canada</option>
+  </select>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">State *</label>
-          <select
-            value={formData.state}
-            onChange={(e) => handleInputChange("state", e.target.value)}
-            className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-              errors.state ? 'border-red-300' : 'border-gray-300'
-            }`}
-          >
-            <option value="">Select State</option>
-            <option value="California">California</option>
-            <option value="New York">New York</option>
-          </select>
-          {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
-        </div>
+  {errors.country && (
+    <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+  )}
+</div>
 
-        <div className="md:col-span-2">
-          <label className="block text-gray-700 font-medium mb-2">Address Line 1 *</label>
-          <input
-            placeholder="Enter street address"
-            value={formData.address1}
-            onChange={(e) => handleInputChange("address1", e.target.value)}
-            className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-              errors.address1 ? 'border-red-300' : 'border-gray-300'
-            }`}
-          />
-          {errors.address1 && <p className="text-red-500 text-sm mt-1">{errors.address1}</p>}
-        </div>
+{/* State Dropdown */}
+<div>
+  <label className="block text-gray-700 font-medium mb-2">
+    State *
+  </label>
+  <select
+    value={formData.state}
+    onChange={(e) => handleInputChange("state", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.state ? "border-red-300" : "border-gray-300"
+    }`}
+    disabled={!formData.country} // Disable if no country selected
+  >
+    <option value="">Select State</option>
+    {states.map((state, index) => (
+      <option key={index} value={state}>
+        {state}
+      </option>
+    ))}
+  </select>
+  {errors.state && (
+    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
+  )}
+</div>
+
+
 
         <div className="md:col-span-2">
           <label className="block text-gray-700 font-medium mb-2">Address Line 2 *</label>

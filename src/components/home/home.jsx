@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef, Suspense} from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import {
@@ -114,8 +114,9 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Suspense fallback={<div>Loading...</div>}>
       <Navbar balance={balance} />
-      
+      </Suspense>
       <div className="flex flex-grow">
         {/* Sidebar */}
         <motion.div

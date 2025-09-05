@@ -81,17 +81,13 @@ const KYCDetails = () => {
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl font-semibold text-gray-900">KYC</h1>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 border border-green-200">
-                {userDetails?.isApproved ? 'Approved' : 'Pending'}
+                {userDetails?.kycStatus ? 'approved' : 'pending'}
               </span>
             </div>
-            <nav className="text-sm text-gray-500">
+            <nav className="text-sm text-gray-500"> 
               Settings &gt; KYC
             </nav>
           </div>
-          <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
-            <span>↗</span>
-            Upgrade To CSB-V
-          </button>
         </div>
 
         <div className="flex gap-6">

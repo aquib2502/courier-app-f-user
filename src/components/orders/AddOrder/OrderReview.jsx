@@ -13,7 +13,7 @@ const OrderReview = ({
   walletBalance = 0,
   router
 }) => {
-  const totalAmount = calculateTotalAmount();
+  const totalAmount = localStorage.getItem('finalShippingPrice') || calculateTotalAmount();
 
   const handlePayAndOrder = async () => {
     try {

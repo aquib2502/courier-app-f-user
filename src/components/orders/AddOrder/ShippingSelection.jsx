@@ -1,6 +1,7 @@
 // components/orders/AddOrder/ShippingSelection.jsx
 import React from 'react';
 import { Truck, Check, ChevronRight } from 'lucide-react';
+import axios from 'axios';
 
 const ShippingSelection = ({ 
   formData, 
@@ -8,13 +9,39 @@ const ShippingSelection = ({
   selectedShippingPartner, 
   errors, 
   handleSelectShippingPartner, 
-  handleContinueToPlaceOrder 
-}) => {
-  // Function to calculate price with 18% GST
-  const calculatePriceWithGST = (basePrice) => {
-    const gstAmount = basePrice * 0.18;
-    return (basePrice + gstAmount).toFixed(2);
-  };
+  handleContinueToPlaceOrder ,
+  discountPercent
+}) => 
+  {
+  
+  
+const calculateFinalPrice = (basePrice, discountPercent) => {
+  console.log("calculateFinalPrice -> basePrice:", basePrice);
+  console.log("calculateFinalPrice -> discountPercent:", discountPercent);
+
+  // Step 1: Ensure values are numbers
+  const price = Number(basePrice);
+  const discount = Number(discountPercent);
+
+  if (isNaN(price) || isNaN(discount)) {
+    console.error("Invalid price or discount!", { price, discount });
+    return 0;
+  }
+
+  const gstAmount = price * 0.18;
+  const priceWithGst = price + gstAmount;
+
+  const discountDecimal = discount / 100;
+  const discountAmount = priceWithGst * discountDecimal;
+
+  const finalPrice = priceWithGst - discountAmount;
+  console.log("Final Price Calculated:", finalPrice);
+
+  localStorage.setItem('finalShippingPrice', finalPrice.toFixed(2));
+
+  return finalPrice.toFixed(2);
+};
+
 
   return (
     <div className="mt-8">
@@ -50,6 +77,7 @@ const ShippingSelection = ({
       ) : (
         <div className="space-y-4">
           {availableRates.map((partner) => (
+            
             <div
               key={partner.id}
               className={`border-2 rounded-xl p-6 cursor-pointer transition-all ${
@@ -83,8 +111,12 @@ const ShippingSelection = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-emerald-600">₹{calculatePriceWithGST(partner.price)}</p>
+                  <p className="text-3xl font-bold text-emerald-600">
+  ₹{calculateFinalPrice(partner.price, discountPercent)}
+</p>
                   <p className="text-sm text-gray-500">Inclusive of 18% GST</p>
+                  <p className="text-sm text-gray-500">& {discountPercent}% indivisual discount</p>
+                  
                 </div>
               </div>
               {selectedShippingPartner?.id === partner.id && (
