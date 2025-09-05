@@ -132,7 +132,7 @@ const SignUp = ({ onToggleToLogin }) => {
             formData.append('gstProof', gstProof);
             formData.append('iecProof', iecProof);
 
-            const response = await axios.post(`${NEXT_PUBLIC_API_URL}/api/user/registerUser`, formData, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/user/registerUser`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

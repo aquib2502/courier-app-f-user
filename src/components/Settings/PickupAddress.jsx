@@ -39,7 +39,7 @@ const PickupAddress = () => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
-      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`);
       const data = response.data.user; // Access the nested user object
       setUserDetails(data);
       
@@ -69,7 +69,7 @@ const PickupAddress = () => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
-      await axios.put(`${NEXT_PUBLIC_API_URL}/api/user/updateuser/${userId}`, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/user/updateuser/${userId}`, {
         pickupAddresses: [...addresses, newAddress]
       });
       
@@ -102,7 +102,7 @@ const PickupAddress = () => {
       const userId = decodedToken.userId;
 
       const updatedAddresses = addresses.filter((_, index) => index !== addressIndex);
-      await axios.put(`${NEXT_PUBLIC_API_URL}/api/user/updateuser/${userId}`, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/user/updateuser/${userId}`, {
         pickupAddresses: updatedAddresses
       });
       

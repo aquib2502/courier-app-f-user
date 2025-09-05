@@ -76,7 +76,7 @@ const Packed = () => {
       }
 
       // Make the API request to fetch orders
-      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
       
       // Filter for only packed orders
       const packedOrders = response.data.data.filter(order => order.orderStatus === 'Packed');

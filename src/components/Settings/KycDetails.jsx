@@ -25,7 +25,7 @@ const KYCDetails = () => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
-      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`);
       setUserDetails(response.data.user);
     } catch (error) {
       console.error('Error fetching user details:', error);

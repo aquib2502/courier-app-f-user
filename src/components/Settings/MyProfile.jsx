@@ -31,7 +31,7 @@ const MyProfile = () => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
-      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`);
       setUserDetails(response.data.user);
       console.log('Fetched user details:', response.data);
     setEditForm({
@@ -58,7 +58,7 @@ const MyProfile = () => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
-      await axios.put(`${NEXT_PUBLIC_API_URL}/api/user/updateuser/${userId}`, editForm);
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/user/updateuser/${userId}`, editForm);
       await fetchUserDetails();
       setIsEditing(false);
     } catch (error) {

@@ -53,7 +53,7 @@ const Draft = () => {
       }
 
       // Make the API request
-      const response = await axios.get(`${NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
       
       // Check if the response has data
       if (response.data && response.data.data) {

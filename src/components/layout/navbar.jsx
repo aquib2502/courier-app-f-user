@@ -72,7 +72,7 @@ const Navbar = ({ balance }) => {
         // Make API request to get user details
         console.log("Fetching user data for ID:", userId);
         const response = await axios.get(
-          `${NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
