@@ -143,7 +143,7 @@ const SignUp = ({ onToggleToLogin }) => {
             
             // Slight delay before redirect for better UX
             setTimeout(() => {
-                router.push('/home');
+                router.push('/');
             }, 200);
     
         } catch (err) {
