@@ -138,18 +138,34 @@ const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipm
 
 
 
-        <div className="md:col-span-2">
-          <label className="block text-gray-700 font-medium mb-2">Address Line 2 *</label>
-          <input 
-            placeholder="Apartment, suite, unit, etc."
-            value={formData.address2}
-            onChange={(e) => handleInputChange("address2", e.target.value)}
-            className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-              errors.address2 ? 'border-red-300' : 'border-gray-300'
-            }`}
-          />
-          {errors.address2 && <p className="text-red-500 text-sm mt-1">{errors.address2}</p>}
-        </div>
+        {/* Address Line 1 */}
+<div className="mb-6">
+  <label className="block text-gray-700 font-medium mb-2">Address Line 1 *</label>
+  <input
+    placeholder="Street address, P.O. box, company name, c/o"
+    value={formData.address1}
+    onChange={(e) => handleInputChange("address1", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.address1 ? "border-red-300" : "border-gray-300"
+    }`}
+  />
+  {errors.address1 && <p className="text-red-500 text-sm mt-1">{errors.address1}</p>}
+</div>
+
+{/* Existing Address Line 2 */}
+<div className="md:col-span-2">
+  <label className="block text-gray-700 font-medium mb-2">Address Line 2 *</label>
+  <input 
+    placeholder="Apartment, suite, unit, etc."
+    value={formData.address2}
+    onChange={(e) => handleInputChange("address2", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.address2 ? 'border-red-300' : 'border-gray-300'
+    }`}
+  />
+  {errors.address2 && <p className="text-red-500 text-sm mt-1">{errors.address2}</p>}
+</div>
+
 
         <div>
           <label className="block text-gray-700 font-medium mb-2">Landmark</label>

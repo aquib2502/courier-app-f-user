@@ -126,7 +126,7 @@ const Packed = () => {
     if (showBarcodeModal && serialNumber && barcodeRef.current) {
       try {
         // Generate barcode using the serial number
-        JsBarcode(barcodeRef.current, serialNumber, {
+        JsBarcode(barcodeRef.current, selectedOrder.invoiceNo, {
           format: "CODE128",
           width: 2,
           height: 70,

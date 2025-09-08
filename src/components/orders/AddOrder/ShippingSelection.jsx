@@ -1,7 +1,6 @@
 // components/orders/AddOrder/ShippingSelection.jsx
 import React from 'react';
 import { Truck, Check, ChevronRight } from 'lucide-react';
-import axios from 'axios';
 
 const ShippingSelection = ({ 
   formData, 
@@ -9,39 +8,32 @@ const ShippingSelection = ({
   selectedShippingPartner, 
   errors, 
   handleSelectShippingPartner, 
-  handleContinueToPlaceOrder ,
+  handleContinueToPlaceOrder,
   discountPercent
-}) => 
-  {
-  
-  
-const calculateFinalPrice = (basePrice, discountPercent) => {
-  console.log("calculateFinalPrice -> basePrice:", basePrice);
-  console.log("calculateFinalPrice -> discountPercent:", discountPercent);
+}) => {
 
-  // Step 1: Ensure values are numbers
-  const price = Number(basePrice);
-  const discount = Number(discountPercent);
+  const calculatePriceBreakdown = (basePrice, discountPercent) => {
+    const price = Number(basePrice);
+    const discount = Number(discountPercent);
 
-  if (isNaN(price) || isNaN(discount)) {
-    console.error("Invalid price or discount!", { price, discount });
-    return 0;
-  }
+    if (isNaN(price) || isNaN(discount)) {
+      return { basePrice: 0, gstAmount: 0, discountAmount: 0, finalPrice: 0 };
+    }
 
-  const gstAmount = price * 0.18;
-  const priceWithGst = price + gstAmount;
+    const gstAmount = price * 0.18;
+    const priceWithGst = price + gstAmount;
 
-  const discountDecimal = discount / 100;
-  const discountAmount = priceWithGst * discountDecimal;
+    const discountAmount = priceWithGst * (discount / 100);
 
-  const finalPrice = priceWithGst - discountAmount;
-  console.log("Final Price Calculated:", finalPrice);
+    const finalPrice = priceWithGst - discountAmount;
 
-  localStorage.setItem('finalShippingPrice', finalPrice.toFixed(2));
-
-  return finalPrice.toFixed(2);
-};
-
+    return {
+      basePrice: price.toFixed(2),
+      gstAmount: gstAmount.toFixed(2),
+      discountAmount: discountAmount.toFixed(2),
+      finalPrice: finalPrice.toFixed(2),
+    };
+  };
 
   return (
     <div className="mt-8">
@@ -49,7 +41,7 @@ const calculateFinalPrice = (basePrice, discountPercent) => {
         <Truck className="mr-3 text-emerald-600" size={28} />
         Select Shipping Partner
       </h3>
-      
+
       {/* Shipping information summary */}
       <div className="bg-gray-50 p-4 rounded-xl mb-6">
         <div className="grid grid-cols-3 gap-4">
@@ -76,63 +68,70 @@ const calculateFinalPrice = (basePrice, discountPercent) => {
         </div>
       ) : (
         <div className="space-y-4">
-          {availableRates.map((partner) => (
-            
-            <div
-              key={partner.id}
-              className={`border-2 rounded-xl p-6 cursor-pointer transition-all ${
-                selectedShippingPartner?.id === partner.id
-                  ? 'border-emerald-500 bg-emerald-50 shadow-lg'
-                  : 'border-gray-200 hover:border-emerald-300 hover:shadow-md'
-              }`}
-              onClick={() => handleSelectShippingPartner(partner)}
-            >
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-3">
-                    <h4 className="font-bold text-xl text-gray-800">{partner.name}</h4>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      partner.type === 'Express' ? 'bg-blue-100 text-blue-700' :
-                      partner.type === 'Standard' ? 'bg-green-100 text-green-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {partner.type}
-                    </span>
+          {availableRates.map((partner) => {
+            // Calculate breakdown for this partner
+            const { basePrice, gstAmount, discountAmount, finalPrice } = calculatePriceBreakdown(
+              partner.price,
+              discountPercent
+            );
+
+            return (
+              <div
+                key={partner.id}
+                className={`border-2 rounded-xl p-6 cursor-pointer transition-all ${
+                  selectedShippingPartner?.id === partner.id
+                    ? 'border-emerald-500 bg-emerald-50 shadow-lg'
+                    : 'border-gray-200 hover:border-emerald-300 hover:shadow-md'
+                }`}
+                onClick={() => handleSelectShippingPartner(partner)}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-3">
+                      <h4 className="font-bold text-xl text-gray-800">{partner.name}</h4>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        partner.type === 'Express' ? 'bg-blue-100 text-blue-700' :
+                        partner.type === 'Standard' ? 'bg-green-100 text-green-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {partner.type}
+                      </span>
+                    </div>
+                    <p className="text-gray-600">{partner.description}</p>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-gray-600">
+                        <Truck size={16} className="inline mr-1" />
+                        Estimated Transit: {partner.deliveryTime}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        ⭐ {partner.rating}/5
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-gray-600">{partner.description}</p>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-600">
-                      <Truck size={16} className="inline mr-1" />
-                      Estimated Transit: {partner.deliveryTime}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      ⭐ {partner.rating}/5
-                    </span>
+                  <div className="text-right space-y-1">
+                    <p className="text-sm text-gray-600">Base Price: ₹{basePrice}</p>
+                    <p className="text-sm text-gray-600">GST (18%): ₹{gstAmount}</p>
+                    <p className="text-sm text-gray-600">Discount ({discountPercent}%): -₹{discountAmount}</p>
+                    <p className="text-3xl font-bold text-emerald-600">Total: ₹{finalPrice}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-3xl font-bold text-emerald-600">
-  ₹{calculateFinalPrice(partner.price, discountPercent)}
-</p>
-                  <p className="text-sm text-gray-500">Inclusive of 18% GST</p>
-                  <p className="text-sm text-gray-500">& {discountPercent}% indivisual discount</p>
-                  
-                </div>
+
+                {selectedShippingPartner?.id === partner.id && (
+                  <div className="mt-4 pt-4 border-t border-emerald-200">
+                    <div className="flex items-center text-emerald-600">
+                      <Check className="w-5 h-5 mr-2" />
+                      <span className="font-medium">Selected Shipping Partner</span>
+                    </div>
+                  </div>
+                )}
               </div>
-              {selectedShippingPartner?.id === partner.id && (
-                <div className="mt-4 pt-4 border-t border-emerald-200">
-                  <div className="flex items-center text-emerald-600">
-                    <Check className="w-5 h-5 mr-2" />
-                    <span className="font-medium">Selected Shipping Partner</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
+
       {errors.shippingPartner && <p className="text-red-500 text-sm mt-1">{errors.shippingPartner}</p>}
-      
+
       <button 
         onClick={handleContinueToPlaceOrder}
         className="mt-8 w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center space-x-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
