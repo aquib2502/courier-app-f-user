@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import {
@@ -26,7 +26,8 @@ import {
   Weight,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
+  Printer
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,6 +51,13 @@ const ManifestListing = () => {
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
   const [isScheduling, setIsScheduling] = useState(false);
+
+  // Modal state variables for barcode printing
+const [showBarcodeModal, setShowBarcodeModal] = useState(false);
+const [selectedManifestForBarcode, setSelectedManifestForBarcode] = useState(null);
+const [isPrinting, setIsPrinting] = useState(false);
+const [printSuccess, setPrintSuccess] = useState(false);
+const barcodeRef = useRef(null);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,6 +97,140 @@ const ManifestListing = () => {
   useEffect(() => {
     fetchManifests();
   }, []);
+
+  // Handle Print Label - Show modal with the barcode
+const handlePrintLabel = (manifest) => {
+  setSelectedManifestForBarcode(manifest);
+  setShowBarcodeModal(true);
+  setPrintSuccess(false);
+  setIsPrinting(false);
+};
+
+// Print the barcode label for manifest
+const printManifestBarcode = () => {
+  if (isPrinting) return;
+
+  setIsPrinting(true);
+
+  try {
+    const printContents = document.getElementById("manifest-barcode-print-area").innerHTML;
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      alert("Please allow pop-ups to print the label");
+      setIsPrinting(false);
+      return;
+    }
+
+    // A7 paper size is 74mm x 105mm
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Manifest Label - ${selectedManifestForBarcode.manifestId}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 0; 
+              padding: 0; 
+              font-size: 10px;
+            }
+            @page { 
+              size: 74mm 105mm; 
+              margin: 2mm; 
+            }
+            .print-container { 
+              width: 100%; 
+              height: 100%; 
+              font-size: 10px;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              font-size: 9px;
+            }
+            td, th { 
+              padding: 2px; 
+              border: 1px solid #ddd; 
+              font-size: 9px;
+              line-height: 1.2;
+            }
+            .header { 
+              font-weight: bold; 
+              background-color: #f9f9f9; 
+              font-size: 10px;
+            }
+            .barcode-container { 
+              text-align: center; 
+              padding: 5px 0; 
+            }
+            .company-logo {
+              font-size: 11px;
+              font-weight: bold;
+              color: #1e40af;
+            }
+            .manifest-id {
+              font-size: 12px;
+              font-weight: bold;
+              color: #dc2626;
+              text-align: center;
+              padding: 3px;
+              background-color: #fef2f2;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            ${printContents}
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    // Listen for the print window to close
+    const checkPrintWindowClosed = setInterval(() => {
+      if (printWindow.closed) {
+        clearInterval(checkPrintWindowClosed);
+        setIsPrinting(false);
+        setPrintSuccess(true);
+        setTimeout(() => {
+          setPrintSuccess(false);
+        }, 3000);
+      }
+    }, 500);
+  } catch (error) {
+    console.error("Error printing:", error);
+    setIsPrinting(false);
+    alert("There was an error printing. Please try again.");
+  }
+};
+
+// Generate barcode when modal opens
+useEffect(() => {
+  if (showBarcodeModal && selectedManifestForBarcode && barcodeRef.current) {
+    try {
+      JsBarcode(barcodeRef.current, selectedManifestForBarcode.manifestId, {
+        format: "CODE128",
+        width: 1.5,
+        height: 40,
+        displayValue: false,
+        font: "Arial",
+        fontSize: 10,
+        margin: 5,
+        background: "#ffffff",
+      });
+    } catch (error) {
+      console.error("Error generating barcode:", error);
+    }
+  }
+}, [showBarcodeModal, selectedManifestForBarcode]);
 
   // Search and filter
   useEffect(() => {
@@ -567,6 +709,14 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
                         <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                           <Eye className="w-5 h-5 text-gray-600" />
                         </button>
+                        
+<button
+  onClick={() => handlePrintLabel(manifest)}
+  className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center"
+>
+  <Printer className="w-3 h-3 mr-1" />
+  Print Label
+</button>
                       </div>
                     </div>
 
@@ -687,6 +837,192 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
           </div>
         )}
       </div>
+
+
+{/* Manifest Barcode Modal */}
+<AnimatePresence>
+  {showBarcodeModal && selectedManifestForBarcode && (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden"
+        style={{ maxHeight: "98vh", overflowY: "auto" }}
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
+      >
+        {/* Modal Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Printer className="w-5 h-5 mr-2" />
+            Manifest Label
+          </h3>
+          <button
+            onClick={() => setShowBarcodeModal(false)}
+            className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Manifest Summary */}
+        <div className="px-6 pt-4 bg-gray-50">
+          <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
+            <span className="font-medium text-gray-700">Manifest ID:</span>
+            <span className="text-blue-600 font-semibold">
+              {selectedManifestForBarcode.manifestId}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
+              <Package className="w-3 h-3 mr-1" />
+              {selectedManifestForBarcode.totalOrders} Orders
+            </div>
+            <div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center">
+              <Weight className="w-3 h-3 mr-1" />
+              {selectedManifestForBarcode.totalWeight} KG
+            </div>
+            <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full flex items-center">
+              <span className="mr-1">Rs. </span>
+              {selectedManifestForBarcode.totalValue} Value
+            </div>
+          </div>
+
+          {/* User Info */}
+          {/* <div className="mb-3 text-sm">
+            <div className="font-semibold text-gray-700">Customer:</div>
+            <div className="text-gray-800">
+              {selectedManifestForBarcode.user.fullname} ({selectedManifestForBarcode.user.email})
+            </div>
+          </div> */}
+
+          {/* Pickup Info */}
+          <div className="mb-3 text-sm">
+            <div className="font-semibold text-gray-700">Pickup Info:</div>
+            <div className="text-gray-800">
+              AWB: {selectedManifestForBarcode.pickupAWB} <br />
+              Pickup Date: {formatDate(selectedManifestForBarcode.pickupDate)} <br />
+              Pickup Time: {selectedManifestForBarcode.pickupTime}
+            </div>
+          </div>
+        </div>
+
+        {/* Barcode Print Area */}
+        <div className="px-4 py-2">
+          <div id="manifest-barcode-print-area">
+            <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden text-xs">
+              <thead>
+                <tr>
+                  <th colSpan="2" className="text-center p-2 bg-blue-50 border-b border-gray-300 company-logo">
+                    THE TRACE EXPRESS
+                  </th>
+                </tr>
+                <tr>
+                  <th colSpan="2" className="border-b border-gray-300 manifest-id">
+                    {selectedManifestForBarcode.manifestId}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan="2" className="p-2 border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1">Courier Partner:</div>
+                    <div className="text-xs">{selectedManifestForBarcode.courierPartner}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="p-2 border-r border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1">Total Orders:</div>
+                    <div className="text-xs">{selectedManifestForBarcode.totalOrders}</div>
+                  </td>
+                  <td className="p-2 border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1">Total Weight:</div>
+                    <div className="text-xs">{selectedManifestForBarcode.totalWeight} KG</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="2" className="p-2 border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1">Total Value:</div>
+                    <div className="text-xs">{selectedManifestForBarcode.totalValue}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="2" className="p-3 border-b border-gray-300 text-center bg-white">
+                    <svg
+                      ref={barcodeRef}
+                      className="mx-auto"
+                      style={{ maxWidth: "100%", height: "auto" }}
+                    ></svg>
+                    <div className="text-center mt-2">
+                      <div className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded inline-block">
+                        {selectedManifestForBarcode.manifestId}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="2" className="p-2 text-xs bg-gray-50">
+                    <div className="text-center">
+                      Created: {formatDate(selectedManifestForBarcode.createdAt)}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+          <div className="text-xs text-gray-500">A7 Label (74×105mm)</div>
+          <div className="flex gap-2">
+            {printSuccess ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-green-100 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm font-medium"
+              >
+                <Check className="w-4 h-4 mr-1" />
+                Printed!
+              </motion.div>
+            ) : (
+              <button
+                onClick={printManifestBarcode}
+                disabled={isPrinting}
+                className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  isPrinting
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md"
+                }`}
+              >
+                {isPrinting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin mr-2"></div>
+                    <span>Printing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Printer className="w-4 h-4 mr-2" />
+                    <span>Print Manifest Label</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
       {/* Enhanced Pickup Request Modal with Dynamic Time Slots */}
       <AnimatePresence>
