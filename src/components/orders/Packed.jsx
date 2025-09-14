@@ -127,14 +127,15 @@ const Packed = () => {
       try {
         // Generate barcode using the serial number
         JsBarcode(barcodeRef.current, selectedOrder.invoiceNo, {
-          format: "CODE128",
-          width: 2,
-          height: 70,
-          displayValue: false, // Hide the text below barcode
-          font: "Arial",
-          fontSize: 12,
-          margin: 10,
-          background: "#ffffff"
+           format: "CODE128",
+  width: 3.5,        // ✅ Thicker bars (easier to scan)
+  height: 80,        // ✅ Good height for scanners
+  displayValue: true, // ✅ Show text automatically
+  fontSize: 20,       // ✅ Bigger readable text
+  textMargin: 10,     // ✅ Space between bars and text
+  margin: 40,         // ✅ Plenty of quiet zone
+  background: "#ffffff",
+  lineColor: "#000000"
         });
       } catch (error) {
         console.error("Error generating barcode:", error);
@@ -270,7 +271,10 @@ const Packed = () => {
             <title>Shipping Label - ${serialNumber}</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-              @page { size: 105mm 148mm; margin: 0; }
+               @page { 
+  size: 105mm 148mm; /* A6 size */
+  margin: 0; 
+}
               .print-container { width: 100%; height: 100%; }
               table { width: 100%; border-collapse: collapse; }
               td, th { padding: 8px; border: 1px solid #ddd; }
@@ -746,9 +750,10 @@ const Packed = () => {
                            {/* Delivery Address - Compact */}
                            <tr>
                              <td className="align-top p-2 border-r border-b border-gray-300" style={{ width: '70%' }}>
-                               <div className="font-semibold text-xs mb-1">TO:</div>
+                               <div className="font-semibold text-xs mb-1">From:</div>
                                <div className="text-xs leading-tight">
                                  <div className="font-medium">{selectedOrder.firstName} {selectedOrder.lastName}</div>
+                                 <div className="font-semibold text-xs mt-2">TO:</div>
                                  <div>{selectedOrder.address1}</div>
                                  {selectedOrder.address2 && <div>{selectedOrder.address2}</div>}
                                  <div>{selectedOrder.city}, {selectedOrder.state}</div>

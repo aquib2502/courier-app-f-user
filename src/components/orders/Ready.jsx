@@ -149,15 +149,15 @@ const Ready = () => {
     if (serialNumber && barcodeRef.current) {
       try {
         JsBarcode(barcodeRef.current, selectedOrder.invoiceNo, {
-          // encode invoice number
-          format: "CODE128",
-          width: 1.5,
-          height: 40,
-          displayValue: false, // keep text hidden
-          font: "Arial",
-          fontSize: 10,
-          margin: 5,
-          background: "#ffffff",
+            format: "CODE128",
+  width: 3.5,        // ✅ Thicker bars (easier to scan)
+  height: 80,        // ✅ Good height for scanners
+  displayValue: true, // ✅ Show text automatically
+  fontSize: 20,       // ✅ Bigger readable text
+  textMargin: 10,     // ✅ Space between bars and text
+  margin: 40,         // ✅ Plenty of quiet zone
+  background: "#ffffff",
+  lineColor: "#000000"
         });
       } catch (error) {
         console.error("Error generating barcode:", error);
@@ -253,9 +253,9 @@ const Ready = () => {
                 font-size: 10px;
               }
               @page { 
-                size: 74mm 105mm; 
-                margin: 2mm; 
-              }
+  size: 105mm 148mm; /* A6 size */
+  margin: 2; 
+}
               .print-container { 
                 width: 100%; 
                 height: 100%; 
@@ -870,11 +870,13 @@ const Ready = () => {
                           className="align-top p-2 border-r border-b border-gray-300"
                           style={{ width: "70%" }}
                         >
-                          <div className="font-semibold text-xs mb-1">TO:</div>
+                          <div className="font-semibold text-xs mb-1">From:</div>
                           <div className="text-xs leading-tight">
                             <div className="font-medium">
                               {selectedOrder.firstName} {selectedOrder.lastName}
+                              
                             </div>
+                            <div className="font-semibold text-xs mt-2">TO:</div>
                             <div>{selectedOrder.address1}</div>
                             {selectedOrder.address2 && (
                               <div>{selectedOrder.address2}</div>
