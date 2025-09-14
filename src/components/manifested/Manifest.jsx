@@ -107,7 +107,6 @@ const handlePrintLabel = (manifest) => {
   setIsPrinting(false);
 };
 
-// Print the barcode label for manifest
 const printManifestBarcode = () => {
   if (isPrinting) return;
 
@@ -123,60 +122,58 @@ const printManifestBarcode = () => {
       return;
     }
 
-    // A7 paper size is 74mm x 105mm
     printWindow.document.write(`
       <html>
         <head>
           <title>Manifest Label - ${selectedManifestForBarcode.manifestId}</title>
           <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 0; 
-              padding: 0; 
-              font-size: 10px;
-            }
-            @page { 
-              size: 74mm 105mm; 
-              margin: 2mm; 
-            }
-            .print-container { 
-              width: 100%; 
-              height: 100%; 
-              font-size: 10px;
-            }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              font-size: 9px;
-            }
-            td, th { 
-              padding: 2px; 
-              border: 1px solid #ddd; 
-              font-size: 9px;
-              line-height: 1.2;
-            }
-            .header { 
-              font-weight: bold; 
-              background-color: #f9f9f9; 
-              font-size: 10px;
-            }
-            .barcode-container { 
-              text-align: center; 
-              padding: 5px 0; 
-            }
-            .company-logo {
-              font-size: 11px;
-              font-weight: bold;
-              color: #1e40af;
-            }
-            .manifest-id {
-              font-size: 12px;
-              font-weight: bold;
-              color: #dc2626;
-              text-align: center;
-              padding: 3px;
-              background-color: #fef2f2;
-            }
+          @page { 
+  size: 105mm 148mm; /* A6 size */
+  margin: 0; 
+}
+
+html, body {
+  width: 105mm;
+  height: 148mm;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.print-container {
+  width: 105mm;
+  height: 148mm;
+  padding: 4mm;            /* barcode quiet zone */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;  /* stack elements top-to-bottom */
+  justify-content: space-between; /* push content to fill page */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 2px 4px;
+}
+
+.barcode-container {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6mm 0; /* extra quiet space for barcode */
+}
+
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
           </style>
         </head>
         <body>
@@ -195,15 +192,12 @@ const printManifestBarcode = () => {
       </html>
     `);
 
-    // Listen for the print window to close
     const checkPrintWindowClosed = setInterval(() => {
       if (printWindow.closed) {
         clearInterval(checkPrintWindowClosed);
         setIsPrinting(false);
         setPrintSuccess(true);
-        setTimeout(() => {
-          setPrintSuccess(false);
-        }, 3000);
+        setTimeout(() => setPrintSuccess(false), 3000);
       }
     }, 500);
   } catch (error) {
@@ -846,7 +840,6 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
 
 
 {/* Manifest Barcode Modal */}
-{/* Manifest Barcode Modal */}
 <AnimatePresence>
   {showBarcodeModal && selectedManifestForBarcode && (
     <motion.div
@@ -859,53 +852,53 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
     >
       <motion.div
         className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden"
-        style={{ maxHeight: "98vh", overflowY: "auto" }}
+        style={{ maxHeight: "95vh", overflowY: "auto" }}
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
       >
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-3 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-white flex items-center">
             <Printer className="w-5 h-5 mr-2" />
             Manifest Label
           </h3>
           <button
             onClick={() => setShowBarcodeModal(false)}
-            className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
+            className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Manifest Summary */}
-        <div className="px-6 pt-4 bg-gray-50">
-          <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
+        <div className="px-6 pt-5 pb-4 bg-gray-50">
+          <div className="flex flex-wrap items-center gap-3 text-sm mb-4">
             <span className="font-medium text-gray-700">Manifest ID:</span>
             <span className="text-blue-600 font-semibold">
               {selectedManifestForBarcode.manifestId}
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-3">
-            <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
-              <Package className="w-3 h-3 mr-1" />
+          <div className="flex flex-wrap gap-3 mb-4">
+            <div className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
+              <Package className="w-3.5 h-3.5 mr-1" />
               {selectedManifestForBarcode.totalOrders} Orders
             </div>
-            <div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center">
-              <Weight className="w-3 h-3 mr-1" />
+            <div className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center">
+              <Weight className="w-3.5 h-3.5 mr-1" />
               {selectedManifestForBarcode.totalWeight} KG
             </div>
-            <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full flex items-center">
-              <span className="mr-1">Rs. </span>
+            <div className="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full flex items-center">
+              <span className="mr-1">Rs.</span>
               {selectedManifestForBarcode.totalValue} Value
             </div>
           </div>
 
           {/* Pickup Info */}
-          <div className="mb-3 text-sm">
-            <div className="font-semibold text-gray-700">Pickup Info:</div>
+          <div className="mb-4 text-sm leading-relaxed">
+            <div className="font-semibold text-gray-700 mb-1">Pickup Info:</div>
             <div className="text-gray-800">
               AWB: {selectedManifestForBarcode.pickupAWB} <br />
               Pickup Date: {formatDate(selectedManifestForBarcode.pickupDate)} <br />
@@ -915,49 +908,71 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
         </div>
 
         {/* Barcode Print Area */}
-        <div className="px-4 py-2">
+        <div className="px-6 py-4">
           <div id="manifest-barcode-print-area">
             <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden text-xs">
               <thead>
                 <tr>
-                  <th colSpan="2" className="text-center p-2 bg-blue-50 border-b border-gray-300 company-logo">
+                  <th
+                    colSpan="2"
+                    className="text-center p-2.5 bg-blue-50 border-b border-gray-300 company-logo"
+                  >
                     THE TRACE EXPRESS
                   </th>
                 </tr>
                 <tr>
-                  <th colSpan="2" className="border-b border-gray-300 manifest-id">
+                  <th
+                    colSpan="2"
+                    className="border-b border-gray-300 manifest-id p-2"
+                  >
                     {selectedManifestForBarcode.manifestId}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td colSpan="2" className="p-2 border-b border-gray-300">
-                    <div className="font-semibold text-xs mb-1">Courier Partner:</div>
-                    <div className="text-xs">{selectedManifestForBarcode.courierPartner}</div>
+                  <td colSpan="2" className="p-3 border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1.5">
+                      Courier Partner:
+                    </div>
+                    <div className="text-xs">
+                      {selectedManifestForBarcode.courierPartner}
+                    </div>
                   </td>
                 </tr>
                 <tr>
-                  <td className="p-2 border-r border-b border-gray-300">
-                    <div className="font-semibold text-xs mb-1">Total Orders:</div>
-                    <div className="text-xs">{selectedManifestForBarcode.totalOrders}</div>
+                  <td className="p-3 border-r border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1.5">
+                      Total Orders:
+                    </div>
+                    <div className="text-xs">
+                      {selectedManifestForBarcode.totalOrders}
+                    </div>
                   </td>
-                  <td className="p-2 border-b border-gray-300">
-                    <div className="font-semibold text-xs mb-1">Total Weight:</div>
-                    <div className="text-xs">{selectedManifestForBarcode.totalWeight} KG</div>
+                  <td className="p-3 border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1.5">
+                      Total Weight:
+                    </div>
+                    <div className="text-xs">
+                      {selectedManifestForBarcode.totalWeight} KG
+                    </div>
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan="2" className="p-2 border-b border-gray-300">
-                    <div className="font-semibold text-xs mb-1">Total Value:</div>
-                    <div className="text-xs">{selectedManifestForBarcode.totalValue}</div>
+                  <td colSpan="2" className="p-3 border-b border-gray-300">
+                    <div className="font-semibold text-xs mb-1.5">
+                      Total Value:
+                    </div>
+                    <div className="text-xs">
+                      {selectedManifestForBarcode.totalValue}
+                    </div>
                   </td>
                 </tr>
 
                 {/* CENTERED BARCODE WITH MARGIN */}
                 <tr>
                   <td colSpan="2" className="border-b border-gray-300 bg-white">
-                    <div className="flex justify-center items-center p-6">
+                    <div className="barcode-container py-4">
                       <svg
                         ref={barcodeRef}
                         style={{ maxWidth: "100%", height: "auto" }}
@@ -967,7 +982,7 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
                 </tr>
 
                 <tr>
-                  <td colSpan="2" className="p-2 text-xs bg-gray-50">
+                  <td colSpan="2" className="p-2.5 text-xs bg-gray-50">
                     <div className="text-center">
                       Created: {formatDate(selectedManifestForBarcode.createdAt)}
                     </div>
@@ -979,7 +994,7 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
         </div>
 
         {/* Modal Footer */}
-        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
           <div className="text-xs text-gray-500">A7 Label (74×105mm)</div>
           <div className="flex gap-2">
             {printSuccess ? (
@@ -995,7 +1010,7 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
               <button
                 onClick={printManifestBarcode}
                 disabled={isPrinting}
-                className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isPrinting
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                     : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md"
@@ -1020,7 +1035,6 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
     </motion.div>
   )}
 </AnimatePresence>
-
 
       {/* Enhanced Pickup Request Modal with Dynamic Time Slots */}
       <AnimatePresence>
