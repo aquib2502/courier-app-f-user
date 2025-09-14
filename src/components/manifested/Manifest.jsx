@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Package,
   Clipboard,
+  Check,
   Calendar,
   Clock,
   Truck,
@@ -212,25 +213,30 @@ const printManifestBarcode = () => {
   }
 };
 
-// Generate barcode when modal opens
 useEffect(() => {
   if (showBarcodeModal && selectedManifestForBarcode && barcodeRef.current) {
     try {
-      JsBarcode(barcodeRef.current, selectedManifestForBarcode.manifestId, {
-        format: "CODE128",
-        width: 1.5,
-        height: 40,
-        displayValue: false,
-        font: "Arial",
-        fontSize: 10,
-        margin: 5,
-        background: "#ffffff",
-      });
+JsBarcode(barcodeRef.current, selectedManifestForBarcode.manifestId, {
+  format: "CODE128",
+  width: 3.5,        // ✅ Thicker bars (easier to scan)
+  height: 80,        // ✅ Good height for scanners
+  displayValue: true, // ✅ Show text automatically
+  fontSize: 20,       // ✅ Bigger readable text
+  textMargin: 10,     // ✅ Space between bars and text
+  margin: 40,         // ✅ Plenty of quiet zone
+  background: "#ffffff",
+  lineColor: "#000000"
+});
+
+
+
+
     } catch (error) {
       console.error("Error generating barcode:", error);
     }
   }
 }, [showBarcodeModal, selectedManifestForBarcode]);
+
 
   // Search and filter
   useEffect(() => {
@@ -840,6 +846,7 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
 
 
 {/* Manifest Barcode Modal */}
+{/* Manifest Barcode Modal */}
 <AnimatePresence>
   {showBarcodeModal && selectedManifestForBarcode && (
     <motion.div
@@ -896,14 +903,6 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
             </div>
           </div>
 
-          {/* User Info */}
-          {/* <div className="mb-3 text-sm">
-            <div className="font-semibold text-gray-700">Customer:</div>
-            <div className="text-gray-800">
-              {selectedManifestForBarcode.user.fullname} ({selectedManifestForBarcode.user.email})
-            </div>
-          </div> */}
-
           {/* Pickup Info */}
           <div className="mb-3 text-sm">
             <div className="font-semibold text-gray-700">Pickup Info:</div>
@@ -954,20 +953,19 @@ console.log("payload", status, pickupDate, pickupTime, schedulePickup);
                     <div className="text-xs">{selectedManifestForBarcode.totalValue}</div>
                   </td>
                 </tr>
+
+                {/* CENTERED BARCODE WITH MARGIN */}
                 <tr>
-                  <td colSpan="2" className="p-3 border-b border-gray-300 text-center bg-white">
-                    <svg
-                      ref={barcodeRef}
-                      className="mx-auto"
-                      style={{ maxWidth: "100%", height: "auto" }}
-                    ></svg>
-                    <div className="text-center mt-2">
-                      <div className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded inline-block">
-                        {selectedManifestForBarcode.manifestId}
-                      </div>
+                  <td colSpan="2" className="border-b border-gray-300 bg-white">
+                    <div className="flex justify-center items-center p-6">
+                      <svg
+                        ref={barcodeRef}
+                        style={{ maxWidth: "100%", height: "auto" }}
+                      />
                     </div>
                   </td>
                 </tr>
+
                 <tr>
                   <td colSpan="2" className="p-2 text-xs bg-gray-50">
                     <div className="text-center">
