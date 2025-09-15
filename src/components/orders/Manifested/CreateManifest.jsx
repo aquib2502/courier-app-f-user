@@ -410,12 +410,7 @@ const manifestPayload = {
           <div className="p-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                {
-                  icon: Hash,
-                  label: "Manifest ID",
-                  value: manifestId,
-                  color: "text-blue-600",
-                },
+                
                 {
                   icon: DollarSign,
                   label: "Total Value",
