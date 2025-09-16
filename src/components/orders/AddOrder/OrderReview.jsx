@@ -86,10 +86,14 @@ const OrderReview = ({
             Invoice Information
           </h4>
           <div className="bg-white p-4 rounded-lg shadow-sm grid grid-cols-3 gap-4">
-            {/* <div>
-              <p className="text-gray-500 text-sm">Invoice No</p>
-              <p className="font-semibold">{formData.invoiceNo}</p>
-            </div> */}
+            <div>
+              <p className="text-gray-500 text-sm">HSN Code</p>
+              <p className="font-semibold">{formData.HSNCode}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Invoice Name</p>
+              <p className="font-semibold">{formData.invoiceName}</p>
+            </div>
             <div>
               <p className="text-gray-500 text-sm">Date</p>
               <p className="font-semibold">{formData.invoiceDate}</p>

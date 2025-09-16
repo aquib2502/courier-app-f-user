@@ -2,8 +2,13 @@
 import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
 
-const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipment,countryStateMap }) => {
-   const states = countryStateMap[formData.country] || [];
+const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputChange, handleContinueShipment,countryStateMap }) => {
+    // ✅ Get states based on selected country
+    // ✅ Dynamically derive states for selected country
+  const states = formData.country && countryStateMap[formData.country]
+    ? countryStateMap[formData.country]
+    : [];
+    
   return (
     <div>
       <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -12,18 +17,26 @@ const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipm
       </h3>
       
       <div className="mb-6">
-        <label className="block text-gray-700 font-medium mb-2">Pickup Address *</label>
-        <textarea
-          placeholder="Enter complete pickup address"
-          value={formData.pickupAddress}
-          onChange={(e) => handleInputChange("pickupAddress", e.target.value)}
-          className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${
-            errors.pickupAddress ? 'border-red-300' : 'border-gray-300'
-          }`}
-          rows={3}
-        />
-        {errors.pickupAddress && <p className="text-red-500 text-sm mt-1">{errors.pickupAddress}</p>}
-      </div>
+  <label className="block text-gray-700 font-medium mb-2">Pickup Address *</label>
+  <select
+    value={formData.pickupAddress}
+    onChange={(e) => handleInputChange("pickupAddress", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${
+      errors.pickupAddress ? 'border-red-300' : 'border-gray-300'
+    }`}
+  >
+    <option value="">Select Pickup Address</option>
+    {pickupAddress.map((address, index) => (
+      <option key={address._id} value={address.addressLine1}>
+        {`${address.addressLine1}, ${address.city}, ${address.state} - ${address.postalCode}`}
+      </option>
+    ))}
+  </select>
+
+  {errors.pickupAddress && (
+    <p className="text-red-500 text-sm mt-1">{errors.pickupAddress}</p>
+  )}
+</div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -81,100 +94,67 @@ const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipm
           />
         </div>
 
-         {/* Country Dropdown */}
-<div>
-  <label className="block text-gray-700 font-medium mb-2">
-    Country *
-  </label>
-  <select
-    value={formData.country}
-    onChange={(e) => {
-      console.log("Selected country:", e.target.value); // Debugging
-      handleInputChange("country", e.target.value);
-      handleInputChange("state", ""); // Reset state when country changes
-    }}
-    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-      errors.country ? "border-red-300" : "border-gray-300"
-    }`}
-  >
-    <option value="">Select Country</option>
-    <option value="USA">USA</option>
-    <option value="USA Remote">USA (Remote)</option>
-    <option value="UK">UK</option>
-    <option value="Australia">Australia</option>
-    <option value="Rest of the World">Rest of the World</option>
-    <option value="Canada">Canada</option>
-  </select>
+ {/* Country Dropdown */}
+      <div>
+        <label className="block text-gray-700 font-medium mb-2">
+          Country *
+        </label>
+        <select
+          value={formData.country}
+          onChange={(e) => {
+            const selectedCountry = e.target.value;
+            handleInputChange("country", selectedCountry);
+            handleInputChange("state", ""); // reset state when country changes
+          }}
+          className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+            errors.country ? "border-red-300" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Country</option>
+          {countries.map((country) => (
+            <option key={country.code} value={country.name}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+        {errors.country && (
+          <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+        )}
+      </div>
 
-  {errors.country && (
-    <p className="text-red-500 text-sm mt-1">{errors.country}</p>
-  )}
-</div>
-
-{/* State Dropdown */}
-<div>
-  <label className="block text-gray-700 font-medium mb-2">
-    State *
-  </label>
-  <select
-    value={formData.state}
-    onChange={(e) => handleInputChange("state", e.target.value)}
-    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-      errors.state ? "border-red-300" : "border-gray-300"
-    }`}
-    disabled={!formData.country} // Disable if no country selected
-  >
-    <option value="">Select State</option>
-    {states.map((state, index) => (
-      <option key={index} value={state}>
-        {state}
-      </option>
-    ))}
-  </select>
-  {errors.state && (
-    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
-  )}
-</div>
-
-
-
-        {/* Address Line 1 */}
-<div className="mb-6">
-  <label className="block text-gray-700 font-medium mb-2">Address Line 1 *</label>
-  <input
-    placeholder="Street address, P.O. box, company name, c/o"
-    value={formData.address1}
-    onChange={(e) => handleInputChange("address1", e.target.value)}
-    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-      errors.address1 ? "border-red-300" : "border-gray-300"
-    }`}
-  />
-  {errors.address1 && <p className="text-red-500 text-sm mt-1">{errors.address1}</p>}
-</div>
-
-{/* Existing Address Line 2 */}
-<div className="md:col-span-2">
-  <label className="block text-gray-700 font-medium mb-2">Address Line 2 *</label>
-  <input 
-    placeholder="Apartment, suite, unit, etc."
-    value={formData.address2}
-    onChange={(e) => handleInputChange("address2", e.target.value)}
-    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-      errors.address2 ? 'border-red-300' : 'border-gray-300'
-    }`}
-  />
-  {errors.address2 && <p className="text-red-500 text-sm mt-1">{errors.address2}</p>}
-</div>
-
-
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">Landmark</label>
-          <input 
-            placeholder="Nearby landmark"
-            className="w-full p-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-          />
-        </div>
-
+      {/* State Dropdown */}
+      <div>
+        <label className="block text-gray-700 font-medium mb-2">
+          State *
+        </label>
+        <select
+          value={formData.state}
+          onChange={(e) => handleInputChange("state", e.target.value)}
+          className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+            errors.state ? "border-red-300" : "border-gray-300"
+          }`}
+          disabled={!formData.country}
+        >
+          <option value="">
+            {formData.country ? "Select State" : "Select Country First"}
+          </option>
+          {formData.country && (
+            states.length > 0 ? (
+              states.map((st, idx) => (
+                <option key={idx} value={st}>
+                  {st}
+                </option>
+              ))
+            ) : (
+              <option value="N/A">No states available</option>
+            )
+          )}
+        </select>
+        {errors.state && (
+          <p className="text-red-500 text-sm mt-1">{errors.state}</p>
+        )}
+      </div>
+    
         <div>
           <label className="block text-gray-700 font-medium mb-2">Pincode *</label>
           <input
@@ -201,6 +181,44 @@ const BuyerDetails = ({ formData, errors, handleInputChange, handleContinueShipm
           {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
         </div>
       </div>
+
+        {/* Address Line 1 */}
+<div className="mb-6 mt-4">
+  <label className="block text-gray-700 font-medium mb-2">Address Line 1 *</label>
+  <input
+    placeholder="Street address, P.O. box, company name, c/o"
+    value={formData.address1}
+    onChange={(e) => handleInputChange("address1", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.address1 ? "border-red-300" : "border-gray-300"
+    }`}
+  />
+  {errors.address1 && <p className="text-red-500 text-sm mt-1">{errors.address1}</p>}
+</div>
+
+{/* Existing Address Line 2 */}
+<div className="md:col-span-2">
+  <label className="block text-gray-700 font-medium mb-2">Address Line 2 </label>
+  <input 
+    placeholder="Apartment, suite, unit, etc."
+    value={formData.address2}
+    onChange={(e) => handleInputChange("address2", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.address2 ? 'border-red-300' : 'border-gray-300'
+    }`}
+  />
+  {errors.address2 && <p className="text-red-500 text-sm mt-1">{errors.address2}</p>}
+</div>
+
+
+        <div>
+          <label className="block text-gray-700 font-medium mb-2 mt-4">Landmark</label>
+          <input 
+            placeholder="Nearby landmark"
+            className="w-full p-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+          />
+        </div>
+
 
       <div className="flex items-center space-x-3 mt-6">
         <input 

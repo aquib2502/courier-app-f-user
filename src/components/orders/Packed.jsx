@@ -270,17 +270,64 @@ const Packed = () => {
           <head>
             <title>Shipping Label - ${serialNumber}</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-               @page { 
-  size: 105mm 148mm; /* A6 size */
-  margin: 0; 
+      @page { 
+  size: 101.6mm 152.4mm; /* 4x6 inch */
+  margin: 0;
 }
-              .print-container { width: 100%; height: 100%; }
-              table { width: 100%; border-collapse: collapse; }
-              td, th { padding: 8px; border: 1px solid #ddd; }
-              .header { font-weight: bold; background-color: #f9f9f9; }
-              .barcode-container { text-align: center; padding: 15px 0; }
-              .serial-header { background-color: #dc2626; color: white; text-align: center; font-weight: bold; padding: 8px; }
+
+body {
+  width: 101.6mm;
+  height: 152.4mm;
+  margin: 0;
+  padding: 6px; /* Outer margins */
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.3;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+table {
+  width: 96%; /* Slightly narrower than total width */
+  margin: 0 auto; /* Centered horizontally */
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid #000;
+  padding: 5px;
+  vertical-align: top;
+}
+
+strong {
+  font-size: 11px;
+}
+
+svg {
+  margin-top: 4px;
+}
+              .header { 
+                font-weight: bold; 
+                background-color: #f9f9f9; 
+                font-size: 10px;
+              }
+              .barcode-container { 
+                text-align: center; 
+                padding: 5px 0; 
+              }
+              .company-logo {
+                font-size: 11px;
+                font-weight: bold;
+                color: #1e40af;
+              }
+              .serial-number {
+                font-size: 12px;
+                font-weight: bold;
+                color: #dc2626;
+                text-align: center;
+                padding: 3px;
+                background-color: #fef2f2;
+              }
             </style>
           </head>
           <body>
@@ -727,101 +774,112 @@ const Packed = () => {
                    
                    {/* Barcode Print Area - Optimized for A7 */}
                    <div className="px-4 py-2">
-                     <div id="barcode-print-area">
-                       <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden text-xs">
-                         {/* Header with Company and Serial */}
-                         <thead>
-                           <tr>
-                             <th colSpan="2" className="text-center p-2 bg-blue-50 border-b border-gray-300" 
-                                 style={{fontSize: '11px', fontWeight: 'bold', color: '#1e40af'}}>
-                               THE TRACE EXPRESS
-                             </th>
-                           </tr>
-                           <tr>
-                             <th colSpan="2" className="border-b border-gray-300" 
-                                 style={{fontSize: '12px', fontWeight: 'bold', color: '#dc2626', 
-                                        textAlign: 'center', padding: '3px', backgroundColor: '#fef2f2'}}>
-                               {selectedOrder.invoiceNo}
-                             </th>
-                           </tr>
-                         </thead>
-                         
-                         <tbody>
-                           {/* Delivery Address - Compact */}
-                           <tr>
-                             <td className="align-top p-2 border-r border-b border-gray-300" style={{ width: '70%' }}>
-                               <div className="font-semibold text-xs mb-1">From:</div>
-                               <div className="text-xs leading-tight">
-                                 <div className="font-medium">{selectedOrder.firstName} {selectedOrder.lastName}</div>
-                                 <div className="font-semibold text-xs mt-2">TO:</div>
-                                 <div>{selectedOrder.address1}</div>
-                                 {selectedOrder.address2 && <div>{selectedOrder.address2}</div>}
-                                 <div>{selectedOrder.city}, {selectedOrder.state}</div>
-                                 <div>{selectedOrder.pincode}, {selectedOrder.country}</div>
-                                 <div className="mt-1 font-medium">📞 {selectedOrder.mobile}</div>
-                               </div>
-                             </td>
-                             <td className="align-top p-2 border-b border-gray-300" style={{ width: '30%' }}>
-                               <div className="text-center">
-                                 <div className="text-xs font-semibold mb-1 bg-yellow-100 py-1 rounded">
-                                   {selectedOrder.shipmentType || 'CSB-IV'}
-                                 </div>
-                                 <div className="mt-1">
-                                   <div className="text-xs text-gray-600">Weight:</div>
-                                   <div className="font-medium text-xs">{selectedOrder.weight || '0.5'} KG</div>
-                                 </div>
-                                 <div className="mt-1">
-                                   <div className="text-xs text-gray-600">Date:</div>
-                                   <div className="font-medium text-xs">{new Date().toLocaleDateString('en-GB')}</div>
-                                 </div>
-                               </div>
-                             </td>
-                           </tr>
-     
-                           {/* Product Info - Compact */}
-                           <tr>
-                             <td colSpan="2" className="p-2 border-b border-gray-300 bg-gray-50">
-                               <div className="text-xs">
-                                 <span className="font-semibold">Item: </span>
-                                 <span>{selectedOrder.productItems?.[0]?.productName || "Product"}</span>
-                                 <span className="ml-2 font-medium">Qty: {selectedOrder.productItems?.[0]?.productQuantity || "1"}</span>
-                               </div>
-                             </td>
-                           </tr>
-     
-                           {/* Barcode with Serial Number Below */}
-                           <tr>
-                             <td colSpan="2" className="p-3 border-b border-gray-300 text-center bg-white">
-                               <div className="space-y-2">
-                                 <svg 
-                                   ref={barcodeRef} 
-                                   className="mx-auto"
-                                   style={{ maxWidth: '100%', height: 'auto' }}
-                                 ></svg>
-                                 <div className="text-center">
-                                   <div className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded inline-block">
-                                     {selectedOrder.invoiceNo}
-                                   </div>
-                                 </div>
-                               </div>
-                             </td>
-                           </tr>
-     
-                           {/* Footer Info - Compact */}
-                           <tr>
-                             <td colSpan="2" className="p-2 text-xs bg-gray-50">
-                               <div className="flex justify-between text-xs">
-                                 <span>BW: {selectedOrder.weight || '0.5'}KG</span>
-                                 <span>DIM: {selectedOrder.length || '10'}×{selectedOrder.width || '10'}×{selectedOrder.height || '10'}cm</span>
-                               </div>
-                               <div className="mt-1 text-center">
-                                 <div className="text-xs text-gray-600">Return: Mumbai, MH 400059, India</div>
-                               </div>
-                             </td>
-                           </tr>
-                         </tbody>
-                       </table>
-                     </div>
+                      <div id="barcode-print-area" style={{ padding: "8px" }}>
+  <table
+    className="border-collapse border border-gray-300 text-xs"
+    style={{ width: "calc(100% - 8px)", margin: "0 auto" }}
+  >
+    
+    {/* --- Header Branding --- */}
+    <thead>
+      <tr>
+        <th colSpan="2" className="text-center py-2 bg-gray-100">
+          <div style={{ fontSize: "16px", fontWeight: "bold", letterSpacing: "1px" }}>
+            THE TRACE EXPRESS
+          </div>
+          <div style={{ fontSize: "13px", marginTop: "3px", fontWeight: "600" }}>
+            {/* {selectedOrder.invoiceNo} */}
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    {/* --- Barcode Section --- */}
+    <tbody>
+      <tr>
+        <td colSpan="2" className="text-center py-3">
+          <svg
+            ref={barcodeRef}
+            style={{
+              display: "block",
+              margin: "0 auto",
+              maxWidth: "90%",
+              height: "65px",
+            }}
+          ></svg>
+          <div
+            style={{
+              marginTop: "5px",
+              fontSize: "12px",
+              fontWeight: "bold",
+              letterSpacing: "1px",
+            }}
+          >
+            {/* {selectedOrder.invoiceNo} */}
+          </div>
+        </td>
+      </tr>
+
+      {/* --- FROM Section --- */}
+      <tr>
+        <td colSpan="2" className="border-t border-gray-300 p-3">
+          <strong>FROM:</strong>
+          <div>{selectedOrder.pickupAddress.split(",")[0]}</div>
+          <div>Mobile: {selectedOrder.mobile}</div>
+        </td>
+      </tr>
+
+      {/* --- TO Section --- */}
+      <tr>
+        <td colSpan="2" className="border-t border-gray-300 p-3">
+          <strong>TO:</strong>
+          <div>{selectedOrder.address1.split(",")[0]}</div>
+          <div>Mobile: {selectedOrder.mobile}</div>
+        </td>
+      </tr>
+
+      {/* --- Invoice Info Section --- */}
+      <tr>
+        <td colSpan="2" className="border-t border-gray-300 p-3">
+          <div>Invoice Name: {selectedOrder.invoiceName}</div>
+          <div>HSN Code: {selectedOrder.HSNCode}</div>
+          <div>Shipment Type: {selectedOrder.shipmentType}</div>
+          <div>Invoice Date: {formatDate(selectedOrder.invoiceDate)}</div>
+        </td>
+      </tr>
+
+      {/* --- Weight, Dimensions & Payment --- */}
+      <tr>
+        <td colSpan="2" className="border-t border-gray-300 p-3">
+          <div className="flex justify-between text-xs">
+            <span>
+              Weight: {selectedOrder.weight} KG | 
+              Dim: {selectedOrder.length}×{selectedOrder.width}×{selectedOrder.height} cm
+            </span>
+            <span>{selectedOrder.paymentStatus}</span>
+          </div>
+        </td>
+      </tr>
+
+      {/* --- Products Section --- */}
+      <tr>
+        <td colSpan="2" className="border-t border-gray-300 p-3">
+          <strong>Products:</strong>
+          {selectedOrder.productItems.map((item, index) => (
+            <div key={index} className="flex justify-between text-xs mt-1">
+              <span>
+                {item.productName} (Qty: {item.productQuantity})
+              </span>
+              <span>
+                {item.productPrice} {selectedOrder.invoiceCurrency}
+              </span>
+            </div>
+          ))}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
                    </div>
                    
                    {/* Modal Footer */}

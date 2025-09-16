@@ -23,6 +23,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
   const [availableRates, setAvailableRates] = useState([]);
   const [allRates, setAllRates] = useState([]);
   const [discountPercent, setDiscountPercent] = useState(0);
+  const [pickupAddress , setPickupAddress] = useState([]);
 
   const [productItems, setProductItems] = useState([
     { productName: "", productQuantity: "", productPrice: "" },
@@ -47,14 +48,22 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     length: "",
     width: "",
     height: "",
+    HSNCode: "",
     invoiceDate: new Date().toISOString().split("T")[0],
-    invoiceCurrency: "INR",
+    invoiceCurrency: " ",
+    invoiceName: "",
+    //
     productItems: productItems,
     shippingPartner: {},
   });
 
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
+
+   const [countries, setCountries] = useState([]);
+  const [countryStateMap, setCountryStateMap] = useState({}); 
+
+  const [currencies, setCurrencies] = useState([]);
 
   // Fetch rates from backend
   useEffect(() => {
@@ -188,46 +197,116 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setAvailableRates(formattedRates);
   };
 
-const countryStateMap = {
-  USA: [
-    "California",
-    "New York",
-    "Texas",
-    "Florida",
-    "Illinois",
-    "Washington",
-    "Pennsylvania",
-    "Ohio",
-    "Georgia",
-    "North Carolina",
-  ],
-  "USA Remote": ["Alaska", "Hawaii", "Puerto Rico", "Guam", "American Samoa"],
-  UK: ["England", "Scotland", "Wales", "Northern Ireland"],
-  Australia: [
-    "New South Wales",
-    "Victoria",
-    "Queensland",
-    "Western Australia",
-    "South Australia",
-    "Tasmania",
-    "Northern Territory",
-    "Australian Capital Territory",
-  ],
-  "Rest of the World": ["No States - International"],
-  Canada: [
-    "Ontario",
-    "Quebec",
-    "British Columbia",
-    "Alberta",
-    "Manitoba",
-    "Saskatchewan",
-    "Nova Scotia",
-    "New Brunswick",
-    "Newfoundland and Labrador",
-  ],
+ useEffect(() => {
+  const fetchCountriesAndStates = async () => {
+    try {
+      const response = await axios.get("https://countriesnow.space/api/v0.1/countries/states");
+
+      if (response.data && response.data.data) {
+        const countryList = response.data.data;
+
+        // Format for country dropdown
+        const countriesArray = countryList.map(country => ({
+          code: country.iso2,
+          name: country.name
+        }));
+
+        // Create a map of country -> states
+        const stateMap = {};
+        countryList.forEach(country => {
+          stateMap[country.name] = country.states.map(state => state.name);
+        });
+
+        // Sort countries alphabetically
+        countriesArray.sort((a, b) => a.name.localeCompare(b.name));
+
+        setCountries(countriesArray);
+        setCountryStateMap(stateMap);
+
+      } else {
+        console.error("Unexpected API response format", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching countries and states:", error);
+    }
+  };
+
+  fetchCountriesAndStates();
+}, []);
+
+useEffect(() => {
+  const fetchCurrencies = async () => {
+    try {
+      const response = await axios.get(
+        "https://restcountries.com/v3.1/all?fields=name,currencies"
+      );
+
+      if (Array.isArray(response.data)) {
+        const currencySet = new Set();
+
+        // Extract unique currency codes with names
+        response.data.forEach((country) => {
+          if (country.currencies) {
+            Object.entries(country.currencies).forEach(([code, details]) => {
+              currencySet.add(
+                JSON.stringify({
+                  code,
+                  name: details.name,
+                  symbol: details.symbol || "",
+                })
+              );
+            });
+          }
+        });
+
+        // Convert Set back to array and sort alphabetically
+        const currencyArray = Array.from(currencySet)
+          .map((item) => JSON.parse(item))
+          .sort((a, b) => a.code.localeCompare(b.code));
+
+        setCurrencies(currencyArray);
+      }
+    } catch (err) {
+      console.error("Error fetching currencies:", err);
+    }
+  };
+
+  fetchCurrencies();
+}, []);
+
+
+const getPickupAddress = async () => {
+  try {
+    const token = localStorage.getItem("userToken");
+    if (!token) {
+      console.error("User is not authenticated");
+      return;
+    }
+
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const userId = decodedToken.userId;
+
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`
+    );
+
+    if (response.data && response.data.user) {
+      const addresses = response.data.user.pickupAddresses;
+
+      if (addresses && addresses.length > 0) {
+        setPickupAddress(addresses); // ✅ Store all addresses in state
+      } else {
+        toast.info("No pickup address found for user, please add one in the profile section");
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error.response?.data || error.message);
+  }
 };
 
-
+    useEffect(() => {
+      getPickupAddress();
+    }, []);
   // Navigation function for sidebar clicks
   const navigateToStep = (step) => {
     // Only allow navigation to completed steps or next step
@@ -296,7 +375,6 @@ const countryStateMap = {
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
     if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
-    if (!formData.address2.trim()) newErrors.address2 = "Address 2 is required";
     if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
     if (!formData.country) newErrors.country = "Country is required";
@@ -537,10 +615,12 @@ const countryStateMap = {
             {currentStep === 1 && (
               <BuyerDetails
                 formData={formData}
+                pickupAddress={pickupAddress}
                 errors={errors}
                 handleInputChange={handleInputChange}
                 handleContinueShipment={handleContinueFromBuyer}
-                 countryStateMap={countryStateMap}
+                  countries={countries}
+                  countryStateMap={countryStateMap}
               />
             )}
 
@@ -561,6 +641,7 @@ const countryStateMap = {
                 errors={errors}
                 handleInputChange={handleInputChange}
                 handleContinueItem={handleContinueFromOrder}
+                currencies={currencies}
               />
             )}
 
