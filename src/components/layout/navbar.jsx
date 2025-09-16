@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { User, Wallet, Package, HelpCircle, Bell, ChevronDown, Search } from "lucide-react";
+import { User, Wallet, Package, HelpCircle, Bell, ChevronDown, Search, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import axios from "axios";
@@ -98,6 +98,12 @@ const Navbar = ({ balance }) => {
 
     fetchUserData();
   }, [router]);
+
+    const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/");
+  };
+
 
   // Get user initials for avatar
   const getInitials = () => {
@@ -261,6 +267,12 @@ const Navbar = ({ balance }) => {
                     <button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
                       <HelpCircle className="w-4 h-4 mr-2" />
                       Help & Support
+                    </button>
+                    <button 
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Log Out
                     </button>
                   </div>
                 </motion.div>

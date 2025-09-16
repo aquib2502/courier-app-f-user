@@ -421,19 +421,19 @@ const HomePage = () => {
           </div>
 
           {/* Logout Button */}
-          <motion.div
+          {/* <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="mt-6"
-          >
-            <button
+          > */}
+            {/* <button
               onClick={handleLogout}
               className="flex items-center justify-center space-x-3 w-full py-3 px-4 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition-all duration-300"
             >
               <LogOut className="w-5 h-5" />
               <span className="font-medium">Logout</span>
-            </button>
-          </motion.div>
+            </button> */}
+          {/* </motion.div> */}
         </motion.div>
 
         {/* Main Content */}
