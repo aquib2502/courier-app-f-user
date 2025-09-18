@@ -10,6 +10,7 @@ const ItemDetails = ({
   handleAddProductItem, 
   handleContinueToShipping 
 }) => {
+
   return (
     <div className="mt-8">
       <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -77,13 +78,20 @@ const ItemDetails = ({
         <span>Add Another Product</span>
       </button>
 
-      <button 
-        onClick={handleContinueToShipping}
-        className="mt-8 w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center space-x-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <span>Continue to Shipping Selection</span>
-        <ChevronRight size={20} />
-      </button>
+    {/* Show global error */}
+{errors.totalProductValue && (
+  <div className="mt-4 text-red-500 text-sm font-medium">
+    {errors.totalProductValue}
+  </div>
+)}
+
+<button 
+  onClick={handleContinueToShipping}
+  className="mt-8 w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center space-x-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+>
+  <span>Continue to Shipping Selection</span>
+  <ChevronRight size={20} />
+</button>
     </div>
   );
 };

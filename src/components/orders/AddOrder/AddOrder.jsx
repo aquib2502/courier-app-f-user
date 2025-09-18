@@ -435,6 +435,16 @@ const getPickupAddress = async () => {
         newErrors[`productPrice_${index}`] = "Product Price is required";
     });
 
+     // ✅ Additional Constraint: If weight <= 100g, total product value cannot exceed 1000
+  const totalProductValue = productItems.reduce((total, item) => {
+    return total + Number(item.productQuantity) * Number(item.productPrice);
+  }, 0);
+
+  if (Number(formData.weight) <= 0.1 && totalProductValue > 1000) {
+    newErrors.totalProductValue =
+      "For shipments with weight ≤ 100g, the total product value cannot exceed ₹1000.";
+  }
+
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {

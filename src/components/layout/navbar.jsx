@@ -4,13 +4,18 @@ import { User, Wallet, Package, HelpCircle, Bell, ChevronDown, Search, LogOut } 
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import axios from "axios";
+import {io} from "socket.io-client";
+
 
 const Navbar = ({ balance }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [userData, setUserData] = useState({ fullname: "", email: "" });
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [notifications, setNotifications] = useState([]);
+const [unreadCount, setUnreadCount] = useState(0);
+
+
   const router = useRouter();
   const searchParams = useSearchParams(); // Get access to search parameters
   
@@ -33,6 +38,66 @@ const Navbar = ({ balance }) => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
+
+  useEffect(() => {
+  const token = localStorage.getItem("userToken");
+  if (!token) return;
+
+  let socketInstance;
+
+  try {
+    // Decode JWT to get userId
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(window.atob(base64));
+    const userId = decoded?.userId;
+    if (!userId) return;
+
+    // Initialize socket
+    socketInstance = io(`${process.env.NEXT_PUBLIC_API_URL}`);
+
+    // Register user
+    socketInstance.emit("register", userId);
+
+    // Listen for notifications
+    socketInstance.on("new-notification", (data) => {
+      console.log("📩 New notification:", data);
+      setNotifications((prev) => [data, ...prev]);
+      setUnreadCount((prev) => prev + 1);
+    });
+
+  } catch (err) {
+    console.error("Error decoding token:", err);
+  }
+
+  // Cleanup
+  return () => {
+    if (socketInstance) {
+      socketInstance.off("new-notification");
+      socketInstance.disconnect();
+    }
+  };
+}, []);
+
+useEffect(() => {
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem("userToken");
+    if (!token) return;
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+        setUnreadCount(response.data.notifications.filter(n => !n.isRead).length);
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  fetchNotifications();
+}, []);
 
   // Fetch user details on component mount
   useEffect(() => {
@@ -105,6 +170,30 @@ const Navbar = ({ balance }) => {
   };
 
 
+  const markAllAsRead = async () => {
+  const token = localStorage.getItem("userToken");
+  if (!token) return;
+
+  try {
+    // Loop through all unread notifications
+    await Promise.all(
+      notifications
+        .filter(n => !n.isRead)
+        .map(n =>
+          axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${n._id}/read`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        )
+    );
+
+    // Update local state
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setUnreadCount(0);
+  } catch (err) {
+    console.error("Error marking notifications as read:", err);
+  }
+};
+
   // Get user initials for avatar
   const getInitials = () => {
     if (userData && userData.fullname) {
@@ -147,48 +236,66 @@ const Navbar = ({ balance }) => {
         {/* Right Section - Icons and Info */}
         <div className="flex items-center space-x-1 md:space-x-4">
           {/* Notifications */}
-          <div className="relative">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 cursor-pointer relative"
-              onClick={toggleNotifications}
-            >
-              <Bell className="w-5 h-5 text-gray-700" />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-            </motion.div>
-            
-            <AnimatePresence>
-              {showNotifications && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
-                >
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-700">Notifications</h3>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto">
-                    <div className="px-4 py-3 hover:bg-gray-50 border-l-4 border-emerald-500">
-                      <p className="text-sm font-medium text-gray-800">New order received</p>
-                      <p className="text-xs text-gray-500 mt-1">Order #125478 has been placed</p>
-                      <p className="text-xs text-gray-400 mt-1">10 minutes ago</p>
-                    </div>
-                    <div className="px-4 py-3 hover:bg-gray-50">
-                      <p className="text-sm font-medium text-gray-800">Shipment update</p>
-                      <p className="text-xs text-gray-500 mt-1">Order #125471 has been dispatched</p>
-                      <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
-                    </div>
-                  </div>
-                  <div className="px-4 py-2 border-t border-gray-100 text-center">
-                    <button className="text-emerald-600 text-sm hover:text-emerald-700">View all notifications</button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        <div className="relative">
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 cursor-pointer relative"
+    onClick={toggleNotifications}
+  >
+    <Bell className="w-5 h-5 text-gray-700" />
+    {unreadCount > 0 && (
+      <span className="absolute top-0 right-0 w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
+        {unreadCount}
+      </span>
+    )}
+  </motion.div>
+
+  <AnimatePresence>
+    {showNotifications && (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        transition={{ duration: 0.2 }}
+        className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+      >
+        <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+          <h3 className="font-semibold text-gray-700">Notifications</h3>
+        <button
+  onClick={markAllAsRead}
+  className="text-sm text-emerald-600 hover:underline"
+>
+  Mark all as read
+</button>
+
+        </div>
+
+        <div className="max-h-72 overflow-y-auto">
+          {notifications.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-4">
+              No notifications yet
+            </p>
+          ) : (
+            notifications.map((note, index) => (
+              <div
+                key={index}
+                className="px-4 py-3 hover:bg-gray-50 border-l-4 border-emerald-500"
+              >
+                <p className="text-sm font-medium text-gray-800">{note.title}</p>
+                <p className="text-xs text-gray-500 mt-1">{note.message}</p>
+               <p className="text-xs text-gray-400 mt-1">
+  {new Date(note.createdAt).toLocaleString()}
+</p>
+
+              </div>
+            ))
+          )}
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
 
           {/* Wallet with Value */}
           <motion.div
