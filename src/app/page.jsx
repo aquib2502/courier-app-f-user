@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { 
   Globe, 
   Package, 
@@ -536,7 +536,9 @@ const page = () =>{
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar should be responsive */}
-      <Navbar balance={1000} /> {/* pass balance if required */}
+      <Suspense fallback={<div>Loading Navbar...</div>}>
+        <Navbar balance={1000} /> {/* pass balance if required */}
+      </Suspense>
       
       <main className="overflow-x-hidden">
         <Home />
