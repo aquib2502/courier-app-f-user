@@ -73,6 +73,13 @@ const PaymentMethods = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+        <button
+      onClick={() => router.push('/home')}
+      className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition"
+    >
+      <ArrowLeftFromLine size={20} />
+      <span>Back</span>
+    </button>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">

@@ -197,6 +197,8 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setAvailableRates(formattedRates);
   };
 
+  
+//Fetch countries and States
  useEffect(() => {
   const fetchCountriesAndStates = async () => {
     try {

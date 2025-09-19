@@ -1,12 +1,21 @@
 // pages/privacy-policy.jsx
+'use client'
 import React from 'react';
-import { Shield, Lock, Eye, Database, Globe, Bell } from 'lucide-react';
-
+import { Shield, Lock, Eye, Database, Globe, Bell, ArrowLeftFromLine } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 const PrivacyPolicy = () => {
+  const router =  useRouter()
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+            <button
+      onClick={() => router.push('/home')}
+      className="flex items-center gap-2 px-4 py-2  text-black rounded-md hover:cursor-pointer"
+    >
+      <ArrowLeftFromLine size={20} />
+      <span>Back</span>
+    </button>
           <div className="flex items-center justify-center mb-8">
             <Shield className="h-12 w-12 text-emerald-600" />
           </div>

@@ -1,188 +1,319 @@
 import React, { useState, useEffect } from "react";
+import { Calculator, MapPin, Package, Clock, ArrowRight } from "lucide-react";
 import axios from "axios";
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/rates`; // Replace with your actual backend URL
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/rates`;
 
 const RateCalculator = () => {
   const [weight, setWeight] = useState("0.1");
   const [errors, setErrors] = useState({});
-  const [pickUpCountry, setPickUpCountry] = useState("India");
-  const [destinationCountry, setDestinationCountry] = useState("United States (USA)");
-  const [postcode, setPostcode] = useState("400059");
+  const [destinationCountry, setDestinationCountry] = useState("");
   const [calculated, setCalculated] = useState(false);
   const [rates, setRates] = useState([]);
   const [filteredRates, setFilteredRates] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch rates from backend
+  /** Fetch all rates */
   useEffect(() => {
     const fetchRates = async () => {
       try {
         const response = await axios.get(API_URL, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`, // If protected
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         });
-        setRates(response.data); // API returns array of rates
+        setRates(response.data);
       } catch (error) {
         console.error("Error loading rates:", error.response?.data || error.message);
       }
     };
-
     fetchRates();
   }, []);
 
-  const handleWeightChange = (e) => setWeight(e.target.value);
-  const handlePostcodeChange = (e) => setPostcode(e.target.value);
+  /** Fetch countries dynamically */
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/countries`);
+        setCountries(response.data);
+      } catch (error) {
+        console.error("Error fetching countries:", error.response?.data || error.message);
+      }
+    };
+    fetchCountries();
+  }, []);
 
+  /** Handle input */
+  const handleWeightChange = (e) => setWeight(e.target.value);
   const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      handleCalculate();
-    }
+    if (event.key === "Enter") handleCalculate();
   };
 
+  /** Core calculation logic */
   const handleCalculate = () => {
     if (!weight || parseFloat(weight) <= 0) {
       setErrors({ weight: "Weight is required and must be greater than 0" });
       setCalculated(false);
       return;
-    } else if (!postcode) {
-      setErrors({ postcode: "PostalCode cannot be empty" });
+    }
+    if (!destinationCountry) {
+      setErrors({ destinationCountry: "Please select a destination country" });
       setCalculated(false);
       return;
     }
 
     setErrors({});
-    setCalculated(true);
+    setIsLoading(true);
 
     const userWeight = parseFloat(weight);
 
-    // Filter all rates for the selected destination country
+    console.log("Selected Country Code:", destinationCountry);
+    console.log("User Entered Weight:", userWeight);
+
+    /** Filter rates by selected country code */
     const destinationRates = rates.filter(
-      (r) => r.dest_country === destinationCountry
+      (r) => r.dest_country_code?.trim() === destinationCountry.trim()
     );
 
-    // Group by package and select the closest lower or equal weight for each package
-    const bestRates = [];
+    console.log("Filtered Destination Rates:", destinationRates);
 
+    if (destinationRates.length === 0) {
+      setFilteredRates([]);
+      setCalculated(true);
+      setIsLoading(false);
+      return;
+    }
+
+    /** Get unique package types */
     const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
 
+    const bestRates = [];
+
     uniquePackages.forEach((pkg) => {
+      /** For each package, find the lowest weight >= user weight */
       const packageRates = destinationRates
-        .filter((r) => parseFloat(r.weight) <= userWeight && r.package === pkg)
-        .sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight));
+        .filter(
+          (r) =>
+            parseFloat(r.weight) >= userWeight &&
+            r.package === pkg
+        )
+        .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight)); // Sort ascending
 
       if (packageRates.length > 0) {
-        bestRates.push(packageRates[0]);
+        bestRates.push(packageRates[0]); // Pick the closest weight
       }
     });
 
+    console.log("Final Best Rates:", bestRates);
     setFilteredRates(bestRates);
+    setCalculated(true);
+    setIsLoading(false);
+  };
+
+  const getPackageIcon = (packageType) => {
+    switch (packageType?.toLowerCase()) {
+      case 'express':
+        return '⚡';
+      case 'standard':
+        return '📦';
+      case 'economy':
+        return '🚚';
+      default:
+        return '📫';
+    }
+  };
+
+  const getPackageColor = (packageType) => {
+    switch (packageType?.toLowerCase()) {
+      case 'express':
+        return 'from-purple-500/10 to-pink-500/10 border-purple-200/30';
+      case 'standard':
+        return 'from-blue-500/10 to-cyan-500/10 border-blue-200/30';
+      case 'economy':
+        return 'from-green-500/10 to-emerald-500/10 border-green-200/30';
+      default:
+        return 'from-gray-500/10 to-slate-500/10 border-gray-200/30';
+    }
   };
 
   return (
-    <div className="min-h-[calc(220vh-200px)] flex flex-col">
-      <div>
-        <h1 className="text-2xl font-extrabold mb-2 text-gray-800">Rate Calculator</h1>
-        <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 text-white p-8 rounded-lg shadow-lg">
-          {/* Form Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <label className="block text-sm font-semibold text-gray-200 mb-2">
-                Pick-up Country <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={pickUpCountry}
-                onChange={(e) => setPickUpCountry(e.target.value)}
-                className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              >
-                <option value="India">India</option>
-                {/* Add more options dynamically if needed */}
-              </select>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+              <Calculator className="w-8 h-8 text-white" />
             </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-200 mb-2">
-                Country/Region <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={destinationCountry}
-                onChange={(e) => setDestinationCountry(e.target.value)}
-                className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              >
-                <option value="India">India</option>
-                <option value="United States (USA)">United States (USA)</option>
-                <option value="United States (Remote)">United States (Remote)</option>
-                <option value="United Kingdom (UK)">United Kingdom (UK)</option>
-                <option value="Europe">Europe</option>
-                <option value="Canada">Canada</option>
-                <option value="Australia">Australia</option>
-                <option value="Rest of World">Rest of World</option>
-              </select>
-            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              Rate Calculator
+            </h1>
           </div>
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+            Calculate shipping rates instantly with our advanced pricing engine. 
+            Get accurate quotes for all your shipping needs.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <label className="block text-sm font-semibold text-gray-200 mb-2">
-                Weight <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                value={weight}
-                onChange={handleWeightChange}
-                onKeyDown={handleKeyDown}
-                className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                min="0.1"
-                step="0.1"
-              />
-              {errors.weight && (
-                <p className="text-red-500 text-md mt-1">{errors.weight}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-200 mb-2">
-                Postcode <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={postcode}
-                onKeyDown={handleKeyDown}
-                onChange={handlePostcodeChange}
-                className="w-full p-3 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="Postcode"
-              />
-              {errors.postcode && (
-                <p className="text-red-500 text-md mt-1">{errors.postcode}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="text-center mb-8">
-            <button
-              onClick={handleCalculate}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-full w-1/2 md:w-1/3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            >
-              Calculate
-            </button>
-          </div>
-
-          {/* Results Section */}
-          {calculated && filteredRates.length > 0 && (
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              {filteredRates.map((rate, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-lg text-emerald-600 font-extrabold mt-2">
-                      AS Enterprise {rate.package}
-                    </p>
-                    <p className="text-lg font-semibold text-emerald-600">Rs. {rate.rate}</p>
+        {/* Main Calculator Card */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 overflow-hidden">
+          <div className="p-8 lg:p-12">
+            {/* Form Section */}
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+              {/* Destination Country */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <MapPin className="w-4 h-4 text-blue-500" />
+                  Destination Country
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={destinationCountry}
+                    onChange={(e) => setDestinationCountry(e.target.value)}
+                    className="w-full p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-slate-200/50 text-slate-800 shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30 appearance-none"
+                  >
+                    <option value="">Select destination country</option>
+                    {countries.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.name} ({country.code})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
-                  <p className="text-sm text-gray-600">Estimated Transit: 6 - 12 Days</p>
                 </div>
-              ))}
+                {errors.destinationCountry && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <span className="w-4 h-4">⚠️</span>
+                    {errors.destinationCountry}
+                  </p>
+                )}
+              </div>
+
+              {/* Weight */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Package className="w-4 h-4 text-blue-500" />
+                  Weight (kg)
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={weight}
+                    onChange={handleWeightChange}
+                    onKeyDown={handleKeyDown}
+                    className="w-full p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-slate-200/50 text-slate-800 shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30"
+                    min="0.001"
+                    step="0.001"
+                    placeholder="Enter package weight"
+                  />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm font-medium">
+                    KG
+                  </div>
+                </div>
+                {errors.weight && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <span className="w-4 h-4">⚠️</span>
+                    {errors.weight}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Calculate Button */}
+            <div className="flex justify-center mb-8">
+              <button
+                onClick={handleCalculate}
+                disabled={isLoading}
+                className="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-400 disabled:to-slate-500 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Calculating...
+                  </>
+                ) : (
+                  <>
+                    Calculate Rates
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Results Section */}
+            {calculated && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
+                  <h3 className="text-2xl font-bold text-slate-800">Available Rates</h3>
+                </div>
+
+                {filteredRates.length > 0 ? (
+                  <div className="grid gap-4">
+                    {filteredRates.map((rate, index) => (
+                      <div
+                        key={index}
+                        className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-r ${getPackageColor(rate.package)} p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="text-3xl">{getPackageIcon(rate.package)}</div>
+                            <div>
+                              <h4 className="text-lg font-bold text-slate-800 mb-1">
+                                TTE {rate.package}
+                              </h4>
+                              <div className="flex items-center gap-2 text-sm text-slate-600">
+                                <Clock className="w-4 h-4" />
+                                Estimated Transit: 6 - 12 Days
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-slate-800">
+                              ₹{rate.rate}
+                            </div>
+                            <div className="text-sm text-slate-600">
+                              for {weight}kg
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Subtle hover effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Package className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      No rates available
+                    </h4>
+                    <p className="text-slate-500 max-w-md mx-auto">
+                      We couldn't find shipping rates for the selected country and weight. 
+                      Please try different parameters or contact support.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-slate-500 text-sm">
+            Rates are calculated in real-time and may vary based on current market conditions.
+          </p>
         </div>
       </div>
     </div>
