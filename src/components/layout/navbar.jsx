@@ -121,7 +121,7 @@ const Navbar = ({ balance }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("userToken");
-    router.push("/login");
+    router.push("/");
   };
 
   const markAllAsRead = async () => {

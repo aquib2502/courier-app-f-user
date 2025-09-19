@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, ShieldCheck, CheckCircle, AlertCircle } from "lucide-react";
+import { Mail, Lock, ArrowRight, ShieldCheck, CheckCircle, AlertCircle, ArrowLeftFromLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Login = ({ onToggleToSignup }) => {
@@ -52,6 +52,7 @@ const Login = ({ onToggleToSignup }) => {
     return (
         <div className="min-h-screen flex bg-slate-50">
             {/* Left Section - Form */}
+            
             <div className="w-full lg:w-1/2 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 p-6 flex items-center justify-center overflow-hidden relative">
                 {/* Background animated shapes */}
                 <div className="absolute inset-0 overflow-hidden opacity-10">
@@ -61,29 +62,40 @@ const Login = ({ onToggleToSignup }) => {
                     <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-emerald-300 rounded-full mix-blend-overlay blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
                 </div>
                 
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="w-full max-w-md z-10"
-                >
-                    <div className="backdrop-blur-md bg-white/10 rounded-3xl p-8 shadow-2xl border border-white/20">
-                        <motion.div 
-                            className="flex items-center justify-center mb-8"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3, duration: 0.5 }}
-                        >
-                            <motion.div
-                                whileHover={{ rotate: 360 }}
-                                transition={{ duration: 0.5 }}
-                            >
-                                <ShieldCheck className="w-10 h-10 text-emerald-300 mr-3" />
-                            </motion.div>
-                            <h2 className="text-3xl font-bold text-white tracking-tight">
-                                Welcome Back
-                            </h2>
-                        </motion.div>
+               <motion.div
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className="w-full max-w-md z-10 relative"
+>
+  <div className="backdrop-blur-md bg-white/10 rounded-3xl p-8 shadow-2xl border border-white/20 relative">
+    
+    {/* Back Button */}
+    <button 
+      onClick={() => router.push('/')}
+      className="absolute top-4 left-4 p-2 hover:cursor-pointer"
+    >
+      <ArrowLeftFromLine size={20} color="white" />
+    </button>
+
+    <motion.div 
+      className="flex items-center justify-center mb-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.3, duration: 0.5 }}
+    >
+      <motion.div
+        whileHover={{ rotate: 360 }}
+        transition={{ duration: 0.5 }}
+      >
+        <ShieldCheck className="w-10 h-10 text-emerald-300 mr-3" />
+      </motion.div>
+      <h2 className="text-3xl font-bold text-white tracking-tight">
+        Welcome Back
+      </h2>
+    </motion.div>
+
+ 
 
                         {/* Display error or success message */}
                         {message && (
