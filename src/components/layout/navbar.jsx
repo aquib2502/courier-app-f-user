@@ -120,11 +120,18 @@ const Navbar = ({ balance }) => {
 
     fetchUserData();
   }, [router]);
+const handleLogout = () => {
+  localStorage.removeItem("userToken");
 
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    router.push("/");
-  };
+  // Clear all relevant states
+  setUserData({ fullname: "", email: "" });
+  setNotifications([]);
+  setUnreadCount(0);
+
+  // Navigate to home
+  router.push("/");
+};
+
 
   const markAllAsRead = async () => {
     const token = localStorage.getItem("userToken");
@@ -203,129 +210,121 @@ const Navbar = ({ balance }) => {
         </div>
 
         {/* Desktop Right - Notifications, Nav Buttons, Wallet, Profile */}
-        <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">
-          {/* Navigation Buttons - Only show when not logged in */}
-          {!userData.fullname && (
-            <div className="flex space-x-2">
-              {navigationButtons.map((btn, index) => {
-                if (btn.guestOnly && userData.fullname) return null;
-                return (
-                  <button
-                    key={index}
-                    onClick={() => router.push(btn.route)}
-                    className="px-3 py-1.5 rounded-lg font-medium text-sm text-gray-700 hover:text-white hover:bg-emerald-600 transition-all duration-200 shadow-sm hover:shadow-lg"
-                  >
-                    {btn.name}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+        <div className="hidden lg:flex items-center space-x-2 md:space-x-4">
+          {/* Navigation Buttons */}
+          <div className="flex space-x-3">
+            {navigationButtons.map((btn, index) => {
+              if (btn.guestOnly && userData.fullname) return null;
+              return (
+                <button
+                  key={index}
+                  onClick={() => router.push(btn.route)}
+                  className="px-4 py-2 rounded-lg font-medium text-gray-700 hover:text-white hover:bg-emerald-600 transition-all duration-200 shadow-sm hover:shadow-lg"
+                >
+                  {btn.name}
+                </button>
+              );
+            })}
+          </div>
 
-          {/* Logged in user elements */}
+          {/* Notifications */}
+          <div className="relative notifications-container">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 cursor-pointer relative"
+              onClick={toggleNotifications}
+            >
+              <Bell className="w-5 h-5 text-gray-700" />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </motion.div>
+
+            <AnimatePresence>
+              {showNotifications && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                >
+                  <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-700">
+                      Notifications
+                    </h3>
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-sm text-emerald-600 hover:underline"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="text-gray-500 text-sm text-center py-4">
+                        No notifications yet
+                      </p>
+                    ) : (
+                      notifications.map((note, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-3 hover:bg-gray-50 border-l-4 border-emerald-500"
+                        >
+                          <p className="text-sm font-medium text-gray-800">
+                            {note.title}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {note.message}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(note.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Wallet & Profile Menu */}
           {userData.fullname && (
             <>
-              {/* Notifications */}
-              <div className="relative notifications-container">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 cursor-pointer relative"
-                  onClick={toggleNotifications}
-                >
-                  <Bell className="w-4 h-4 text-gray-700" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 text-xs font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </motion.div>
-
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
-                    >
-                      <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
-                        <h3 className="font-semibold text-gray-700 text-sm">
-                          Notifications
-                        </h3>
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={markAllAsRead}
-                            className="text-xs text-emerald-600 hover:underline"
-                          >
-                            Mark all read
-                          </button>
-                        )}
-                      </div>
-                      <div className="max-h-72 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <p className="text-gray-500 text-sm text-center py-4">
-                            No notifications yet
-                          </p>
-                        ) : (
-                          notifications.map((note, index) => (
-                            <div
-                              key={index}
-                              className={`px-4 py-3 hover:bg-gray-50 border-l-4 transition-colors ${
-                                note.isRead ? 'border-gray-300' : 'border-emerald-500'
-                              }`}
-                            >
-                              <p className="text-sm font-medium text-gray-800">
-                                {note.title}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {note.message}
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {new Date(note.createdAt).toLocaleString()}
-                              </p>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Wallet */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center space-x-1.5 cursor-pointer px-2 py-1.5 rounded-md bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-100 transition-all duration-200"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center space-x-2 cursor-pointer p-2 rounded-md bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-100 transition-all duration-200"
               >
-                <Wallet className="w-4 h-4 text-green-600" />
-                <span className="text-green-600 font-medium text-sm">₹{balance}</span>
+                <Wallet className="w-5 h-5 text-green-600" />
+                <span className="text-green-600 font-medium">Rs.{balance}</span>
               </motion.div>
 
-              {/* Profile Menu */}
               <div className="relative profile-container">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={toggleProfileMenu}
-                  className="flex items-center space-x-1.5 cursor-pointer px-1.5 py-1 rounded-full bg-emerald-100 hover:bg-emerald-200 transition-all duration-200"
+                  className="flex items-center space-x-2 cursor-pointer ml-2 p-1.5 rounded-full bg-emerald-100 hover:bg-emerald-200 transition-all duration-200"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-medium text-sm">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-medium">
                     {getInitials()}
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-emerald-700" />
+                  <ChevronDown className="w-4 h-4 text-emerald-700" />
                 </motion.div>
 
                 <AnimatePresence>
                   {showProfileMenu && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                     >
                       <div className="px-4 py-2 border-b border-gray-100">
                         {isLoading ? (
@@ -334,10 +333,10 @@ const Navbar = ({ balance }) => {
                           </p>
                         ) : (
                           <>
-                            <p className="font-medium text-gray-800 text-sm">
+                            <p className="font-medium text-gray-800">
                               {userData.fullname}
                             </p>
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-gray-500">
                               {userData.email}
                             </p>
                           </>
@@ -349,14 +348,14 @@ const Navbar = ({ balance }) => {
                             router.push("/home?tab=profile");
                             setShowProfileMenu(false);
                           }}
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center transition-colors"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center"
                         >
                           <User className="w-4 h-4 mr-2" />
                           Profile Settings
                         </button>
                         <button
                           onClick={handleLogout}
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center transition-colors"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center"
                         >
                           <LogOut className="w-4 h-4 mr-2" />
                           Log Out
