@@ -1,11 +1,12 @@
 // components/orders/AddOrder/AddOrder.jsx
 "use client";
 import React, { useState, useEffect, use } from "react";
-import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, X, ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import all the separated components from the same folder
 import Sidebar from "./Sidebar";
@@ -24,6 +25,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
   const [allRates, setAllRates] = useState([]);
   const [discountPercent, setDiscountPercent] = useState(0);
   const [pickupAddress , setPickupAddress] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [productItems, setProductItems] = useState([
     { productName: "", productQuantity: "", productPrice: "" },
@@ -64,6 +66,9 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
   const [countryStateMap, setCountryStateMap] = useState({}); 
 
   const [currencies, setCurrencies] = useState([]);
+
+  // Toggle sidebar for mobile
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   // Fetch rates from backend
   useEffect(() => {
@@ -314,6 +319,10 @@ const getPickupAddress = async () => {
     // Only allow navigation to completed steps or next step
     if (step <= currentStep || isStepAccessible(step)) {
       setCurrentStep(step);
+      // Close sidebar on mobile after step selection
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      }
     }
   };
 
@@ -577,23 +586,76 @@ const getPickupAddress = async () => {
     }
   };
 
+  // Sidebar animation variants
+  const sidebarVariants = {
+    hidden: { x: "-100%" },
+    visible: { x: 0 },
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Enhanced Sidebar */}
-      <Sidebar currentStep={currentStep} navigateToStep={navigateToStep} />
+      {/* Mobile Sidebar Toggle Button */}
+      {/* <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={toggleSidebar}
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-emerald-600 text-white rounded-full shadow-lg hover:bg-emerald-700 transition-all duration-200"
+      >
+        <Menu className="w-5 h-5" />
+      </motion.button> */}
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <Sidebar currentStep={currentStep} navigateToStep={navigateToStep} />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {/* <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={toggleSidebar}
+          />
+        )}
+      </AnimatePresence> */}
+
+      {/* Mobile Sidebar
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={sidebarVariants}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="lg:hidden fixed left-0 top-0 bottom-0 w-80 max-w-[85vw] z-50 overflow-y-auto"
+          >
+            <Sidebar 
+              currentStep={currentStep} 
+              navigateToStep={navigateToStep} 
+              isMobile={true}
+              onClose={toggleSidebar}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence> */}
 
       <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="bg-white shadow-xl rounded-2xl p-8 max-w-4xl mx-auto">
+      <div className="flex-1 p-3 sm:p-4 lg:p-6">
+        <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
           {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold text-gray-800">
+          <div className="mb-6 lg:mb-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
                 {getStepTitle()}
               </h2>
-              <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium">
+              <div className="px-3 sm:px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium self-start sm:self-auto">
                 Step {currentStep} of 6
               </div>
             </div>
@@ -617,12 +679,12 @@ const getPickupAddress = async () => {
             >
               {message.type === "success" && <Check className="w-5 h-5" />}
               {message.type === "error" && <X className="w-5 h-5" />}
-              <p>{message.text}</p>
+              <p className="text-sm sm:text-base">{message.text}</p>
             </div>
           )}
 
           {/* Step Content */}
-          <div className="min-h-96">
+          <div className="min-h-80 sm:min-h-96">
             {/* Step 1: Buyer Details */}
             {currentStep === 1 && (
               <BuyerDetails
@@ -631,8 +693,8 @@ const getPickupAddress = async () => {
                 errors={errors}
                 handleInputChange={handleInputChange}
                 handleContinueShipment={handleContinueFromBuyer}
-                  countries={countries}
-                  countryStateMap={countryStateMap}
+                countries={countries}
+                countryStateMap={countryStateMap}
               />
             )}
 
@@ -669,9 +731,6 @@ const getPickupAddress = async () => {
               />
             )}
 
-
-
-
             {/* Step 5: Shipping Selection */}
             {currentStep === 5 && (
               console.log("Discount Percent before passing to ShippingSelection:", discountPercent),
@@ -701,11 +760,11 @@ const getPickupAddress = async () => {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-8 pt-6 border-t">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 lg:mt-8 pt-4 lg:pt-6 border-t space-y-4 sm:space-y-0">
             <button
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-center space-x-2 px-4 sm:px-6 py-3 rounded-lg transition-all duration-200 w-full sm:w-auto ${
                 currentStep === 1
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -714,7 +773,8 @@ const getPickupAddress = async () => {
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
             </button>
-            <div className="flex space-x-2">
+            
+            <div className="flex justify-center space-x-2 order-first sm:order-none">
               {[1, 2, 3, 4, 5, 6].map((step) => (
                 <button
                   key={step}
@@ -732,8 +792,9 @@ const getPickupAddress = async () => {
                 />
               ))}
             </div>
-            {/* The Next button functionality is handled by each step's continue function */}
-            <div className="w-24"></div> {/* Spacer for centering */}
+            
+            {/* Spacer for desktop, hidden on mobile */}
+            <div className="hidden sm:block sm:w-24"></div>
           </div>
         </div>
       </div>
