@@ -293,6 +293,7 @@ const AboutUs = () => {
   return (
     <section id="about-us" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Heading Section */}
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
             United by <span className="text-emerald-600">Passion</span>, Driven by <span className="text-emerald-600">Purpose</span>
@@ -300,8 +301,15 @@ const AboutUs = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             At the heart of our business lies a deep passion for innovation and a relentless drive to transform the e-commerce and logistics industry.
           </p>
+
+          {/* Business Ownership Info */}
+          <p className="mt-6 text-lg text-gray-700">
+            This website is owned by <span className="font-semibold text-emerald-600">The Trace Express</span> and is managed by{" "}
+            <span className="font-semibold text-emerald-600">A &amp; A Technologies</span>.
+          </p>
         </div>
 
+        {/* What We Do Section */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center mb-16">
           <div>
             <h3 className="text-3xl font-bold text-gray-900 mb-6">What We Do?</h3>
@@ -315,7 +323,10 @@ const AboutUs = () => {
                 { icon: Globe, title: 'Global Network', desc: 'Extensive worldwide shipping and delivery network' },
                 { icon: Shield, title: 'Secure Handling', desc: 'Advanced security measures and insurance coverage' }
               ].map((feature, index) => (
-                <div key={index} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-emerald-50 transition-colors duration-200">
+                <div
+                  key={index}
+                  className="flex items-start space-x-4 p-4 rounded-lg hover:bg-emerald-50 transition-colors duration-200"
+                >
                   <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <feature.icon className="w-6 h-6 text-emerald-600" />
                   </div>
@@ -328,6 +339,7 @@ const AboutUs = () => {
             </div>
           </div>
           
+          {/* Visual Icons Grid */}
           <div className="mt-12 lg:mt-0">
             <div className="relative">
               <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl p-8 h-96 flex items-center justify-center">
@@ -356,9 +368,11 @@ const AboutUs = () => {
           </div>
         </div>
 
-        {/* Why Choose Us */}
+        {/* Why Choose Us Section */}
         <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-2xl p-8 lg:p-12">
-          <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">Why Choose TraceExpress?</h3>
+          <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Why Choose TraceExpress?
+          </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { icon: Star, title: 'Premium Service', desc: 'White-glove treatment for every shipment' },
@@ -368,7 +382,10 @@ const AboutUs = () => {
               { icon: Phone, title: 'Expert Support', desc: 'Dedicated account managers' },
               { icon: Package, title: 'Smart Solutions', desc: 'AI-powered logistics optimization' }
             ].map((item, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-200 transform hover:-translate-y-1">
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-200 transform hover:-translate-y-1"
+              >
                 <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
                   <item.icon className="w-6 h-6 text-emerald-600" />
                 </div>
@@ -383,88 +400,6 @@ const AboutUs = () => {
   );
 };
 
-// // Contact Us Component
-// const ContactUs = () => {
-//   return (
-//     <section id="contact-us" className="py-20 bg-gradient-to-br from-emerald-50 to-white">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//         <div className="text-center mb-16">
-//           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-//             <span className="text-emerald-600">Support</span> Information
-//           </h2>
-//           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-//             We're here to help you 24/7. Reach out to us through any of the channels below.
-//           </p>
-//         </div>
-
-//         <div className="grid lg:grid-cols-2 gap-12">
-//           <div className="space-y-8">
-//             {[
-//               {
-//                 icon: Phone,
-//                 title: '24/7 Support Hotline',
-//                 info: '+91 8419958646',
-//                 desc: 'Call us anytime for immediate assistance'
-//               },
-//               {
-//                 icon: Mail,
-//                 title: 'Email Support',
-//                 info: 'thetraceexpress@gmail.com',
-//                 desc: 'Send us your queries and we\'ll respond within 2 hours'
-//               },
-//               {
-//                 icon: MapPin,
-//                 title: 'Global Headquarters',
-//                 info: 'Marol, Andheri (East), Mumbai, India',
-//                 desc: 'Visit our main office for in-person consultations'
-//               },
-//               {
-//                 icon: Clock,
-//                 title: 'Business Hours',
-//                 info: '24/7 Operations, Support: Mon-Fri 11AM - 11PM',
-//                 desc: 'Our operations run around the clock'
-//               }
-//             ].map((contact, index) => (
-//               <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
-//                 <div className="flex items-start space-x-4">
-//                   <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-//                     <contact.icon className="w-6 h-6 text-emerald-600" />
-//                   </div>
-//                   <div className="flex-1">
-//                     <h3 className="font-semibold text-gray-900 mb-1">{contact.title}</h3>
-//                     <p className="text-emerald-600 font-medium mb-2">{contact.info}</p>
-//                     <p className="text-gray-600 text-sm">{contact.desc}</p>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-
-//           <div className="bg-white rounded-2xl shadow-xl p-8">
-//             <h3 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h3>
-//             <div className="space-y-6">
-//               <div className="grid grid-cols-2 gap-4">
-//                 <div>
-//                   <div className="block text-sm font-medium text-gray-700 mb-2">First Name</div>
-//                   <input
-//                     type="text"
-//                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200"
-//                     placeholder="John"
-//                   />
-//                 </div>
-//                 <div>
-//                   <div className="block text-sm font-medium text-gray-700 mb-2">Last Name</div>
-//                   <input
-//                     type="text"
-//                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200"
-//                     placeholder="Doe"
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
-
-// Footer Component
 const LpFooter = () => {
   return (
     <footer className="bg-gray-900 text-white">

@@ -14,7 +14,7 @@ const ShippingPolicy = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
           {/* Back Button */}
         <button
-          onClick={() => router.push('/home')}
+          onClick={() => router.push('/')}
             className="flex items-center gap-2 mb-8 px-4 py-2  text-black rounded-md hover:cursor-pointer"
           >
           <ArrowLeftFromLine size={20} />
@@ -72,7 +72,8 @@ const ShippingPolicy = () => {
                 For shipping-related queries or assistance, please contact us:
               </p>
               <div className="bg-emerald-50 rounded-lg p-6">
-                <p className="text-gray-700">Email: support@traceexpress.com</p>
+                <p className="text-gray-700">Email: thetraceexpress@gmail.com</p>
+                <p className="text-gray-700">Mobile: +91 8419958646</p>
                 <p className="text-gray-700">Support Hours: 24/7</p>
               </div>
             </section>

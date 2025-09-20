@@ -10,7 +10,7 @@ const PrivacyPolicy = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
             <button
-      onClick={() => router.push('/home')}
+      onClick={() => router.push('/')}
       className="flex items-center gap-2 px-4 py-2  text-black rounded-md hover:cursor-pointer"
     >
       <ArrowLeftFromLine size={20} />

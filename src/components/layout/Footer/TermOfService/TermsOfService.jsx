@@ -12,7 +12,7 @@ const TermsOfService = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
            {/* Back Button */}
         <button
-          onClick={() => router.push('/home')}
+          onClick={() => router.push('/')}
             className="flex items-center gap-2 mb-8 px-4 py-2  text-black rounded-md hover:cursor-pointer"
           >
           <ArrowLeftFromLine size={20} />
@@ -120,7 +120,7 @@ const TermsOfService = () => {
                   fees may apply based on the timing of cancellation.
                 </p>
                 <p>
-                  <strong>5.2 Refund Process:</strong> Refunds are processed within 7-10 business days to the 
+                  <strong>5.2 Refund Process:</strong> Refunds are processed within 7-10 business days after the approval to the 
                   original payment method or as wallet credit, at our discretion.
                 </p>
                 <p>
@@ -161,9 +161,9 @@ const TermsOfService = () => {
                 For questions about these Terms of Service, please contact us at:
               </p>
               <div className="mt-4 text-gray-700">
-                <p>Email: legal@shipeasy.com</p>
-                <p>Phone: +91 1800-123-4567</p>
-                <p>Address: 123 Shipping Street, Mumbai, MH 400001</p>
+                <p>Email: thetraceexpress@gmail.com</p>
+                <p>Phone: +91 8419958646</p>
+                <p>Address: Marol, Andheri (East), Mumbai, India</p>
               </div>
             </section>
           </div>
