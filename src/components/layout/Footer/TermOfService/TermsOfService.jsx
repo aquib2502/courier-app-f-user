@@ -25,6 +25,10 @@ const TermsOfService = () => {
           <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
             Terms of Service
           </h1>
+
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            AS Enterprises
+          </h2>
           
           <div className="text-sm text-gray-600 mb-8 text-center">
             Last updated: {new Date().toLocaleDateString()}
@@ -36,7 +40,7 @@ const TermsOfService = () => {
                 1. Acceptance of Terms
               </h2>
               <p className="text-gray-700">
-                By accessing or using ShipEasy's services, you agree to be bound by these Terms of Service 
+                By accessing or using AS Enterprise's services, you agree to be bound by these Terms of Service 
                 and all applicable laws and regulations. If you do not agree with any of these terms, 
                 you are prohibited from using or accessing our services.
               </p>
