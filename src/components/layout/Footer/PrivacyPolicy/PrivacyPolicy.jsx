@@ -134,9 +134,9 @@ const PrivacyPolicy = () => {
                 If you have questions about this Privacy Policy or our data practices, please contact us at:
               </p>
               <div className="mt-4 text-gray-700">
-                <p>Email: privacy@shipeasy.com</p>
-                <p>Phone: +91 1800-123-4567</p>
-                <p>Address: 123 Shipping Street, Mumbai, MH 400001</p>
+                <p className="text-gray-700">Email: thetraceexpress@gmail.com</p>
+                <p className="text-gray-700">Mobile: +91 8419958646</p>
+                <p className="text-gray-700">Support Hours: 24/7</p>
               </div>
             </section>
           </div>

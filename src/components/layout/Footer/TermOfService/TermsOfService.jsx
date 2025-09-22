@@ -124,7 +124,7 @@ const TermsOfService = () => {
                   fees may apply based on the timing of cancellation.
                 </p>
                 <p>
-                  <strong>5.2 Refund Process:</strong> Refunds are processed within 7-10 business days after the approval to the 
+                  <strong>5.2 Refund Process:</strong> Refunds are credited within 7-10 business days after the approval to the 
                   original payment method or as wallet credit, at our discretion.
                 </p>
                 <p>
