@@ -47,10 +47,10 @@ const ShippingPolicy = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 Estimated Delivery Time
               </h2>
-              <p className="text-gray-700">
-                Delivery times are estimates and may vary depending on the destination and the size or type of the package. 
-                We strive to deliver your shipment as quickly as possible, but please note that delays may occur due to customs, weather, or other factors.
-              </p>
+             <p className="text-gray-700">
+  Delivery times are typically <span className="font-semibold">within 2-3 weeks</span> and may vary depending on the destination and the size or type of the package. 
+  We strive to deliver your shipment as quickly as possible, but please note that delays may occur due to customs, weather, or other unforeseen factors.
+</p>
             </section>
 
             <section>

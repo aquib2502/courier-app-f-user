@@ -48,7 +48,7 @@ const RefundPolicy = () => {
               </h2>
               <p className="text-gray-700">
                 Once you submit a cancellation request, our team will review it and determine if a refund is applicable. 
-                This review typically takes 1-3 business days. If approved, the refund will be processed to your original payment method.
+                This review typically takes 1-3 business days. If approved, the refund will be credited to your original payment method.
               </p>
             </section>
 
