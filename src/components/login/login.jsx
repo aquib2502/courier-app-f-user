@@ -21,7 +21,8 @@ const Login = ({ onToggleToSignup }) => {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/user/loginUser`, {
                 email,
                 password,
-            });
+            },
+         { withCredentials: true });
     
             if (response.status === 200) {
                 const { message, token } = response.data;

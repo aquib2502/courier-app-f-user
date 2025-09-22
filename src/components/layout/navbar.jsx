@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { io } from "socket.io-client";
+import axiosClient from "@/utils/axiosClient";
 
 const Navbar = ({ balance }) => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -14,6 +15,7 @@ const Navbar = ({ balance }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,61 +67,53 @@ const Navbar = ({ balance }) => {
   }, []);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      const token = localStorage.getItem("userToken");
-      if (!token) return;
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (response.data.success) {
-          setNotifications(response.data.notifications);
-          setUnreadCount(
-            response.data.notifications.filter((n) => !n.isRead).length
-          );
-        }
-      } catch (err) {
-        console.error("Error fetching notifications:", err);
-      }
-    };
-    fetchNotifications();
-  }, []);
+  const fetchNotifications = async () => {
+    try {
+      const response = await axiosClient.get("/api/notifications");
 
-  // User Data Fetching
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+        setUnreadCount(
+          response.data.notifications.filter((n) => !n.isRead).length
+        );
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  fetchNotifications();
+}, []);
+
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem("userToken");
-        // if (!token) {
-        //   router.push("/login");
-        //   return;
-        // }
+  const fetchUserData = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("userToken");
 
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const decoded = JSON.parse(window.atob(base64));
-        const userId = decoded.userId;
-        if (!userId) return;
+      // Decode token to get userId
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const decoded = JSON.parse(window.atob(base64));
+      const userId = decoded.userId;
+      if (!userId) return;
 
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/user/getuser/${userId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+      const response = await axiosClient.get(`/api/user/getuser/${userId}`);
 
-        if (response.data && response.data.user) {
-          setUserData(response.data.user);
-        }
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      } finally {
-        setIsLoading(false);
+      if (response.data?.user) {
+        setUserData(response.data.user);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchUserData();
-  }, [router]);
+  fetchUserData();
+}, [router]);
+
 const handleLogout = () => {
   localStorage.removeItem("userToken");
 
@@ -134,28 +128,24 @@ const handleLogout = () => {
 
 
   const markAllAsRead = async () => {
-    const token = localStorage.getItem("userToken");
-    if (!token) return;
+  if (!notifications?.length) return;
 
-    try {
-      await Promise.all(
-        notifications
-          .filter((n) => !n.isRead)
-          .map((n) =>
-            axios.put(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${n._id}/read`,
-              {},
-              { headers: { Authorization: `Bearer ${token}` } }
-            )
-          )
-      );
+  try {
+    await Promise.all(
+      notifications
+        .filter((n) => !n.isRead)
+        .map((n) => axiosClient.put(`/api/notifications/${n._id}/read`))
+    );
 
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-    } catch (err) {
-      console.error("Error marking notifications as read:", err);
-    }
-  };
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, isRead: true }))
+    );
+    setUnreadCount(0);
+  } catch (err) {
+    console.error("Error marking notifications as read:", err);
+  }
+};
+
 
   const getInitials = () => {
     if (userData && userData.fullname) {

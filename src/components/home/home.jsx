@@ -40,6 +40,7 @@ import PickupRequest from "../manifested/PickupRequest";
 import MyProfile from "../Settings/MyProfile";
 import KYCDetails from "../Settings/KycDetails";
 import PickupAddresses from "../Settings/PickupAddress";
+import Dispute from "../orders/Dispute";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -243,6 +244,7 @@ const HomePage = () => {
                         "Dispatched",
                         "Received",
                         "Cancelled",
+                        "Disputed"
                       ].map((item, index) => (
                         <motion.li
                           key={item}
@@ -646,6 +648,7 @@ const HomePage = () => {
               {activeTab === "dispatched" && <Dispatched />}
               {activeTab === "received" && <Received />}
               {activeTab === "cancelled" && <Cancelled />}
+              {activeTab === "disputed" && <Dispute />} 
               {activeTab === "rate-calculator" && <RateCalculator />}
               {activeTab === "recharge-wallet" && (
                 <RechargeWallet onRecharge={handleRecharge} />

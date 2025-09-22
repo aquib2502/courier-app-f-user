@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Calculator, MapPin, Package, Clock, ArrowRight } from "lucide-react";
 import axios from "axios";
+import axiosClient from "@/utils/axiosClient";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/rates`;
 
@@ -14,22 +15,19 @@ const RateCalculator = () => {
   const [countries, setCountries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  /** Fetch all rates */
-  useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        const response = await axios.get(API_URL, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        });
-        setRates(response.data);
-      } catch (error) {
-        console.error("Error loading rates:", error.response?.data || error.message);
-      }
-    };
-    fetchRates();
-  }, []);
+ /** Fetch all rates */
+useEffect(() => {
+  const fetchRates = async () => {
+    try {
+      const response = await axiosClient.get(API_URL);
+      setRates(response.data);
+    } catch (error) {
+      console.error("Error loading rates:", error.response?.data || error.message);
+    }
+  };
+  fetchRates();
+}, []);
+
 
   /** Fetch countries dynamically */
   useEffect(() => {

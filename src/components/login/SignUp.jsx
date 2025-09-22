@@ -143,8 +143,10 @@ const SignUp = ({ onToggleToLogin }) => {
             
             // Slight delay before redirect for better UX
             setTimeout(() => {
-                router.push('/');
+                router.push('/login');
             }, 200);
+
+            toast.info('Please Log in once to very credentials')
     
         } catch (err) {
             console.error('Registration error:', err);

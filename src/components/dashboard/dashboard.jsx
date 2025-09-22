@@ -12,8 +12,11 @@ import {
   TrendingUp,
   Activity,
   Calendar,
-  Filter
+  Filter,
+  Info,
+  Bell
 } from "lucide-react";
+import axiosClient from "@/utils/axiosClient";
 
 const Dashboard = () => {
   const [orderCounts, setOrderCounts] = useState({
@@ -29,7 +32,9 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dateFilter, setDateFilter] = useState('7'); // Default to last 7 days
+  const [dateFilter, setDateFilter] = useState('7');
+  const [notice, setNotice] = useState(null);
+  const [noticeLoading, setNoticeLoading] = useState(true);
 
   // Date filter options
   const dateFilterOptions = [
@@ -109,40 +114,44 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchOrderCounts();
+    fetchNotice();
   }, [dateFilter]);
+
+  const fetchNotice = async () => {
+    try {
+      setNoticeLoading(true);
+      const response = await axiosClient.get("/api/admin/getNote");
+      
+      if (response.data && response.data.note) {
+        setNotice(response.data.note);
+      }
+    } catch (err) {
+      console.error("Error fetching notice:", err);
+      // Don't show error for notice, just continue without it
+    } finally {
+      setNoticeLoading(false);
+    }
+  };
 
   const fetchOrderCounts = async () => {
     try {
       setLoading(true);
-      const userToken = localStorage.getItem('userToken') || 'your-token-here';
-      
+
       // Add date filter to the API call
-      const url = dateFilter === 'all' 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/user/orderCount`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/user/orderCount?days=${dateFilter}`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const url = dateFilter === "all"
+        ? "/api/user/orderCount"
+        : `/api/user/orderCount?days=${dateFilter}`;
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch order counts');
-      }
+      const response = await axiosClient.get(url);
 
-      const result = await response.json();
-      
-      if (result.success) {
-        setOrderCounts(result.data);
+      if (response.data.success) {
+        setOrderCounts(response.data.data);
       } else {
-        throw new Error(result.message || 'Failed to fetch order counts');
+        throw new Error(response.data.message || "Failed to fetch order counts");
       }
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching order counts:', err);
+      console.error("Error fetching order counts:", err);
     } finally {
       setLoading(false);
     }
@@ -188,6 +197,41 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Notice Section */}
+      {notice && (
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg border-b border-blue-700">
+          <div className="relative overflow-hidden py-3">
+            <div className="flex items-center">
+              <div className="flex items-center px-4 sm:px-6 lg:px-8 flex-shrink-0">
+                <Bell className="h-4 w-4 mr-2 animate-pulse" />
+                <span className="font-semibold text-sm uppercase tracking-wide">
+                  Notice:
+                </span>
+              </div>
+              
+              <div className="flex-1 overflow-hidden">
+                <div className="animate-marquee whitespace-nowrap">
+                  <span className="text-sm sm:text-base font-medium">
+                    {notice.title} {notice.content}
+                  </span>
+                  {/* Duplicate content for seamless loop */}
+                  <span className="ml-16 text-sm sm:text-base font-medium">
+                    {notice.title} {notice.content}
+                  </span>
+                  <span className="ml-16 text-sm sm:text-base font-medium">
+                    {notice.title} {notice.content}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex-shrink-0 px-4 sm:px-6 lg:px-8">
+                <Info className="h-4 w-4 opacity-75" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header with Filter */}
         <div className="mb-8">
@@ -295,6 +339,31 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translate3d(100%, 0, 0);
+          }
+          100% {
+            transform: translate3d(-100%, 0, 0);
+          }
+        }
+
+        .animate-marquee {
+          animation: marquee 20s linear infinite;
+        }
+
+        .animate-marquee:hover {
+          animation-play-state: paused;
+        }
+
+        @media (max-width: 640px) {
+          .animate-marquee {
+            animation: marquee 15s linear infinite;
+          }
+        }
+      `}</style>
     </div>
   );
 };
