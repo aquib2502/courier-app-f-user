@@ -273,7 +273,7 @@ const Home = () => {
         <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8">
           {[
             { number: '200+', label: 'Countries Served' },
-            { number: '1M+', label: 'Packages Delivered' },
+            { number: '1L+', label: 'Packages Delivered' },
             { number: '99.9%', label: 'Delivery Success' },
             { number: '24/7', label: 'Customer Support' }
           ].map((stat, index) => (
@@ -304,7 +304,7 @@ const AboutUs = () => {
 
           {/* Business Ownership Info */}
           <p className="mt-6 text-lg text-gray-700">
-            This website is owned by <span className="font-semibold text-emerald-600">The Trace Express</span> and is managed by{" "}
+            This website is owned by <span className="font-semibold text-emerald-600">AS Enterprises</span> and is managed by{" "}
             <span className="font-semibold text-emerald-600">A &amp; A Technologies</span>.
           </p>
         </div>
