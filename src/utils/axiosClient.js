@@ -77,7 +77,7 @@ axiosClient.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         localStorage.removeItem("userToken");
-        toast.error("Session expired. Please log in again.");
+        console.error("Session expired. Please log in again.");
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
