@@ -256,7 +256,7 @@ const Home = () => {
                 <div className="bg-emerald-50 rounded-xl p-6 text-center transform hover:scale-105 transition-transform duration-200">
                   <Shield className="w-12 h-12 text-emerald-600 mx-auto mb-3" />
                   <h3 className="font-semibold text-gray-800">Secure</h3>
-                  <p className="text-sm text-gray-600 mt-2">Insurance & tracking</p>
+                  <p className="text-sm text-gray-600 mt-2">Secure Tracking</p>
                 </div>
                 <div className="bg-emerald-50 rounded-xl p-6 text-center transform hover:scale-105 transition-transform duration-200">
                   <Clock className="w-12 h-12 text-emerald-600 mx-auto mb-3" />
@@ -304,8 +304,8 @@ const AboutUs = () => {
 
           {/* Business Ownership Info */}
           <p className="mt-6 text-lg text-gray-700">
-            This website is owned by <span className="font-semibold text-emerald-600">AS Enterprises</span> and is managed by{" "}
-            <span className="font-semibold text-emerald-600">A &amp; A Technologies</span>.
+            This website is owned by and is managed by{" "}
+            <span className="font-semibold text-emerald-600">AS ENTERPRISES</span>.
           </p>
         </div>
 
@@ -321,7 +321,7 @@ const AboutUs = () => {
               {[
                 { icon: Package, title: 'Smart Packaging', desc: 'Optimized packaging solutions for every product type' },
                 { icon: Globe, title: 'Global Network', desc: 'Extensive worldwide shipping and delivery network' },
-                { icon: Shield, title: 'Secure Handling', desc: 'Advanced security measures and insurance coverage' }
+                { icon: Shield, title: 'Secure Handling', desc: 'Advanced security measures and coverage' }
               ].map((feature, index) => (
                 <div
                   key={index}
@@ -377,7 +377,7 @@ const AboutUs = () => {
             {[
               { icon: Star, title: 'Premium Service', desc: 'White-glove treatment for every shipment' },
               { icon: Clock, title: 'Time Efficiency', desc: 'Fastest delivery times in the industry' },
-              { icon: Shield, title: 'Complete Protection', desc: 'Full insurance and damage protection' },
+              { icon: Shield, title: 'Complete Protection', desc: 'Damage protection' },
               { icon: Globe, title: 'Global Presence', desc: 'Offices and partners in 200+ countries' },
               { icon: Phone, title: 'Expert Support', desc: 'Dedicated account managers' },
               { icon: Package, title: 'Smart Solutions', desc: 'AI-powered logistics optimization' }

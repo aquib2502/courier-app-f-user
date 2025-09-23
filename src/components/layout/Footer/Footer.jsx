@@ -139,7 +139,7 @@ const Footer = () => {
           <p className="mb-4 md:mb-0">
             © {currentYear} THE TRACE EXPRESS. All rights reserved.
           </p>
-          <p className="text-gray-400">Made with ❤️ A&A Technologies </p>
+          {/* <p className="text-gray-400">Made with ❤️ A&A Technologies </p> */}
         </div>
       </div>
     </footer>

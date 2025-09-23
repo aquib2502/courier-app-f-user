@@ -101,7 +101,7 @@ const TermsOfService = () => {
               <div className="space-y-4 text-gray-700">
                 <p>
                   <strong>4.1 Limited Liability:</strong> Our liability for any shipment is limited to the 
-                  declared value or the maximum liability specified in our insurance policy, whichever is lower.
+                  declared value or the maximum liability, whichever is lower.
                 </p>
                 <p>
                   <strong>4.2 Service Interruptions:</strong> We do not guarantee uninterrupted service and 
