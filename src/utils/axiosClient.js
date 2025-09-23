@@ -65,6 +65,9 @@ axiosClient.interceptors.response.use(
 
         if (!accessToken) throw new Error("Failed to refresh token");
 
+            // <-- Add console.log here
+        console.log("Token refresh successful");
+
         // Save new access token (short-lived) in localStorage
         localStorage.setItem("userToken", accessToken);
 
