@@ -54,6 +54,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     invoiceDate: new Date().toISOString().split("T")[0],
     invoiceCurrency: " ",
     invoiceName: "",
+    product:"",
     //
     productItems: productItems,
     shippingPartner: {},

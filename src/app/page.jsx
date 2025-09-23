@@ -117,7 +117,7 @@ const ContactUs = () => {
         <div className="grid lg:grid-cols gap-12">
           <div className="space-y-8">
             {[
-              { icon: Phone, title: '24/7 Support Hotline', info: '+91 8419958646', desc: 'Call us anytime for immediate assistance' },
+              { icon: Phone, title: '24/7 Support Hotline', info: '+91 9167077853', desc: 'Call us anytime for immediate assistance' },
               { icon: Mail, title: 'Email Support', info: 'thetraceexpress@gmail.com', desc: 'Send us your queries and we\'ll respond within 2 hours' },
               { icon: MapPin, title: 'Global Headquarters', info: 'Marol, Andheri (East), Mumbai, India', desc: 'Visit our main office for in-person consultations' },
               { icon: Clock, title: 'Business Hours', info: '24/7 Operations, Support: Mon-Fri 11AM - 11PM', desc: 'Our operations run around the clock' },

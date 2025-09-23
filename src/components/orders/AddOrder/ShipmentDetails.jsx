@@ -27,6 +27,28 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
             </label>
           ))}
         </div>
+
+         {/* New Product Radio Buttons */}
+        <h4 className="text-lg font-semibold text-gray-800 mt-6 mb-4">Product</h4>
+        <div className="flex space-x-6">
+          {[
+            { label: 'Economy', value: 'ECONOMY-USPS' },
+            { label: 'Standard', value: 'STANDARD' }
+          ].map((product) => (
+            <label key={product.value} className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="radio"
+                name="product"
+                value={product.value}
+                className="w-5 h-5 text-emerald-600 focus:ring-emerald-500"
+                onChange={(e) => handleInputChange("product", e.target.value)}
+                checked={formData.product === product.value}
+              />
+              <span className="text-gray-700 font-medium">{product.label}</span>
+            </label>
+          ))}
+        </div>
+      
       </div>
 
       <div>

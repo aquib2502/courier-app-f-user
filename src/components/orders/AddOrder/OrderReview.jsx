@@ -69,6 +69,10 @@ const OrderReview = ({
               <p className="font-semibold">{formData.shipmentType}</p>
             </div>
             <div>
+              <p className="text-gray-500 text-sm">Product</p>
+              <p className="font-semibold">{formData.product}</p>
+            </div>
+            <div>
               <p className="text-gray-500 text-sm">Weight</p>
               <p className="font-semibold">{formData.weight} kg</p>
             </div>

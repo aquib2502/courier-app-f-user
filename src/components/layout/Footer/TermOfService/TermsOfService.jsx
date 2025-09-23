@@ -166,7 +166,7 @@ const TermsOfService = () => {
               </p>
               <div className="mt-4 text-gray-700">
                 <p>Email: thetraceexpress@gmail.com</p>
-                <p>Phone: +91 8419958646</p>
+                <p>Phone: +91 9167077853</p>
                 <p>Address: Marol, Andheri (East), Mumbai, India</p>
               </div>
             </section>
