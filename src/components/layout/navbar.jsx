@@ -291,7 +291,7 @@ const handleLogout = () => {
                 className="flex items-center space-x-2 cursor-pointer p-2 rounded-md bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-100 transition-all duration-200"
               >
                 <Wallet className="w-5 h-5 text-green-600" />
-                <span className="text-green-600 font-medium">Rs.{balance}</span>
+                <span className="text-green-600 font-medium">Rs.{userData.walletBalance ||  0}</span>
               </motion.div>
 
               <div className="relative profile-container">
