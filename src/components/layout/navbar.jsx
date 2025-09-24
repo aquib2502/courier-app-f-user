@@ -439,7 +439,7 @@ const handleLogout = () => {
                 className="flex items-center space-x-1 cursor-pointer px-1.5 py-1 rounded-md bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-100 transition-all duration-200"
               >
                 <Wallet className="w-3.5 h-3.5 text-green-600" />
-                <span className="text-green-600 font-medium text-xs">₹{balance}</span>
+                <span className="text-green-600 font-medium text-xs">₹{userData.walletBalance ||  0}</span>
               </motion.div>
 
               {/* Mobile Profile */}
