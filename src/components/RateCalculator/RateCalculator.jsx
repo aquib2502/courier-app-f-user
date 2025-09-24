@@ -50,70 +50,76 @@ useEffect(() => {
 
   /** Core calculation logic */
   const handleCalculate = () => {
-    if (!weight || parseFloat(weight) <= 0) {
-      setErrors({ weight: "Weight is required and must be greater than 0" });
-      setCalculated(false);
-      return;
-    }
-    if (!destinationCountry) {
-      setErrors({ destinationCountry: "Please select a destination country" });
-      setCalculated(false);
-      return;
-    }
+  if (!weight || parseFloat(weight) <= 0) {
+    setErrors({ weight: "Weight is required and must be greater than 0" });
+    setCalculated(false);
+    return;
+  }
+  if (!destinationCountry) {
+    setErrors({ destinationCountry: "Please select a destination country" });
+    setCalculated(false);
+    return;
+  }
 
-    setErrors({});
-    setIsLoading(true);
+  setErrors({});
+  setIsLoading(true);
 
-    const userWeight = parseFloat(weight);
+  const userWeight = parseFloat(weight);
 
-    console.log("Selected Country Code:", destinationCountry);
-    console.log("User Entered Weight:", userWeight);
+  // ✅ Map unknown countries to "ROW"
+  const allowedCountryCodes = ["USA", "GBR", "AUS", "CAN"];
+  const finalCountryCode = allowedCountryCodes.includes(destinationCountry.trim())
+    ? destinationCountry.trim()
+    : "ROW";
 
-    /** Filter rates by selected country code */
-    const destinationRates = rates.filter(
-      (r) => r.dest_country_code?.trim() === destinationCountry.trim()
-    );
+  console.log("Selected Country Code:", destinationCountry);
+  console.log("Mapped Country Code:", finalCountryCode);
+  console.log("User Entered Weight:", userWeight);
 
-    console.log("Filtered Destination Rates:", destinationRates);
+  /** Filter rates by selected or defaulted country code */
+  const destinationRates = rates.filter(
+    (r) => r.dest_country_code?.trim() === finalCountryCode
+  );
 
-    if (destinationRates.length === 0) {
-      setFilteredRates([]);
-      setCalculated(true);
-      setIsLoading(false);
-      return;
-    }
+  console.log("Filtered Destination Rates:", destinationRates);
 
-    /** Get unique package types */
-    const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
-
-    const bestRates = [];
-
-    uniquePackages.forEach((pkg) => {
-      /** For each package, find the lowest weight >= user weight */
-      const packageRates = destinationRates
-        .filter(
-          (r) =>
-            parseFloat(r.weight) >= userWeight &&
-            r.package === pkg
-        )
-        .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight)); // Sort ascending
-
-      if (packageRates.length > 0) {
-        bestRates.push(packageRates[0]); // Pick the closest weight
-      }
-    });
-
-    console.log("Final Best Rates:", bestRates);
-    setFilteredRates(bestRates);
+  if (destinationRates.length === 0) {
+    setFilteredRates([]);
     setCalculated(true);
     setIsLoading(false);
-  };
+    return;
+  }
+
+  /** Get unique package types */
+  const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
+
+  const bestRates = [];
+
+  uniquePackages.forEach((pkg) => {
+    /** For each package, find the lowest weight >= user weight */
+    const packageRates = destinationRates
+      .filter(
+        (r) => parseFloat(r.weight) >= userWeight && r.package === pkg
+      )
+      .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight)); // Sort ascending
+
+    if (packageRates.length > 0) {
+      bestRates.push(packageRates[0]); // Pick the closest weight
+    }
+  });
+
+  console.log("Final Best Rates:", bestRates);
+  setFilteredRates(bestRates);
+  setCalculated(true);
+  setIsLoading(false);
+};
+
 
   const getPackageIcon = (packageType) => {
     switch (packageType?.toLowerCase()) {
-      case 'express':
+      case 'premium self':
         return '⚡';
-      case 'standard':
+      case 'ddp premium':
         return '📦';
       case 'economy':
         return '🚚';

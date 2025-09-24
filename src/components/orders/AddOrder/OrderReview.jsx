@@ -10,8 +10,6 @@ const OrderReview = ({
   calculateTotalAmount, 
   handlePlaceOrder, 
   isLoading,
-  walletBalance = 0,
-  router
 }) => {
   const totalAmount = localStorage.getItem('finalShippingPrice') || calculateTotalAmount();
 

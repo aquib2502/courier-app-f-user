@@ -188,16 +188,16 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     // Format rates for display
     const formattedRates = bestRates.map((rate, index) => ({
       id: index + 1,
-      name: `AS Enterprise ${rate.package}`,
-      type: rate.package.includes("Express")
-        ? "Express"
+      name: `TTE ${rate.package}`,
+      type: rate.package.includes("premium self")
+        ? "Recommended"
         : rate.package.includes("Standard")
         ? "Standard"
         : "Economy",
       price: parseFloat(rate.rate),
       deliveryTime: "6 - 12 Days",
       rating: 4.5,
-      description: `${rate.package} service for ${formData.country}`,
+      description: `Duty Paid service for ${formData.country}`,
     }));
 
     setAvailableRates(formattedRates);
