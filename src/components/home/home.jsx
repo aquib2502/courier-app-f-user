@@ -422,7 +422,7 @@ const HomePage = () => {
                     className="ml-4 pl-4 border-l border-emerald-600/50 mt-1 overflow-hidden"
                   >
                     <ul className="space-y-1 py-1">
-                      {["Recharge Wallet", "Wallet History", "Transactions"].map((item, index) => (
+                      {["Recharge Wallet", "Transactions"].map((item, index) => (
                         <motion.li 
                           key={item} 
                           initial={{ opacity: 0, x: -10 }}
