@@ -366,55 +366,83 @@ const TransactionHistory = () => {
             </div>
           ) : (
             <>
-              {/* Table View - Desktop */}
+              {/* Table View */}
               {viewMode === 'table' && (
-                <div className="hidden lg:block overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="text-left py-4 px-4 font-semibold text-gray-700">Order ID</th>
-                        <th className="text-left py-4 px-4 font-semibold text-gray-700">Amount</th>
-                        <th className="text-left py-4 px-4 font-semibold text-gray-700">Status</th>
-                        <th className="text-left py-4 px-4 font-semibold text-gray-700">Payment Method</th>
-                        <th className="text-left py-4 px-4 font-semibold text-gray-700">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredTransactions.map((tx, index) => (
-                        <tr key={tx._id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                          <td className="py-4 px-4">
-                            <div className="font-mono text-sm text-gray-800">{tx.merchantOrderId}</div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="font-semibold text-emerald-600">₹{tx.amount?.toLocaleString()}</div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="flex items-center space-x-2">
-                              {getStatusIcon(tx.status)}
-                              <span className={getStatusBadge(tx.status)}>{tx.status}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="flex items-center space-x-2">
-                              {getPaymentMethodIcon(tx.paymentMethod)}
-                              <span className="text-gray-700">{tx.paymentMethod}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-gray-600 text-sm">
-                              {new Date(tx.createdAt).toLocaleString()}
-                            </div>
-                          </td>
+                <div className="overflow-x-auto">
+                  {/* Desktop Table */}
+                  <div className="hidden sm:block">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          <th className="text-left py-4 px-4 font-semibold text-gray-700">Order ID</th>
+                          <th className="text-left py-4 px-4 font-semibold text-gray-700">Amount</th>
+                          <th className="text-left py-4 px-4 font-semibold text-gray-700">Status</th>
+                          <th className="text-left py-4 px-4 font-semibold text-gray-700">Payment Method</th>
+                          <th className="text-left py-4 px-4 font-semibold text-gray-700">Date</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {filteredTransactions.map((tx, index) => (
+                          <tr key={tx._id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                            <td className="py-4 px-4">
+                              <div className="font-mono text-sm text-gray-800">{tx.merchantOrderId}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="font-semibold text-emerald-600">₹{tx.amount?.toLocaleString()}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center space-x-2">
+                                {getStatusIcon(tx.status)}
+                                <span className={getStatusBadge(tx.status)}>{tx.status}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center space-x-2">
+                                {getPaymentMethodIcon(tx.paymentMethod)}
+                                <span className="text-gray-700">{tx.paymentMethod}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="text-gray-600 text-sm">
+                                {new Date(tx.createdAt).toLocaleString()}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Table - Compact Layout */}
+                  <div className="sm:hidden space-y-3">
+                    {filteredTransactions.map((tx) => (
+                      <div key={tx._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="font-mono text-sm text-gray-600">{tx.merchantOrderId}</div>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(tx.status)}
+                            <span className={getStatusBadge(tx.status)}>{tx.status}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-lg font-bold text-emerald-600">₹{tx.amount?.toLocaleString()}</span>
+                          <div className="flex items-center space-x-2">
+                            {getPaymentMethodIcon(tx.paymentMethod)}
+                            <span className="text-sm text-gray-700">{tx.paymentMethod}</span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(tx.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Cards View - Mobile and Desktop Alternative */}
-              {(viewMode === 'cards' || viewMode === 'table') && (
-                <div className={`grid gap-4 ${viewMode === 'table' ? 'lg:hidden' : ''} ${viewMode === 'cards' ? 'sm:grid-cols-2 lg:grid-cols-3' : ''}`}>
+              {/* Cards View */}
+              {viewMode === 'cards' && (
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredTransactions.map((tx) => (
                     <div key={tx._id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
                       <div className="flex items-start justify-between mb-3">
