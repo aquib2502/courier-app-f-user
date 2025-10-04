@@ -76,15 +76,20 @@ const ShippingSelection = ({
             );
 
             return (
-              <div
-                key={partner.id}
-                className={`border-2 rounded-xl p-6 cursor-pointer transition-all ${
-                  selectedShippingPartner?.id === partner.id
-                    ? 'border-emerald-500 bg-emerald-50 shadow-lg'
-                    : 'border-gray-200 hover:border-emerald-300 hover:shadow-md'
-                }`}
-                onClick={() => handleSelectShippingPartner(partner)}
-              >
+             <div
+  key={partner.id}
+  className={`border-2 rounded-xl p-6 cursor-pointer transition-all
+    ${
+      partner.type === "Recommended"
+        ? 'border-yellow-500 bg-yellow-50 shadow-lg'
+        : selectedShippingPartner?.id === partner.id
+        ? 'border-emerald-500 bg-emerald-50 shadow-lg'
+        : 'border-gray-200 hover:border-emerald-300 hover:shadow-md'
+    }
+  `}
+  onClick={() => handleSelectShippingPartner(partner)}
+>
+
                 <div className="flex justify-between items-start">
                   <div className="space-y-2">
                     <div className="flex items-center space-x-3">

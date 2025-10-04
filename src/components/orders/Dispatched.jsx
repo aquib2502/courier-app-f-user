@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { 
   Filter, 
   Download, 
@@ -22,6 +23,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 
 const Dispatched = () => {
+  const router = useRouter();
   const [filterVisible, setFilterVisible] = useState(false);
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -242,7 +244,7 @@ const Dispatched = () => {
   // Handle Contact Support
   const handleContactSupport = (order) => {
     // In a real application, you might open a support ticket or chat
-    toast.info("Support contact functionality will be implemented soon");
+    router.push('/#contact-us')
   };
 
   // Format date helper function with proper null checking
@@ -535,7 +537,7 @@ const Dispatched = () => {
                             <p className="text-xs text-gray-600">AWB:</p>
                             <p className="text-sm font-medium text-gray-900">{order.lastMileAWB || "Pending"}</p>
                             <p className="text-xs text-gray-500 mt-1">
-                              Partner: {order.courierPartner || "ShipGlobal Express"}
+                              Partner: The Trace Express
                             </p>
                           </div>
                         </td>

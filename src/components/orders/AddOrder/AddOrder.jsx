@@ -147,61 +147,88 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
     setAvailableRates([]);
   }, [formData.weight, formData.country]);
 
-  // Function to calculate rates based on weight and destination
+const destinationMap = {
+  USA: "United States",
+  "United States": "United States",
+  "USA Remote": "USA Remote",
+  Canada: "Canada",
+  "United Kingdom": "United Kingdom",
+  Australia: "Australia",
+};
+
+
   const calculateShippingRates = () => {
-    if (!formData.weight || !formData.country) return;
+  if (!formData.weight || !formData.country) return;
 
-    const userWeight = parseFloat(formData.weight);
+  const userWeight = parseFloat(formData.weight);
+  const destinationCountry =
+    destinationMap[formData.country] || "Rest of World";
 
-    // Map country selection to rate calculator format
-    const destinationMap = {
-      USA: "United States (USA)",
-      Canada: "Canada",
-      "United Kingdom": "United Kingdom (UK)",
-      Australia: "Australia",
-      // Add more mappings as needed
-    };
+ let destinationRates = allRates.filter(
+  (r) =>
+    r.dest_country.toLowerCase() === destinationCountry.toLowerCase() &&
+    parseFloat(r.weight) <= userWeight
+);
 
-    const destinationCountry =
-      destinationMap[formData.country] || "Rest of World";
 
-    // Filter all rates for the selected destination country
-    const destinationRates = allRates.filter(
-      (r) => r.dest_country === destinationCountry
+  let bestRates = [];
+const normalizedCountry = formData.country?.trim().toLowerCase();
+if (["usa", "united states", "us"].includes(normalizedCountry)) {
+    // ✅ Ensure Premium Self (United) shows first
+    const premiumSelf = destinationRates
+      .filter((r) => r.package === "Premium Self")
+      .sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight))[0];
+
+    if (premiumSelf) {
+      bestRates.push(premiumSelf);
+    }
+
+    // ✅ Add all other packages (ShipGlobal ones)
+    const otherRates = destinationRates.filter((r) => r.package !== "Premium Self");
+    addBestPackageRates(otherRates, bestRates);
+
+  } else if (
+    ["Australia", "Canada", "United Kingdom", "USA Remote"].includes(formData.country)
+  ) {
+    // ✅ For these countries, just take whatever packages exist
+    addBestPackageRates(destinationRates, bestRates);
+
+  } else {
+    // ✅ Rest of World fallback
+    const restRates = allRates.filter(
+      (r) => r.dest_country === "Rest of World" && parseFloat(r.weight) <= userWeight
     );
+    addBestPackageRates(restRates, bestRates);
+  }
 
-    // Group by package and select the closest lower or equal weight for each package
-    const bestRates = [];
+  // Format for UI (⚠️ no carrier info shown)
+  const formattedRates = bestRates.map((rate, index) => ({
+    id: index + 1,
+    name: `TTE ${rate.package}`,  // e.g. "TTE Premium Self"
+    type: rate.package.includes("Self")
+      ? "Recommended"
+      : rate.package.includes("Premium")
+      ? "Premium"
+      : "Economy",
+    price: parseFloat(rate.rate),
+    deliveryTime: "6 - 12 Days",
+    rating: 4.5,
+    description: `Duty Paid service for ${formData.country}`,
+  }));
 
-    const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
+  setAvailableRates(formattedRates);
+};
 
-    uniquePackages.forEach((pkg) => {
-      const packageRates = destinationRates
-        .filter((r) => r.package === pkg && parseFloat(r.weight) <= userWeight)
-        .sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight));
-
-      if (packageRates.length > 0) {
-        bestRates.push(packageRates[0]);
-      }
-    });
-
-    // Format rates for display
-    const formattedRates = bestRates.map((rate, index) => ({
-      id: index + 1,
-      name: `TTE ${rate.package}`,
-      type: rate.package.includes("premium self")
-        ? "Recommended"
-        : rate.package.includes("Standard")
-        ? "Standard"
-        : "Economy",
-      price: parseFloat(rate.rate),
-      deliveryTime: "6 - 12 Days",
-      rating: 4.5,
-      description: `Duty Paid service for ${formData.country}`,
-    }));
-
-    setAvailableRates(formattedRates);
-  };
+// Helper
+const addBestPackageRates = (rates, bestRates) => {
+  const uniquePackages = [...new Set(rates.map((r) => r.package))];
+  uniquePackages.forEach((pkg) => {
+    const pkgRates = rates
+      .filter((r) => r.package === pkg)
+      .sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight));
+    if (pkgRates.length > 0) bestRates.push(pkgRates[0]);
+  });
+};
 
   
 //Fetch countries and States
