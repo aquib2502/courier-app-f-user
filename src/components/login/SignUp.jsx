@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify";
 import { 
     Mail, Lock, User, ArrowRight, ArrowLeft, ShieldCheck, 
     CheckCircle, AlertCircle, FileText, Upload 
@@ -141,39 +142,58 @@ const SignUp = ({ onToggleToLogin }) => {
             setMessage(response.data.message);
             setError('');
             
-            // Slight delay before redirect for better UX
-            setTimeout(() => {
-                router.push('/login');
-            }, 200);
+          // Slight delay before refresh for better UX
+setTimeout(() => {
+  window.location.reload();
+}, 200);
+
 
             toast.info('Please Log in once to very credentials')
+
     
-        } catch (err) {
-            console.error('Registration error:', err);
-            setError(err.response?.data?.message || 'Registration failed. Please try again.');
-            setMessage('');
-        } finally {
-            setIsSubmitting(false);
-        }
+       } catch (err) {
+    console.error('Registration error:', err);
+    setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    setMessage('');
+
+    // 🧹 Clear all uploaded files when error occurs
+    setAadharProof(null);
+    setPanProof(null);
+    setGstProof(null);
+    setIecProof(null);
+} finally {
+    setIsSubmitting(false);
+}
+
     };
 
     const handleFileUpload = (file, setFileState, fileType) => {
-        if (file) {
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-            if (!allowedTypes.includes(file.type)) {
-                setError('Please upload only JPG, PNG, or PDF files');
-                return false;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                setError('File size should be less than 5MB');
-                return false;
-            }
-            setFileState(file);
-            setError('');
-            return true;
-        }
-        return false;
-    };
+  if (file) {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+
+    const fileExtension = file.name.slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2).toLowerCase();
+
+    const isTypeValid = allowedTypes.includes(file.type);
+    const isExtensionValid = allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+
+    if (!isTypeValid && !isExtensionValid) {
+      setError('Please upload only JPG, PNG, or PDF files');
+      return false;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size should be less than 5MB');
+      return false;
+    }
+
+    setFileState(file);
+    setError('');
+    return true;
+  }
+  return false;
+};
+
 
     const formVariants = {
         hidden: { opacity: 0, x: 50 },
@@ -620,6 +640,7 @@ const SignUp = ({ onToggleToLogin }) => {
 
     return (
         <div className="min-h-screen flex bg-slate-50">
+            <ToastContainer />
             {/* Left Section - Form */}
             <div className="w-full lg:w-1/2 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 p-6 flex items-center justify-center overflow-hidden relative">
                 {/* Background animated shapes */}

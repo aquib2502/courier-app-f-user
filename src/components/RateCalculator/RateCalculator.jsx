@@ -15,19 +15,18 @@ const RateCalculator = () => {
   const [countries, setCountries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
- /** Fetch all rates */
-useEffect(() => {
-  const fetchRates = async () => {
-    try {
-      const response = await axiosClient.get(API_URL);
-      setRates(response.data);
-    } catch (error) {
-      console.error("Error loading rates:", error.response?.data || error.message);
-    }
-  };
-  fetchRates();
-}, []);
-
+  /** Fetch all rates */
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const response = await axiosClient.get(API_URL);
+        setRates(response.data);
+      } catch (error) {
+        console.error("Error loading rates:", error.response?.data || error.message);
+      }
+    };
+    fetchRates();
+  }, []);
 
   /** Fetch countries dynamically */
   useEffect(() => {
@@ -50,94 +49,90 @@ useEffect(() => {
 
   /** Core calculation logic */
   const handleCalculate = () => {
-  if (!weight || parseFloat(weight) <= 0) {
-    setErrors({ weight: "Weight is required and must be greater than 0" });
-    setCalculated(false);
-    return;
-  }
-  if (!destinationCountry) {
-    setErrors({ destinationCountry: "Please select a destination country" });
-    setCalculated(false);
-    return;
-  }
+    if (!weight || parseFloat(weight) <= 0) {
+      setErrors({ weight: "Weight is required and must be greater than 0" });
+      setCalculated(false);
+      return;
+    }
+    if (!destinationCountry) {
+      setErrors({ destinationCountry: "Please select a destination country" });
+      setCalculated(false);
+      return;
+    }
 
-  setErrors({});
-  setIsLoading(true);
+    setErrors({});
+    setIsLoading(true);
 
-  const userWeight = parseFloat(weight);
+    const userWeight = parseFloat(weight);
+    const destinationName = destinationCountry.trim().toLowerCase();
 
-  // ✅ Map unknown countries to "ROW"
-  const allowedCountryCodes = ["USA", "GBR", "AUS", "CAN"];
-  const finalCountryCode = allowedCountryCodes.includes(destinationCountry.trim())
-    ? destinationCountry.trim()
-    : "ROW";
+    console.log("Selected Country:", destinationCountry);
+    console.log("User Entered Weight:", userWeight);
 
-  console.log("Selected Country Code:", destinationCountry);
-  console.log("Mapped Country Code:", finalCountryCode);
-  console.log("User Entered Weight:", userWeight);
+    /** Filter rates by destination name (case-insensitive) */
+    const matchingRates = rates.filter(
+      (r) => r.dest_country?.trim().toLowerCase() === destinationName
+    );
 
-  /** Filter rates by selected or defaulted country code */
-  const destinationRates = rates.filter(
-    (r) => r.dest_country_code?.trim() === finalCountryCode
-  );
+    const destinationRates =
+      matchingRates.length > 0
+        ? matchingRates
+        : rates.filter((r) => r.dest_country?.trim().toLowerCase() === "row");
 
-  console.log("Filtered Destination Rates:", destinationRates);
+    console.log("Filtered Destination Rates:", destinationRates);
 
-  if (destinationRates.length === 0) {
-    setFilteredRates([]);
+    if (destinationRates.length === 0) {
+      setFilteredRates([]);
+      setCalculated(true);
+      setIsLoading(false);
+      return;
+    }
+
+    /** Get unique package types */
+    const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
+
+    const bestRates = [];
+
+    uniquePackages.forEach((pkg) => {
+      /** For each package, find the lowest weight >= user weight */
+      const packageRates = destinationRates
+        .filter((r) => parseFloat(r.weight) >= userWeight && r.package === pkg)
+        .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight)); // Sort ascending
+
+      if (packageRates.length > 0) {
+        bestRates.push(packageRates[0]); // Pick the closest weight
+      }
+    });
+
+    console.log("Final Best Rates:", bestRates);
+    setFilteredRates(bestRates);
     setCalculated(true);
     setIsLoading(false);
-    return;
-  }
-
-  /** Get unique package types */
-  const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
-
-  const bestRates = [];
-
-  uniquePackages.forEach((pkg) => {
-    /** For each package, find the lowest weight >= user weight */
-    const packageRates = destinationRates
-      .filter(
-        (r) => parseFloat(r.weight) >= userWeight && r.package === pkg
-      )
-      .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight)); // Sort ascending
-
-    if (packageRates.length > 0) {
-      bestRates.push(packageRates[0]); // Pick the closest weight
-    }
-  });
-
-  console.log("Final Best Rates:", bestRates);
-  setFilteredRates(bestRates);
-  setCalculated(true);
-  setIsLoading(false);
-};
-
+  };
 
   const getPackageIcon = (packageType) => {
     switch (packageType?.toLowerCase()) {
-      case 'premium self':
-        return '⚡';
-      case 'ddp premium':
-        return '📦';
-      case 'economy':
-        return '🚚';
+      case "premium self":
+        return "⚡";
+      case "ddp premium":
+        return "📦";
+      case "economy":
+        return "🚚";
       default:
-        return '📫';
+        return "📫";
     }
   };
 
   const getPackageColor = (packageType) => {
     switch (packageType?.toLowerCase()) {
-      case 'express':
-        return 'from-purple-500/10 to-pink-500/10 border-purple-200/30';
-      case 'standard':
-        return 'from-blue-500/10 to-cyan-500/10 border-blue-200/30';
-      case 'economy':
-        return 'from-green-500/10 to-emerald-500/10 border-green-200/30';
+      case "express":
+        return "from-purple-500/10 to-pink-500/10 border-purple-200/30";
+      case "standard":
+        return "from-blue-500/10 to-cyan-500/10 border-blue-200/30";
+      case "economy":
+        return "from-green-500/10 to-emerald-500/10 border-green-200/30";
       default:
-        return 'from-gray-500/10 to-slate-500/10 border-gray-200/30';
+        return "from-gray-500/10 to-slate-500/10 border-gray-200/30";
     }
   };
 
@@ -180,8 +175,8 @@ useEffect(() => {
                   >
                     <option value="">Select destination country</option>
                     {countries.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.name} ({country.code})
+                      <option key={country.code} value={country.name.toLowerCase()}>
+                        {country.name}
                       </option>
                     ))}
                   </select>

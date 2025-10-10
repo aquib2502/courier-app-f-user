@@ -329,7 +329,13 @@ const getPickupAddress = async () => {
       const addresses = response.data.user.pickupAddresses;
 
       if (addresses && addresses.length > 0) {
-        setPickupAddress(addresses); // ✅ Store all addresses in state
+        setPickupAddress(addresses);
+
+        // ✅ Auto-select first address if not already set
+        setFormData((prev) => ({
+          ...prev,
+          pickupAddress: addresses[0].addressLine1,
+        }));
       } else {
         toast.info("No pickup address found for user, please add one in the profile section");
       }
@@ -338,6 +344,16 @@ const getPickupAddress = async () => {
     console.error("Error fetching user data:", error.response?.data || error.message);
   }
 };
+
+useEffect(() => {
+  if (pickupAddress.length > 0 && !formData.pickupAddress) {
+    setFormData((prev) => ({
+      ...prev,
+      pickupAddress: pickupAddress[0].addressLine1,
+    }));
+  }
+}, [pickupAddress]);
+
 
     useEffect(() => {
       getPickupAddress();

@@ -288,6 +288,7 @@ const handleLogout = () => {
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
+                onClick={() => router.push("/home?tab=recharge-wallet")} // ← Navigate to /wallet on click
                 className="flex items-center space-x-2 cursor-pointer p-2 rounded-md bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-100 transition-all duration-200"
               >
                 <Wallet className="w-5 h-5 text-green-600" />

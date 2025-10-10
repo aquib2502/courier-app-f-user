@@ -824,7 +824,8 @@ svg {
       <tr>
         <td colSpan="2" className="border-t border-gray-300 p-3">
           <strong>FROM:</strong>
-          <div>{selectedOrder.pickupAddress.split(",")[0]}</div>
+          <div>{selectedOrder.user.fullname}</div>
+          <div>{selectedOrder.pickupAddress}</div>
           <div>Mobile: {selectedOrder.mobile}</div>
         </td>
       </tr>
@@ -833,7 +834,10 @@ svg {
       <tr>
         <td colSpan="2" className="border-t border-gray-300 p-3">
           <strong>TO:</strong>
+         <div>{selectedOrder.firstName}{selectedOrder.lastName}</div>
           <div>{selectedOrder.address1.split(",")[0]}</div>
+          <div>{selectedOrder.country}, {selectedOrder.state}</div>
+          <div>{selectedOrder.pincode}</div>
           <div>Mobile: {selectedOrder.mobile}</div>
         </td>
       </tr>
@@ -871,7 +875,7 @@ svg {
                 {item.productName} (Qty: {item.productQuantity})
               </span>
               <span>
-                {item.productPrice} {selectedOrder.invoiceCurrency}
+                Rs {item.productPrice}  
               </span>
             </div>
           ))}
