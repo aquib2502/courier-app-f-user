@@ -74,6 +74,8 @@ const ShippingPolicy = () => {
               <div className="bg-emerald-50 rounded-lg p-6">
                 <p className="text-gray-700">Email: thetraceexpress@gmail.com</p>
                 <p className="text-gray-700">Mobile: +91 9167077853</p>
+                <p className="text-gray-700">Mobile ALT 1: +91 8419958646</p>
+                <p className="text-gray-700">Mobile ALT 2: +91 8108735742</p>
                 <p className="text-gray-700">Support Hours: 24/7</p>
               </div>
             </section>
