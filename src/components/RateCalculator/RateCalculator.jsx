@@ -48,73 +48,77 @@ const RateCalculator = () => {
   };
 
   /** Core calculation logic */
-  const handleCalculate = () => {
-    if (!weight || parseFloat(weight) <= 0) {
-      setErrors({ weight: "Weight is required and must be greater than 0" });
-      setCalculated(false);
-      return;
-    }
-    if (!destinationCountry) {
-      setErrors({ destinationCountry: "Please select a destination country" });
-      setCalculated(false);
-      return;
-    }
+const handleCalculate = () => {
+  if (!weight || parseFloat(weight) <= 0) {
+    setErrors({ weight: "Weight is required and must be greater than 0" });
+    setCalculated(false);
+    return;
+  }
+  if (!destinationCountry) {
+    setErrors({ destinationCountry: "Please select a destination country" });
+    setCalculated(false);
+    return;
+  }
 
-    setErrors({});
-    setIsLoading(true);
+  setErrors({});
+  setIsLoading(true);
 
-    const userWeight = parseFloat(weight);
-    const destinationName = destinationCountry.trim().toLowerCase();
+  const userWeight = parseFloat(weight);
+  const destinationName = destinationCountry.trim().toLowerCase();
 
-    console.log("Selected Country:", destinationCountry);
-    console.log("User Entered Weight:", userWeight);
+  console.log("Selected Country:", destinationCountry);
+  console.log("User Entered Weight:", userWeight);
 
-    /** Filter rates by destination name (case-insensitive) */
-    const matchingRates = rates.filter(
-      (r) => r.dest_country?.trim().toLowerCase() === destinationName
+  /** Filter rates by destination name (case-insensitive) */
+  let destinationRates = rates.filter(
+    (r) => r.dest_country?.trim().toLowerCase() === destinationName
+  );
+
+  /** If no rates for the selected country, fallback to Rest of the World */
+  if (destinationRates.length === 0) {
+    console.warn(`No rates found for ${destinationCountry}, using Rest of the World`);
+    destinationRates = rates.filter(
+      (r) => r.dest_country?.trim().toLowerCase() === "rest of world"
     );
+  }
 
-    const destinationRates =
-      matchingRates.length > 0
-        ? matchingRates
-        : rates.filter((r) => r.dest_country?.trim().toLowerCase() === "row");
+  console.log("Filtered Destination Rates:", destinationRates);
 
-    console.log("Filtered Destination Rates:", destinationRates);
-
-    if (destinationRates.length === 0) {
-      setFilteredRates([]);
-      setCalculated(true);
-      setIsLoading(false);
-      return;
-    }
-
-    /** Get unique package types */
-    const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
-
-    const bestRates = [];
-
-    uniquePackages.forEach((pkg) => {
-      /** For each package, find the lowest weight >= user weight */
-      const packageRates = destinationRates
-        .filter((r) => parseFloat(r.weight) >= userWeight && r.package === pkg)
-        .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight)); // Sort ascending
-
-      if (packageRates.length > 0) {
-        bestRates.push(packageRates[0]); // Pick the closest weight
-      }
-    });
-
-    console.log("Final Best Rates:", bestRates);
-    setFilteredRates(bestRates);
+  if (destinationRates.length === 0) {
+    setFilteredRates([]);
     setCalculated(true);
     setIsLoading(false);
-  };
+    return;
+  }
+
+  /** Get unique package types */
+  const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
+
+  const bestRates = [];
+
+  uniquePackages.forEach((pkg) => {
+    /** For each package, find the lowest weight >= user weight */
+    const packageRates = destinationRates
+      .filter((r) => parseFloat(r.weight) >= userWeight && r.package === pkg)
+      .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight));
+
+    if (packageRates.length > 0) {
+      bestRates.push(packageRates[0]);
+    }
+  });
+
+  console.log("Final Best Rates:", bestRates);
+  setFilteredRates(bestRates);
+  setCalculated(true);
+  setIsLoading(false);
+};
+
 
   const getPackageIcon = (packageType) => {
     switch (packageType?.toLowerCase()) {
       case "premium self":
         return "⚡";
-      case "ddp premium":
+      case "premium dpd":
         return "📦";
       case "economy":
         return "🚚";

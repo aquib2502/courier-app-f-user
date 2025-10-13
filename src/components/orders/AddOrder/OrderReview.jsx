@@ -17,7 +17,6 @@ const OrderReview = ({
     try {
       // Process payment and complete order
       await handlePlaceOrder('Payment Received', 'Ready');
-      toast.success("Payment successful! Order placed successfully.");
     } catch (error) {
       console.error('Pay and Order error:', error);
     }

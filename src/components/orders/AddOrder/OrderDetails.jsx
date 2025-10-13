@@ -33,21 +33,30 @@ const OrderDetails = ({
           )}
         </div>
         <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            HSN Code*
-          </label>
-          <input
-            placeholder="Enter HSN Code"
-            value={formData.HSNCode}
-            onChange={(e) => handleInputChange("HSNCode", e.target.value)}
-            className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-              errors.HSNCode ? "border-red-300" : "border-gray-300"
-            }`}
-          />
-          {errors.invoiceNo && (
-            <p className="text-red-500 text-sm mt-1">{errors.invoiceNo}</p>
-          )}
-        </div>
+  <label className="block text-gray-700 font-medium mb-2">
+    HSN Code *
+  </label>
+  <input
+    placeholder="Enter HSN Code"
+    value={formData.HSNCode}
+    onChange={(e) => {
+      const value = e.target.value;
+      // Allow only digits and max 8 characters
+      if (/^\d{0,8}$/.test(value)) {
+        handleInputChange("HSNCode", value);
+      }
+    }}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.HSNCode ? "border-red-300" : "border-gray-300"
+    }`}
+    inputMode="numeric" // brings numeric keyboard on mobile
+    maxLength={8}      // ensures max 8 characters
+  />
+  {errors.HSNCode && (
+    <p className="text-red-500 text-sm mt-1">{errors.HSNCode}</p>
+  )}
+</div>
+
         {/* Invoice Currency Dropdown */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">

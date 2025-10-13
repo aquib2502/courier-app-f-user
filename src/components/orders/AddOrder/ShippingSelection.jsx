@@ -9,31 +9,53 @@ const ShippingSelection = ({
   errors, 
   handleSelectShippingPartner, 
   handleContinueToPlaceOrder,
-  discountPercent
+  discountPercent,
+  packageDiscounts
 }) => {
 
-  const calculatePriceBreakdown = (basePrice, discountPercent) => {
-    const price = Number(basePrice);
-    const discount = Number(discountPercent);
+  const getApplicableDiscount = (partner) => {
+  if (!formData.country || !packageDiscounts) return { value: discountPercent, isFlat: false };
 
-    if (isNaN(price) || isNaN(discount)) {
-      return { basePrice: 0, gstAmount: 0, discountAmount: 0, finalPrice: 0 };
+  const country = formData.country.trim();
+  const partnerName = partner.name.toLowerCase();
+
+  for (const [key, value] of Object.entries(packageDiscounts)) {
+    const [pkgCountry, pkgService] = key.split("-");
+    if (
+      pkgCountry.trim().toLowerCase() === country.toLowerCase() &&
+      partnerName.includes(pkgService.trim().toLowerCase())
+    ) {
+      // value here is a flat rupee discount
+      return { value, isFlat: true };
     }
+  }
 
-    const gstAmount = price * 0.18;
-    const priceWithGst = price + gstAmount;
+  // fallback to percentage-based global discount
+  return { value: discountPercent, isFlat: false };
+};
 
-    const discountAmount = priceWithGst * (discount / 100);
+ const calculatePriceBreakdown = (basePrice, discountValue, isFlat = false) => {
+  const price = Number(basePrice);
+  const gstAmount = price * 0.18;
+  const priceWithGst = price + gstAmount;
 
-    const finalPrice = priceWithGst - discountAmount;
+  let discountAmount = 0;
+  if (isFlat) {
+    discountAmount = discountValue; // fixed rupee discount
+  } else {
+    discountAmount = priceWithGst * (discountValue / 100); // fallback %
+  }
 
-    return {
-      basePrice: price.toFixed(2),
-      gstAmount: gstAmount.toFixed(2),
-      discountAmount: discountAmount.toFixed(2),
-      finalPrice: finalPrice.toFixed(2),
-    };
+  const finalPrice = Math.max(priceWithGst - discountAmount, 0);
+
+  return {
+    basePrice: price.toFixed(2),
+    gstAmount: gstAmount.toFixed(2),
+    discountAmount: discountAmount.toFixed(2),
+    finalPrice: finalPrice.toFixed(2),
   };
+};
+
 
   return (
     <div className="mt-8">
@@ -70,10 +92,11 @@ const ShippingSelection = ({
         <div className="space-y-4">
           {availableRates.map((partner) => {
             // Calculate breakdown for this partner
-            const { basePrice, gstAmount, discountAmount, finalPrice } = calculatePriceBreakdown(
-              partner.price,
-              discountPercent
-            );
+          const { value: applicableDiscount, isFlat } = getApplicableDiscount(partner);
+const { basePrice, gstAmount, discountAmount, finalPrice } =
+  calculatePriceBreakdown(partner.price, applicableDiscount, isFlat);
+
+
 
             return (
              <div
@@ -116,7 +139,10 @@ const ShippingSelection = ({
                   <div className="text-right space-y-1">
                     <p className="text-sm text-gray-600">Base Price: ₹{basePrice}</p>
                     <p className="text-sm text-gray-600">GST (18%): ₹{gstAmount}</p>
-                    <p className="text-sm text-gray-600">Discount ({discountPercent}%): -₹{discountAmount}</p>
+                   <p className="text-sm text-gray-600">
+  Discount ({isFlat ? `₹${applicableDiscount}` : `${applicableDiscount}%`}): -₹{discountAmount}
+</p>
+
                     <p className="text-3xl font-bold text-emerald-600">Total: ₹{finalPrice}</p>
                   </div>
                 </div>

@@ -88,10 +88,17 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
 
         <div className="md:col-span-2">
           <label className="block text-gray-700 font-medium mb-2">Email *</label>
-          <input 
-            placeholder="Enter email address"
-            className="w-full p-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-          />
+       <input 
+  placeholder="Enter email address"
+  value={formData.email}
+  onChange={(e) => handleInputChange("email", e.target.value)}
+  className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+    errors.email ? "border-red-300" : "border-gray-300"
+  }`}
+/>
+
+{errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+
         </div>
 
  {/* Country Dropdown */}
