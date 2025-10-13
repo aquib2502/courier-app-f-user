@@ -110,7 +110,13 @@ const { basePrice, gstAmount, discountAmount, finalPrice } =
         : 'border-gray-200 hover:border-emerald-300 hover:shadow-md'
     }
   `}
-  onClick={() => handleSelectShippingPartner(partner)}
+  onClick={() =>
+  handleSelectShippingPartner({
+    ...partner,
+    finalPrice, // include discounted final price
+  })
+}
+
 >
 
                 <div className="flex justify-between items-start">

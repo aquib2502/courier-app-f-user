@@ -147,10 +147,12 @@ const OrderReview = ({
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <div className="flex justify-between items-center">
               <div>
+                
                 <p className="font-semibold">{selectedShippingPartner?.name}</p>
                 <p className="text-sm text-gray-600">{selectedShippingPartner?.deliveryTime}</p>
               </div>
-              <p className="text-lg font-bold text-emerald-600">₹{selectedShippingPartner?.price}</p>
+              ₹{selectedShippingPartner?.finalPrice || selectedShippingPartner?.price}
+
             </div>
           </div>
         </div>
