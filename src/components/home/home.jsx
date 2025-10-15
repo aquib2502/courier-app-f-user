@@ -41,6 +41,7 @@ import MyProfile from "../Settings/MyProfile";
 import KYCDetails from "../Settings/KycDetails";
 import PickupAddresses from "../Settings/PickupAddress";
 import Dispute from "../orders/Dispute";
+import MonthlyInvoice from "../wallet/MonthlyInvoice";
 
 const HomePage = () => {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -422,7 +423,7 @@ const HomePage = () => {
                     className="ml-4 pl-4 border-l border-emerald-600/50 mt-1 overflow-hidden"
                   >
                     <ul className="space-y-1 py-1">
-                      {["Recharge Wallet", "Transactions"].map((item, index) => (
+                      {["Recharge Wallet", "Transactions", "Invoice"].map((item, index) => (
                         <motion.li 
                           key={item} 
                           initial={{ opacity: 0, x: -10 }}
@@ -654,6 +655,7 @@ const HomePage = () => {
                 <RechargeWallet onRecharge={handleRecharge} />
               )}
               {activeTab === "wallet-history" && <WalletHistory />}
+              {activeTab === "invoice" && <MonthlyInvoice />}
               {activeTab === "transactions" && <TransactionHistory />}
               {activeTab === "manifest" && <ManifestListing />}
               {activeTab === "pickup-request" && <PickupRequest />}
