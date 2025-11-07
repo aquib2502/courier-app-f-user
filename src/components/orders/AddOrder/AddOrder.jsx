@@ -219,20 +219,45 @@
       addBestPackageRates(restRates, bestRates);
     }
 
-    // Format for UI (⚠️ no carrier info shown)
-    const formattedRates = bestRates.map((rate, index) => ({
-      id: index + 1,
-      name: `TTE ${rate.package}`,  // e.g. "TTE Premium Self"
-      type: rate.package.includes("Self")
-        ? "Recommended"
-        : rate.package.includes("DPD")
-        ? "Premium"
-        : "Economy",
-      price: parseFloat(rate.rate),
-      deliveryTime: "6 - 12 Days",
-      rating: 4.5,
-      description: `Duty Paid service for ${formData.country}`,
-    }));
+    // Format for UI (dynamic transit time for USA)
+const formattedRates = bestRates.map((rate, index) => {
+  const packageName = rate.package.toLowerCase();
+  const isUSA = ["usa", "united states", "us"].includes(
+    formData.country?.trim().toLowerCase()
+  );
+
+  let deliveryTime = "6 - 12 Days"; // default
+
+  if (isUSA) {
+    if (packageName.includes("express")) {
+      deliveryTime = "5 - 6 Business Days";
+    } else if (
+      packageName.includes("direct") ||
+      packageName.includes("service handling")
+    ) {
+      deliveryTime = "15 - 17 Business Days";
+    } else if (packageName.includes("super save")) {
+      deliveryTime = "17 - 20 Business Days";
+    } else if (packageName.includes("first class")) {
+      deliveryTime = "13 - 16 Business Days";
+    }
+  }
+
+  return {
+    id: index + 1,
+    name: `TTE ${rate.package}`,
+    type: rate.package.includes("Self")
+      ? "Recommended"
+      : rate.package.includes("DPD")
+      ? "Premium"
+      : "Economy",
+    price: parseFloat(rate.rate),
+    deliveryTime,
+    rating: 4.5,
+    description: `Duty Paid service for ${formData.country}`,
+  };
+});
+
 
     setAvailableRates(formattedRates);
   };
