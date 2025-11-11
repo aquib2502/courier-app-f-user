@@ -78,12 +78,37 @@ const KYCDetails = () => {
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-semibold text-gray-900">KYC</h1>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 border border-green-200">
-                {userDetails?.kycStatus ? 'approved' : 'pending'}
-              </span>
-            </div>
+           <div className="mb-3">
+  <div className="flex items-center gap-3 mb-2">
+    <h1 className="text-2xl font-semibold text-gray-900">KYC</h1>
+
+    {userDetails?.kycStatus === "approved" && (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 border border-green-200">
+        Approved
+      </span>
+    )}
+
+    {userDetails?.kycStatus === "rejected" && (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-700 border border-red-200">
+        Rejected
+      </span>
+    )}
+
+    {userDetails?.kycStatus === "pending" && (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800 border border-yellow-200">
+        Pending
+      </span>
+    )}
+  </div>
+
+  {/* Show rejection reason if rejected */}
+  {userDetails?.kycStatus === "rejected" && userDetails?.kycRejectReason && (
+    <p className="text-sm text-red-600 ml-1">
+      Reason: {userDetails.kycRejectReason}
+    </p>
+  )}
+</div>
+
             <nav className="text-sm text-gray-500"> 
               Settings &gt; KYC
             </nav>

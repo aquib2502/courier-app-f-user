@@ -226,7 +226,7 @@ const MyProfile = () => {
                   </div>
                 <div>
   <label className="block text-lg text-gray-500 mb-1">Status</label>
-  {userDetails?.isActive ? (
+  {userDetails?.kycStatus === "approved" ? (
     <span className="inline-flex items-center px-3 py-2 rounded-full text-xl bg-green-100 text-green-800 border border-green-200">
       <CheckCircle className="w-3 h-3 mr-1" />
       Verified
