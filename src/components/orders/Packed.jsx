@@ -2,7 +2,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import JsBarcode from "jsbarcode";
-import { Filter, Download, FilePlus, Search, RefreshCw, ExternalLink, Truck, Package, Printer, X, Check, ChevronDown } from "lucide-react";
+import { 
+  Filter, 
+  Download, 
+  FilePlus, 
+  Search, 
+  RefreshCw, 
+  ExternalLink, 
+  Truck, 
+  Package, 
+  Printer, 
+  X, 
+  Check, 
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Packed = () => {
@@ -30,7 +47,7 @@ const Packed = () => {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [ordersPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
 
   const toggleFilters = () => {
     setFilterVisible(!filterVisible);
@@ -127,15 +144,15 @@ const Packed = () => {
       try {
         // Generate barcode using the serial number
         JsBarcode(barcodeRef.current, selectedOrder.invoiceNo, {
-           format: "CODE128",
-  width: 3.5,        // ✅ Thicker bars (easier to scan)
-  height: 80,        // ✅ Good height for scanners
-  displayValue: true, // ✅ Show text automatically
-  fontSize: 20,       // ✅ Bigger readable text
-  textMargin: 10,     // ✅ Space between bars and text
-  margin: 40,         // ✅ Plenty of quiet zone
-  background: "#ffffff",
-  lineColor: "#000000"
+          format: "CODE128",
+          width: 3.5,
+          height: 80,
+          displayValue: true,
+          fontSize: 20,
+          textMargin: 10,
+          margin: 40,
+          background: "#ffffff",
+          lineColor: "#000000"
         });
       } catch (error) {
         console.error("Error generating barcode:", error);
@@ -168,7 +185,7 @@ const Packed = () => {
     }
 
     setFilteredOrders(filtered);
-    setCurrentPage(1); // Reset to first page when applying filters
+    setCurrentPage(1);
   };
 
   // Clear filters function
@@ -179,6 +196,11 @@ const Packed = () => {
     setFilteredOrders(orders);
     setCurrentPage(1);
   };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, orderDate, orderId, customerName, rowsPerPage]);
 
   // Handle Print Label - Show modal with the barcode
   const handlePrintLabel = (order) => {
@@ -196,9 +218,7 @@ const Packed = () => {
   // Handle Clone Order (stub for now)
   const handleCloneOrder = (order) => {
     console.log("Cloning order:", order._id);
-    // Close dropdown
     setActiveActionOrder(null);
-    // Show notification
     const notificationDiv = document.createElement('div');
     notificationDiv.className = 'fixed top-4 right-4 bg-blue-100 text-blue-800 px-4 py-2 rounded shadow-md z-50';
     notificationDiv.innerHTML = `
@@ -218,9 +238,7 @@ const Packed = () => {
   // Handle Cancel Order (stub for now)
   const handleCancelOrder = (order) => {
     console.log("Cancelling order:", order._id);
-    // Close dropdown
     setActiveActionOrder(null);
-    // Show notification
     const notificationDiv = document.createElement('div');
     notificationDiv.className = 'fixed top-4 right-4 bg-blue-100 text-blue-800 px-4 py-2 rounded shadow-md z-50';
     notificationDiv.innerHTML = `
@@ -245,12 +263,12 @@ const Packed = () => {
       setIsPrinting(false);
       setPrintSuccess(false);
       setSerialNumber('');
-    }, 300); // Wait for animation to complete
+    }, 300);
   };
 
   // Print the barcode label
   const printBarcode = () => {
-    if (isPrinting) return; // Prevent multiple clicks
+    if (isPrinting) return;
     
     setIsPrinting(true);
     
@@ -264,48 +282,48 @@ const Packed = () => {
         return;
       }
       
-      // Write the print content to the new window
       printWindow.document.write(`
         <html>
           <head>
             <title>Shipping Label - ${serialNumber}</title>
             <style>
-      @page { 
-  size: 101.6mm 152.4mm; /* 4x6 inch */
-  margin: 0;
-}
+              @page { 
+                size: 101.6mm 152.4mm;
+                margin: 0;
+              }
 
-body {
-  width: 101.6mm;
-  height: 152.4mm;
-  margin: 0;
-  padding: 6px; /* Outer margins */
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-  line-height: 1.3;
-  background: #fff;
-  box-sizing: border-box;
-}
+              body {
+                width: 101.6mm;
+                height: 152.4mm;
+                margin: 0;
+                padding: 6px;
+                font-family: Arial, sans-serif;
+                font-size: 11px;
+                line-height: 1.3;
+                background: #fff;
+                box-sizing: border-box;
+              }
 
-table {
-  width: 96%; /* Slightly narrower than total width */
-  margin: 0 auto; /* Centered horizontally */
-  border-collapse: collapse;
-}
+              table {
+                width: 96%;
+                margin: 0 auto;
+                border-collapse: collapse;
+              }
 
-td, th {
-  border: 1px solid #000;
-  padding: 5px;
-  vertical-align: top;
-}
+              td, th {
+                border: 1px solid #000;
+                padding: 5px;
+                vertical-align: top;
+              }
 
-strong {
-  font-size: 11px;
-}
+              strong {
+                font-size: 11px;
+              }
 
-svg {
-  margin-top: 4px;
-}
+              svg {
+                margin-top: 4px;
+              }
+              
               .header { 
                 font-weight: bold; 
                 background-color: #f9f9f9; 
@@ -346,7 +364,6 @@ svg {
         </html>
       `);
       
-      // Listen for the print window to close
       const checkPrintWindowClosed = setInterval(() => {
         if (printWindow.closed) {
           clearInterval(checkPrintWindowClosed);
@@ -367,7 +384,6 @@ svg {
 
   // Handle export to CSV
   const exportToCsv = () => {
-    // Implementation for CSV export
     console.log("Exporting to CSV");
   };
 
@@ -375,19 +391,51 @@ svg {
   const formatDate = (date) => {
     if (!date) return "";
     const formattedDate = new Date(date);
-    return formattedDate.toLocaleDateString("en-GB"); // Format as "DD/MM/YYYY"
+    return formattedDate.toLocaleDateString("en-GB");
   };
 
-  // Get current orders for pagination
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
 
-  // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Pagination handlers
+  const goToFirstPage = () => setCurrentPage(1);
+  const goToLastPage = () => setCurrentPage(totalPages);
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const goToPrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const goToPage = (page) => setCurrentPage(page);
 
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  // Get page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const showPages = 5;
+    
+    if (totalPages <= showPages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
 
   return (
     <div className="min-h-[calc(220vh-200px)] flex flex-col">
@@ -459,6 +507,27 @@ svg {
           <div className="mb-6 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-100 shadow-sm">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter Orders</h3>
+              
+              {/* Rows Per Page Selector */}
+              <div className="flex items-center space-x-3 mb-4">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  Rows per page:
+                </label>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-medium"
+                >
+                  <option value={50}>50</option>
+                  <option value={200}>200</option>
+                  <option value={500}>500</option>
+                  <option value={1000}>1000</option>
+                </select>
+                <span className="text-sm text-gray-600">
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredOrders.length)} of {filteredOrders.length}
+                </span>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="orderDate" className="block text-xs font-medium text-gray-600 mb-1">
@@ -583,9 +652,8 @@ svg {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700">
-  {order.shipmentDetails?.trackingNumber || "-"}
-</td>
-
+                          {order.shipmentDetails?.trackingNumber || "-"}
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center space-x-2">
                             <button 
@@ -604,7 +672,6 @@ svg {
                                 <ChevronDown className="w-3 h-3 ml-1" />
                               </button>
                               
-                              {/* Dropdown Menu */}
                               {activeActionOrder === order._id && (
                                 <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                                   <div className="py-1">
@@ -651,289 +718,315 @@ svg {
                 </tbody>
               </table>
             </div>
-            
-            {/* Pagination - Only show if we have orders */}
-            {filteredOrders.length > 0 && (
-              <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3">
-                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      Showing <span className="font-medium">{indexOfFirstOrder + 1}</span> to{" "}
-                      <span className="font-medium">
-                        {indexOfLastOrder > filteredOrders.length ? filteredOrders.length : indexOfLastOrder}
-                      </span>{" "}
-                      of <span className="font-medium">{filteredOrders.length}</span> results
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                      <button
-                        onClick={() => currentPage > 1 && paginate(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className={`relative inline-flex items-center rounded-l-md px-2 py-2 ${
-                          currentPage === 1 
-                            ? 'text-gray-300 cursor-not-allowed' 
-                            : 'text-gray-400 hover:bg-gray-50 cursor-pointer'
-                        } ring-1 ring-inset ring-gray-300`}
-                      >
-                        <span className="sr-only">Previous</span>
-                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                      
-                      {/* Generate page numbers */}
-                      {[...Array(totalPages).keys()].map(number => (
-                        <button
-                          key={number + 1}
-                          onClick={() => paginate(number + 1)}
-                          className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                            currentPage === number + 1
-                              ? 'bg-emerald-600 text-white'
-                              : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {number + 1}
-                        </button>
-                      ))}
-                      
-                      <button
-                        onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className={`relative inline-flex items-center rounded-r-md px-2 py-2 ${
-                          currentPage === totalPages 
-                            ? 'text-gray-300 cursor-not-allowed' 
-                            : 'text-gray-400 hover:bg-gray-50 cursor-pointer'
-                        } ring-1 ring-inset ring-gray-300`}
-                      >
-                        <span className="sr-only">Next</span>
-                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </nav>
-                  </div>
-                </div>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredOrders.length > 0 && !loading && !error && (
+          <div className="bg-white rounded-xl shadow-lg p-4 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Page Info */}
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
               </div>
-            )}
+
+              {/* Pagination Buttons */}
+              <div className="flex items-center space-x-2">
+                {/* First Page */}
+                <button
+                  onClick={goToFirstPage}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="First Page"
+                >
+                  <ChevronsLeft size={18} />
+                </button>
+
+                {/* Previous Page */}
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Previous Page"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center space-x-1">
+                  {getPageNumbers().map((page, index) => (
+                    page === '...' ? (
+                      <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`px-3 py-1 rounded-lg font-medium transition-colors ${
+                          currentPage === page
+                            ? 'bg-emerald-600 text-white'
+                            : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  ))}
+                </div>
+
+                {/* Next Page */}
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Next Page"
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+                {/* Last Page */}
+                <button
+                  onClick={goToLastPage}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Last Page"
+                >
+                  <ChevronsRight size={18} />
+                </button>
+              </div>
+
+              {/* Jump to Page (Desktop only) */}
+              <div className="hidden sm:flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Go to:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max={totalPages}
+                  value={currentPage}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value);
+                    if (page >= 1 && page <= totalPages) {
+                      goToPage(page);
+                    }
+                  }}
+                  className="w-16 px-2 py-1 border border-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-       {/* Enhanced Barcode Modal with Serial Number and A7 Optimization */}
-           <AnimatePresence>
-             {showBarcodeModal && selectedOrder && (
-               <motion.div 
-                 className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                 style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 exit={{ opacity: 0 }}
-                 transition={{ duration: 0.2 }}
-               >
-                 <motion.div 
-                   className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden"
-                   style={{ maxHeight: '98vh', overflowY: 'auto' }}
-                   initial={{ scale: 0.9, y: 20 }}
-                   animate={{ scale: 1, y: 0 }}
-                   exit={{ scale: 0.9, y: 20 }}
-                   transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
-                 >
-                   {/* Modal Header */}
-                   <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex justify-between items-center">
-                     <h3 className="text-lg font-semibold text-white flex items-center">
-                       <Printer className="w-5 h-5 mr-2" />
-                       A7 Shipping Label
-                     </h3>
-                     <button 
-                       onClick={closeBarcodeModal}
-                       className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
-                     >
-                       <X className="w-4 h-4" />
-                     </button>
-                   </div>
-                   
-                   {/* Order Summary */}
-                   <div className="px-6 pt-4 bg-gray-50">
-                     <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
-                       <span className="font-medium text-gray-700">Order:</span> 
-                       <span className="text-blue-600 font-semibold">{selectedOrder.invoiceNo}</span>
-                       <span className="mx-1 text-gray-300">•</span>
-                       {/* <span className="font-medium text-gray-700">Serial:</span>
-                       <span className="text-red-600 font-bold">{selectedOrder.invoiceNo}</span> */}
-                     </div>
-                     
-                     <div className="flex flex-wrap gap-2 mb-3">
-                       <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
-                         <Package className="w-3 h-3 mr-1" />
-                         {selectedOrder.weight || "0.5"} KG
-                       </div>
-                       <div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center">
-                         <Truck className="w-3 h-3 mr-1" />
-                         {selectedOrder.shipmentType || 'CSB IV'}
-                       </div>
-                     </div>
-                   </div>
-                   
-                   {/* Barcode Print Area - Optimized for A7 */}
-                   <div className="px-4 py-2">
-                      <div id="barcode-print-area" style={{ padding: "8px" }}>
-  <table
-    className="border-collapse border border-gray-300 text-xs"
-    style={{ width: "calc(100% - 8px)", margin: "0 auto" }}
-  >
-    
-    {/* --- Header Branding --- */}
-    <thead>
-      <tr>
-        <th colSpan="2" className="text-center py-2 bg-gray-100">
-          <div style={{ fontSize: "16px", fontWeight: "bold", letterSpacing: "1px" }}>
-            THE TRACE EXPRESS
-          </div>
-          <div style={{ fontSize: "13px", marginTop: "3px", fontWeight: "600" }}>
-            {/* {selectedOrder.invoiceNo} */}
-          </div>
-        </th>
-      </tr>
-    </thead>
-
-    {/* --- Barcode Section --- */}
-    <tbody>
-      <tr>
-        <td colSpan="2" className="text-center py-3">
-          <svg
-            ref={barcodeRef}
-            style={{
-              display: "block",
-              margin: "0 auto",
-              maxWidth: "90%",
-              height: "65px",
-            }}
-          ></svg>
-          <div
-            style={{
-              marginTop: "5px",
-              fontSize: "12px",
-              fontWeight: "bold",
-              letterSpacing: "1px",
-            }}
+      {/* Enhanced Barcode Modal with Serial Number and A7 Optimization */}
+      <AnimatePresence>
+        {showBarcodeModal && selectedOrder && (
+          <motion.div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
-            {/* {selectedOrder.invoiceNo} */}
-          </div>
-        </td>
-      </tr>
+            <motion.div 
+              className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden"
+              style={{ maxHeight: '98vh', overflowY: 'auto' }}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
+            >
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-white flex items-center">
+                  <Printer className="w-5 h-5 mr-2" />
+                  A7 Shipping Label
+                </h3>
+                <button 
+                  onClick={closeBarcodeModal}
+                  className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              {/* Order Summary */}
+              <div className="px-6 pt-4 bg-gray-50">
+                <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
+                  <span className="font-medium text-gray-700">Order:</span> 
+                  <span className="text-blue-600 font-semibold">{selectedOrder.invoiceNo}</span>
+                  <span className="mx-1 text-gray-300">•</span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
+                    <Package className="w-3 h-3 mr-1" />
+                    {selectedOrder.weight || "0.5"} KG
+                  </div>
+                  <div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center">
+                    <Truck className="w-3 h-3 mr-1" />
+                    {selectedOrder.shipmentType || 'CSB IV'}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Barcode Print Area - Optimized for A7 */}
+              <div className="px-4 py-2">
+                <div id="barcode-print-area" style={{ padding: "8px" }}>
+                  <table
+                    className="border-collapse border border-gray-300 text-xs"
+                    style={{ width: "calc(100% - 8px)", margin: "0 auto" }}
+                  >
+                    {/* Header Branding */}
+                    <thead>
+                      <tr>
+                        <th colSpan="2" className="text-center py-2 bg-gray-100">
+                          <div style={{ fontSize: "16px", fontWeight: "bold", letterSpacing: "1px" }}>
+                            THE TRACE EXPRESS
+                          </div>
+                          <div style={{ fontSize: "13px", marginTop: "3px", fontWeight: "600" }}>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
 
-      {/* --- FROM Section --- */}
-      <tr>
-        <td colSpan="2" className="border-t border-gray-300 p-3">
-          <strong>FROM:</strong>
-          <div>{selectedOrder.user.fullname}</div>
-          <div>{selectedOrder.pickupAddress}</div>
-          <div>Mobile: {selectedOrder.mobile}</div>
-        </td>
-      </tr>
+                    {/* Barcode Section */}
+                    <tbody>
+                      <tr>
+                        <td colSpan="2" className="text-center py-3">
+                          <svg
+                            ref={barcodeRef}
+                            style={{
+                              display: "block",
+                              margin: "0 auto",
+                              maxWidth: "90%",
+                              height: "65px",
+                            }}
+                          ></svg>
+                          <div
+                            style={{
+                              marginTop: "5px",
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                              letterSpacing: "1px",
+                            }}
+                          >
+                          </div>
+                        </td>
+                      </tr>
 
-      {/* --- TO Section --- */}
-      <tr>
-        <td colSpan="2" className="border-t border-gray-300 p-3">
-          <strong>TO:</strong>
-         <div>{selectedOrder.firstName}{selectedOrder.lastName}</div>
-          <div>{selectedOrder.address1.split(",")[0]}</div>
-          <div>{selectedOrder.country}, {selectedOrder.state}</div>
-          <div>{selectedOrder.pincode}</div>
-          <div>Mobile: {selectedOrder.mobile}</div>
-        </td>
-      </tr>
+                      {/* FROM Section */}
+                      <tr>
+                        <td colSpan="2" className="border-t border-gray-300 p-3">
+                          <strong>FROM:</strong>
+                          <div>{selectedOrder.user.fullname}</div>
+                          <div>{selectedOrder.pickupAddress}</div>
+                          <div>Mobile: {selectedOrder.mobile}</div>
+                        </td>
+                      </tr>
 
-      {/* --- Invoice Info Section --- */}
-      <tr>
-        <td colSpan="2" className="border-t border-gray-300 p-3">
-          <div>Invoice Name: {selectedOrder.invoiceName}</div>
-          <div>HSN Code: {selectedOrder.HSNCode}</div>
-          <div>Shipment Type: {selectedOrder.shipmentType}</div>
-          <div>Invoice Date: {formatDate(selectedOrder.invoiceDate)}</div>
-        </td>
-      </tr>
+                      {/* TO Section */}
+                      <tr>
+                        <td colSpan="2" className="border-t border-gray-300 p-3">
+                          <strong>TO:</strong>
+                          <div>{selectedOrder.firstName}{selectedOrder.lastName}</div>
+                          <div>{selectedOrder.address1.split(",")[0]}</div>
+                          <div>{selectedOrder.country}, {selectedOrder.state}</div>
+                          <div>{selectedOrder.pincode}</div>
+                          <div>Mobile: {selectedOrder.mobile}</div>
+                        </td>
+                      </tr>
 
-      {/* --- Weight, Dimensions & Payment --- */}
-      <tr>
-        <td colSpan="2" className="border-t border-gray-300 p-3">
-          <div className="flex justify-between text-xs">
-            <span>
-              Weight: {selectedOrder.weight} KG | 
-              Dim: {selectedOrder.length}×{selectedOrder.width}×{selectedOrder.height} cm
-            </span>
-            <span>{selectedOrder.paymentStatus}</span>
-          </div>
-        </td>
-      </tr>
+                      {/* Invoice Info Section */}
+                      <tr>
+                        <td colSpan="2" className="border-t border-gray-300 p-3">
+                          <div>Invoice Name: {selectedOrder.invoiceName}</div>
+                          <div>HSN Code: {selectedOrder.HSNCode}</div>
+                          <div>Shipment Type: {selectedOrder.shipmentType}</div>
+                          <div>Invoice Date: {formatDate(selectedOrder.invoiceDate)}</div>
+                        </td>
+                      </tr>
 
-      {/* --- Products Section --- */}
-      <tr>
-        <td colSpan="2" className="border-t border-gray-300 p-3">
-          <strong>Products:</strong>
-          {selectedOrder.productItems.map((item, index) => (
-            <div key={index} className="flex justify-between text-xs mt-1">
-              <span>
-                {item.productName} (Qty: {item.productQuantity})
-              </span>
-              <span>
-                Rs {item.productPrice}  
-              </span>
-            </div>
-          ))}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-                   </div>
-                   
-                   {/* Modal Footer */}
-                   <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                     <div className="text-xs text-gray-500">
-                       A7 Label (74×105mm)
-                     </div>
-                     
-                     <div className="flex gap-2">
-                       {printSuccess ? (
-                         <motion.div 
-                           initial={{ opacity: 0, scale: 0.8 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           className="bg-green-100 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm font-medium"
-                         >
-                           <Check className="w-4 h-4 mr-1" />
-                           Printed!
-                         </motion.div>
-                       ) : (
-                         <button 
-                           onClick={printBarcode} 
-                           disabled={isPrinting}
-                           className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                             isPrinting 
-                               ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                               : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
-                           }`}
-                         >
-                           {isPrinting ? (
-                             <>
-                               <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin mr-2"></div>
-                               <span>Printing...</span>
-                             </>
-                           ) : (
-                             <>
-                               <Printer className="w-4 h-4 mr-2" />
-                               <span>Print A7 Label</span>
-                             </>
-                           )}
-                         </button>
-                       )}
-                     </div>
-                   </div>
-                 </motion.div>
-               </motion.div>
-             )}
-           </AnimatePresence>
+                      {/* Weight, Dimensions & Payment */}
+                      <tr>
+                        <td colSpan="2" className="border-t border-gray-300 p-3">
+                          <div className="flex justify-between text-xs">
+                            <span>
+                              Weight: {selectedOrder.weight} KG | 
+                              Dim: {selectedOrder.length}×{selectedOrder.width}×{selectedOrder.height} cm
+                            </span>
+                            <span>{selectedOrder.paymentStatus}</span>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Products Section */}
+                      <tr>
+                        <td colSpan="2" className="border-t border-gray-300 p-3">
+                          <strong>Products:</strong>
+                          {selectedOrder.productItems.map((item, index) => (
+                            <div key={index} className="flex justify-between text-xs mt-1">
+                              <span>
+                                {item.productName} (Qty: {item.productQuantity})
+                              </span>
+                              <span>
+                                Rs {item.productPrice}  
+                              </span>
+                            </div>
+                          ))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Modal Footer */}
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                <div className="text-xs text-gray-500">
+                  A7 Label (74×105mm)
+                </div>
+                
+                <div className="flex gap-2">
+                  {printSuccess ? (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-green-100 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm font-medium"
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      Printed!
+                    </motion.div>
+                  ) : (
+                    <button 
+                      onClick={printBarcode} 
+                      disabled={isPrinting}
+                      className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        isPrinting 
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+                      }`}
+                    >
+                      {isPrinting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin mr-2"></div>
+                          <span>Printing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Printer className="w-4 h-4 mr-2" />
+                          <span>Print A7 Label</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
