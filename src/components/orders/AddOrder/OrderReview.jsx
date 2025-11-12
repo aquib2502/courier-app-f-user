@@ -11,7 +11,8 @@ const OrderReview = ({
   handlePlaceOrder, 
   isLoading,
 }) => {
-  const totalAmount = localStorage.getItem('finalShippingPrice') || calculateTotalAmount();
+  const totalAmount = selectedShippingPartner?.price || calculateTotalAmount();
+
 
   const handlePayAndOrder = async () => {
     try {
