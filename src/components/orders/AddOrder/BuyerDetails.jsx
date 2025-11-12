@@ -130,37 +130,40 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
       </div>
 
       {/* State Dropdown */}
-      <div>
-        <label className="block text-gray-700 font-medium mb-2">
-          State *
-        </label>
-        <select
-          value={formData.state}
-          onChange={(e) => handleInputChange("state", e.target.value)}
-          className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-            errors.state ? "border-red-300" : "border-gray-300"
-          }`}
-          disabled={!formData.country}
-        >
-          <option value="">
-            {formData.country ? "Select State" : "Select Country First"}
-          </option>
-          {formData.country && (
-            states.length > 0 ? (
-              states.map((st, idx) => (
-                <option key={idx} value={st}>
-                  {st}
-                </option>
-              ))
-            ) : (
-              <option value="N/A">No states available</option>
-            )
-          )}
-        </select>
-        {errors.state && (
-          <p className="text-red-500 text-sm mt-1">{errors.state}</p>
-        )}
-      </div>
+      {/* State Dropdown */}
+<div>
+  <label className="block text-gray-700 font-medium mb-2">
+    State *
+  </label>
+  <select
+    value={formData.state}
+    onChange={(e) => handleInputChange("state", e.target.value)}
+    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+      errors.state ? "border-red-300" : "border-gray-300"
+    }`}
+    disabled={!formData.country}
+  >
+    <option value="">
+      {formData.country ? "Select State" : "Select Country First"}
+    </option>
+
+    {/* ✅ Always include "Not Applicable" option */}
+    <option value="Not Applicable">Not Applicable</option>
+
+    {/* ✅ Add all API states if available */}
+    {formData.country && states.length > 0 &&
+      states.map((st, idx) => (
+        <option key={idx} value={st}>
+          {st}
+        </option>
+      ))}
+  </select>
+
+  {errors.state && (
+    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
+  )}
+</div>
+
     
         <div>
           <label className="block text-gray-700 font-medium mb-2">Pincode *</label>
