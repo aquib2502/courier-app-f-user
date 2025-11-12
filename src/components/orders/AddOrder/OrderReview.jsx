@@ -11,7 +11,7 @@ const OrderReview = ({
   handlePlaceOrder, 
   isLoading,
 }) => {
-  const totalAmount = selectedShippingPartner?.price || calculateTotalAmount();
+  const totalAmount = selectedShippingPartner?.finalPrice || selectedShippingPartner?.price
 
 
   const handlePayAndOrder = async () => {
