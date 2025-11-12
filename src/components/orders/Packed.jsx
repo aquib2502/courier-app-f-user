@@ -456,23 +456,7 @@ const Packed = () => {
               <span className="font-medium">Filters</span>
             </button>
             
-            <button className="flex items-center bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-sm">
-              <FilePlus className="w-4 h-4 mr-2" />
-              <span className="font-medium">Bulk Invoice</span>
-            </button>
-            
-            <button className="flex items-center bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition-all duration-300 shadow-sm">
-              <FilePlus className="w-4 h-4 mr-2" />
-              <span className="font-medium">Bulk Label</span>
-            </button>
-            
-            <button 
-              onClick={exportToCsv}
-              className="flex items-center bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-all duration-300 shadow-sm"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              <span className="font-medium">Export CSV</span>
-            </button>
+           
           </div>
         </div>
 
