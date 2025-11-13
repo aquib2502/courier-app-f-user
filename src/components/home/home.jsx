@@ -244,7 +244,6 @@ const HomePage = () => {
                         "Manifested",
                         "Dispatched",
                         "Received",
-                        "Cancelled",
                         "Disputed"
                       ].map((item, index) => (
                         <motion.li

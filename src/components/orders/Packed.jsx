@@ -20,9 +20,11 @@ import {
   ChevronsLeft,
   ChevronsRight
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Packed = () => {
+  const router = useRouter()
   const [filterVisible, setFilterVisible] = useState(false);
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -437,6 +439,11 @@ const Packed = () => {
     return pages;
   };
 
+  const handleViewOrder = (order) => {
+    console.log("Viewing order:", order._id);
+    router.push(`/home/order-details?orderId=${order._id}`);
+  }
+
   return (
     <div className="min-h-[calc(220vh-200px)] flex flex-col">
       <div className="flex-1 bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-md border border-gray-200">
@@ -649,11 +656,11 @@ const Packed = () => {
                             </button>
                             <div className="relative action-dropdown">
                               <button
-                                onClick={() => toggleActions(order._id)}
+                                onClick={() => handleViewOrder(order)}
                                 className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center"
                               >
                                 View
-                                <ChevronDown className="w-3 h-3 ml-1" />
+                                
                               </button>
                               
                               {activeActionOrder === order._id && (

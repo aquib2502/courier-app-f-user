@@ -18,9 +18,11 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import CreateManifest from "./CreateManifest"; // Import the new component
 
 const Manifested = () => {
+  const router = useRouter();
   const [filterVisible, setFilterVisible] = useState(false);
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -257,6 +259,11 @@ const Manifested = () => {
     const formattedDate = new Date(date);
     return formattedDate.toLocaleDateString("en-GB"); // Format as "DD/MM/YYYY"
   };
+
+     const handleViewOrder = (order) => {
+    console.log("Viewing order:", order._id);
+    router.push(`/home/order-details?orderId=${order._id}`);
+  }
 
   // Get current orders for pagination
   const indexOfLastOrder = currentPage * ordersPerPage;
@@ -570,9 +577,14 @@ const Manifested = () => {
                               <Printer className="w-3 h-3 mr-1" />
                               Reprint Label
                             </button>
-                            <button className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                              View
-                            </button>
+                        
+                              <button
+                                onClick={() => handleViewOrder(order)}
+                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center"
+                              >
+                                View
+                                
+                              </button>
                           </div>
                         </td>
                       </tr>

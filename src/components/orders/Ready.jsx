@@ -16,10 +16,12 @@ import {
   ChevronsLeft,
   ChevronsRight
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 
 const Ready = () => {
+  const router = useRouter();
   const [filterVisible, setFilterVisible] = useState(false);
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -388,6 +390,11 @@ const Ready = () => {
     return formattedDate.toLocaleDateString("en-GB");
   };
 
+   const handleViewOrder = (order) => {
+    console.log("Viewing order:", order._id);
+    router.push(`/home/order-details?orderId=${order._id}`);
+  }
+
   // Pagination calculations
   const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -682,6 +689,14 @@ const Ready = () => {
                             >
                               Process
                             </button>
+                           
+                              <button
+                                onClick={() => handleViewOrder(order)}
+                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center"
+                              >
+                                View
+                                
+                              </button>
                           </div>
                         </td>
                       </tr>
