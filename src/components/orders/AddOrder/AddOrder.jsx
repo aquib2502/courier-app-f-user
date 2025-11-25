@@ -275,42 +275,59 @@ const formattedRates = bestRates.map((rate, index) => {
 
     
   //Fetch countries and States
-  useEffect(() => {
-    const fetchCountriesAndStates = async () => {
-      try {
-        const response = await axios.get("https://countriesnow.space/api/v0.1/countries/states");
+ useEffect(() => {
+  const fetchCountriesAndStates = async () => {
+    try {
+      const headers = { "X-CSCAPI-KEY":"ZUVLUHhxTURNaHI4RU9WRmplUVhaaU9WeFVmbFNrVjltSUk5bFN0Mg==" };
 
-        if (response.data && response.data.data) {
-          const countryList = response.data.data;
+      // Fetch countries
+      const countryRes = await axios.get(
+        "https://api.countrystatecity.in/v1/countries",
+        { headers }
+      );
 
-          // Format for country dropdown
-          const countriesArray = countryList.map(country => ({
-            code: country.iso2,
-            name: country.name
-          }));
+      const countryList = countryRes.data;
 
-          // Create a map of country -> states
-          const stateMap = {};
-          countryList.forEach(country => {
-            stateMap[country.name] = country.states.map(state => state.name);
-          });
+      // Build dropdown array
+      const countriesArray = countryList.map(c => ({
+        name: c.name,
+        code: c.iso2
+      }));
 
-          // Sort countries alphabetically
-          countriesArray.sort((a, b) => a.name.localeCompare(b.name));
+      countriesArray.sort((a, b) => a.name.localeCompare(b.name));
+      setCountries(countriesArray);
 
-          setCountries(countriesArray);
-          setCountryStateMap(stateMap);
+      // Fetch states for each country
+      const stateRequests = countryList.map(c =>
+        axios.get(
+          `https://api.countrystatecity.in/v1/countries/${c.iso2}/states`,
+          { headers }
+        )
+      );
 
-        } else {
-          console.error("Unexpected API response format", response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching countries and states:", error);
-      }
-    };
+      const stateResponses = await Promise.all(stateRequests);
 
-    fetchCountriesAndStates();
-  }, []);
+      const stateMap = {};
+
+      stateResponses.forEach((res, index) => {
+        const country = countryList[index];
+        const states = res.data;
+
+        stateMap[country.name] = states.map(s => ({
+          name: s.name,   // "Ghazni"
+          code: s.iso2    // "GHA"
+        }));
+      });
+
+      setCountryStateMap(stateMap);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchCountriesAndStates();
+}, []);
+
 
   useEffect(() => {
     const fetchCurrencies = async () => {
