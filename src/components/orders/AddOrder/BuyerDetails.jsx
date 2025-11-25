@@ -147,14 +147,12 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
       {formData.country ? "Select State" : "Select Country First"}
     </option>
 
-    {/* ✅ Always include "Not Applicable" option */}
     <option value="Not Applicable">Not Applicable</option>
 
-    {/* ✅ Add all API states if available */}
     {formData.country && states.length > 0 &&
-      states.map((st, idx) => (
-        <option key={idx} value={st}>
-          {st}
+      states.map((st) => (
+        <option key={st.code} value={st.name}>
+          {st.name}
         </option>
       ))}
   </select>
@@ -163,6 +161,7 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
     <p className="text-red-500 text-sm mt-1">{errors.state}</p>
   )}
 </div>
+
 
     
         <div>
