@@ -13,6 +13,24 @@ const ShippingSelection = ({
   packageDiscounts
 }) => {
 
+  const getTransitTime = (packageName, destination) => {
+  const pkg = packageName?.toLowerCase();
+  const dest = destination?.trim().toLowerCase();
+
+  if (pkg.includes("direct")) {
+    return dest === "united states" || dest === "usa"
+      ? "10 - 15 working days"
+      : "15 - 20 working days";
+  }
+
+  if (pkg.includes("premium dpd")) return "10 - 12 working days";
+  if (pkg.includes("premium self")) return "9 - 12 working days";
+  if (pkg.includes("worldwide")) return "20 - 25 working days";
+
+  return "6 - 12 working days"; // fallback
+};
+
+
   const getApplicableDiscount = (partner) => {
   if (!formData.country || !packageDiscounts) return { value: discountPercent, isFlat: false };
 
@@ -135,7 +153,8 @@ const { basePrice, gstAmount, discountAmount, finalPrice } =
                     <div className="flex items-center space-x-4">
                       <span className="text-sm text-gray-600">
                         <Truck size={16} className="inline mr-1" />
-                        Estimated Transit: {partner.deliveryTime}
+                       Estimated Transit: {getTransitTime(partner.name, formData.country)}
+
                       </span>
                       <span className="text-sm text-gray-600">
                         ⭐ {partner.rating}/5

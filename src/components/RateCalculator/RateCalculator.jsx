@@ -28,6 +28,24 @@ const RateCalculator = () => {
     fetchRates();
   }, []);
 
+  const getTransitTime = (packageType, destination) => {
+    const pkg = packageType?.toLowerCase();
+    const dest = destination?.trim().toLowerCase();
+
+    if (pkg.includes("direct")) {
+      return dest === "united states" || dest === "usa"
+        ? "10 - 15 working days"
+        : "15 - 20 working days";
+    }
+
+    if (pkg.includes("premium dpd")) return "10 - 12 working days";
+    if (pkg.includes("premium self")) return "9 - 12 working days";
+    if (pkg.includes("worldwide")) return "20 - 25 working days";
+
+    return "6 - 12 working days"; // fallback
+  };
+
+
   /** Fetch countries dynamically */
   useEffect(() => {
     const fetchCountries = async () => {
@@ -48,70 +66,70 @@ const RateCalculator = () => {
   };
 
   /** Core calculation logic */
-const handleCalculate = () => {
-  if (!weight || parseFloat(weight) <= 0) {
-    setErrors({ weight: "Weight is required and must be greater than 0" });
-    setCalculated(false);
-    return;
-  }
-  if (!destinationCountry) {
-    setErrors({ destinationCountry: "Please select a destination country" });
-    setCalculated(false);
-    return;
-  }
+  const handleCalculate = () => {
+    if (!weight || parseFloat(weight) <= 0) {
+      setErrors({ weight: "Weight is required and must be greater than 0" });
+      setCalculated(false);
+      return;
+    }
+    if (!destinationCountry) {
+      setErrors({ destinationCountry: "Please select a destination country" });
+      setCalculated(false);
+      return;
+    }
 
-  setErrors({});
-  setIsLoading(true);
+    setErrors({});
+    setIsLoading(true);
 
-  const userWeight = parseFloat(weight);
-  const destinationName = destinationCountry.trim().toLowerCase();
+    const userWeight = parseFloat(weight);
+    const destinationName = destinationCountry.trim().toLowerCase();
 
-  console.log("Selected Country:", destinationCountry);
-  console.log("User Entered Weight:", userWeight);
+    console.log("Selected Country:", destinationCountry);
+    console.log("User Entered Weight:", userWeight);
 
-  /** Filter rates by destination name (case-insensitive) */
-  let destinationRates = rates.filter(
-    (r) => r.dest_country?.trim().toLowerCase() === destinationName
-  );
-
-  /** If no rates for the selected country, fallback to Rest of the World */
-  if (destinationRates.length === 0) {
-    console.warn(`No rates found for ${destinationCountry}, using Rest of the World`);
-    destinationRates = rates.filter(
-      (r) => r.dest_country?.trim().toLowerCase() === "rest of world"
+    /** Filter rates by destination name (case-insensitive) */
+    let destinationRates = rates.filter(
+      (r) => r.dest_country?.trim().toLowerCase() === destinationName
     );
-  }
 
-  console.log("Filtered Destination Rates:", destinationRates);
+    /** If no rates for the selected country, fallback to Rest of the World */
+    if (destinationRates.length === 0) {
+      console.warn(`No rates found for ${destinationCountry}, using Rest of the World`);
+      destinationRates = rates.filter(
+        (r) => r.dest_country?.trim().toLowerCase() === "rest of world"
+      );
+    }
 
-  if (destinationRates.length === 0) {
-    setFilteredRates([]);
+    console.log("Filtered Destination Rates:", destinationRates);
+
+    if (destinationRates.length === 0) {
+      setFilteredRates([]);
+      setCalculated(true);
+      setIsLoading(false);
+      return;
+    }
+
+    /** Get unique package types */
+    const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
+
+    const bestRates = [];
+
+    uniquePackages.forEach((pkg) => {
+      /** For each package, find the lowest weight >= user weight */
+      const packageRates = destinationRates
+        .filter((r) => parseFloat(r.weight) >= userWeight && r.package === pkg)
+        .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight));
+
+      if (packageRates.length > 0) {
+        bestRates.push(packageRates[0]);
+      }
+    });
+
+    console.log("Final Best Rates:", bestRates);
+    setFilteredRates(bestRates);
     setCalculated(true);
     setIsLoading(false);
-    return;
-  }
-
-  /** Get unique package types */
-  const uniquePackages = [...new Set(destinationRates.map((r) => r.package))];
-
-  const bestRates = [];
-
-  uniquePackages.forEach((pkg) => {
-    /** For each package, find the lowest weight >= user weight */
-    const packageRates = destinationRates
-      .filter((r) => parseFloat(r.weight) >= userWeight && r.package === pkg)
-      .sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight));
-
-    if (packageRates.length > 0) {
-      bestRates.push(packageRates[0]);
-    }
-  });
-
-  console.log("Final Best Rates:", bestRates);
-  setFilteredRates(bestRates);
-  setCalculated(true);
-  setIsLoading(false);
-};
+  };
 
 
   const getPackageIcon = (packageType) => {
@@ -154,7 +172,7 @@ const handleCalculate = () => {
             </h1>
           </div>
           <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-            Calculate shipping rates instantly with our advanced pricing engine. 
+            Calculate shipping rates instantly with our advanced pricing engine.
             Get accurate quotes for all your shipping needs.
           </p>
         </div>
@@ -274,7 +292,8 @@ const handleCalculate = () => {
                               </h4>
                               <div className="flex items-center gap-2 text-sm text-slate-600">
                                 <Clock className="w-4 h-4" />
-                                Estimated Transit: 6 - 12 Days
+                                Estimated Transit: {getTransitTime(rate.package, destinationCountry)}
+
                               </div>
                             </div>
                           </div>
@@ -287,7 +306,7 @@ const handleCalculate = () => {
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Subtle hover effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
                       </div>
@@ -302,7 +321,7 @@ const handleCalculate = () => {
                       No rates available
                     </h4>
                     <p className="text-slate-500 max-w-md mx-auto">
-                      We couldn't find shipping rates for the selected country and weight. 
+                      We couldn't find shipping rates for the selected country and weight.
                       Please try different parameters or contact support.
                     </p>
                   </div>
