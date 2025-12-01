@@ -174,93 +174,91 @@
     Australia: "Australia",
   };
 
+  const getDeliveryTime = (pkg, country) => {
+  const p = pkg.toLowerCase();
+  const c = country.toLowerCase();
+
+  // EXPRESS always 5–6 business days regardless of country
+  if (p.includes("express")) return "5 - 6 business days";
+
+  // USA logic
+  if (c === "usa" || c === "united states" || c === "us") {
+    if (p.includes("direct") || p.includes("service handling"))
+      return "15 - 17 business days";
+    if (p.includes("super save")) return "17 - 20 business days";
+    if (p.includes("first class")) return "13 - 16 business days";
+    return "15 - 17 business days"; // fallback for USA
+  }
+
+  // UK
+  if (c === "united kingdom" || c === "uk") return "8 - 12 business days";
+
+  // Australia + Canada
+  if (c === "australia" || c === "canada") return "15 - 18 business days";
+
+  // Other countries
+  return "20 - 25 business days";
+};
+
 
     const calculateShippingRates = () => {
-    if (!formData.weight || !formData.country) return;
+  if (!formData.weight || !formData.country) return;
 
-    const userWeight = parseFloat(formData.weight);
-    const destinationCountry =
-      destinationMap[formData.country] || "Rest of World";
+  const userWeight = parseFloat(formData.weight);
+  const rawCountry = formData.country.trim();
+  const mappedCountry =
+    destinationMap[rawCountry] || rawCountry; // <– no default to "Rest of World"
 
-  let destinationRates = allRates.filter(
+  // 1️⃣ Try country-specific rates first
+  let countryRates = allRates.filter(
     (r) =>
-      r.dest_country.toLowerCase() === destinationCountry.toLowerCase() &&
+      r.dest_country.toLowerCase() === mappedCountry.toLowerCase() &&
       parseFloat(r.weight) <= userWeight
   );
 
-
-    let bestRates = [];
-  const normalizedCountry = formData.country?.trim().toLowerCase();
-  if (["usa", "united states", "us"].includes(normalizedCountry)) {
-      // ✅ Ensure Premium Self (United) shows first
-      const premiumSelf = destinationRates
-        .filter((r) => r.package === "Premium Self")
-        .sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight))[0];
-
-      if (premiumSelf) {
-        bestRates.push(premiumSelf);
-      }
-
-      // ✅ Add all other packages (ShipGlobal ones)
-      const otherRates = destinationRates.filter((r) => r.package !== "Premium Self");
-      addBestPackageRates(otherRates, bestRates);
-
-    } else if (
-      ["Australia", "Canada", "United Kingdom", "USA Remote"].includes(formData.country)
-    ) {
-      // ✅ For these countries, just take whatever packages exist
-      addBestPackageRates(destinationRates, bestRates);
-
-    } else {
-      // ✅ Rest of World fallback
-      const restRates = allRates.filter(
-        (r) => r.dest_country === "Rest of World" && parseFloat(r.weight) <= userWeight
-      );
-      addBestPackageRates(restRates, bestRates);
-    }
-
-    // Format for UI (dynamic transit time for USA)
-const formattedRates = bestRates.map((rate, index) => {
-  const packageName = rate.package.toLowerCase();
-  const isUSA = ["usa", "united states", "us"].includes(
-    formData.country?.trim().toLowerCase()
-  );
-
-  let deliveryTime = "6 - 12 Days"; // default
-
-  if (isUSA) {
-    if (packageName.includes("express")) {
-      deliveryTime = "5 - 6 Business Days";
-    } else if (
-      packageName.includes("direct") ||
-      packageName.includes("service handling")
-    ) {
-      deliveryTime = "15 - 17 Business Days";
-    } else if (packageName.includes("super save")) {
-      deliveryTime = "17 - 20 Business Days";
-    } else if (packageName.includes("first class")) {
-      deliveryTime = "13 - 16 Business Days";
-    }
+  // 2️⃣ If none, fall back to "Rest of World"
+  if (countryRates.length === 0) {
+    countryRates = allRates.filter(
+      (r) =>
+        r.dest_country.toLowerCase() === "rest of world" &&
+        parseFloat(r.weight) <= userWeight
+    );
   }
 
-  return {
+  // 3️⃣ If still nothing, no rates
+  if (countryRates.length === 0) {
+    setAvailableRates([]);
+    return;
+  }
+
+  // 4️⃣ One best row per package (using your existing helper)
+  const bestRates = [];
+  addBestPackageRates(countryRates, bestRates);
+
+  // 5️⃣ Map to UI format for ShippingSelection
+  const formattedRates = bestRates.map((rate, index) => ({
     id: index + 1,
     name: `TTE ${rate.package}`,
-    type: rate.package.includes("Self")
-      ? "Recommended"
-      : rate.package.includes("DPD")
-      ? "Premium"
-      : "Economy",
+   type:
+  rate.package.toLowerCase().includes("premium self") ? "Recommended" :
+  rate.package.toLowerCase().includes("premium") ? "Premium" :
+  rate.package.toLowerCase().includes("express") ? "Express" :
+  rate.package.toLowerCase().includes("firstclass") ? "Standard" :
+  rate.package.toLowerCase().includes("worldwide") ? "Standard" :
+  rate.package.toLowerCase().includes("direct") ? "Economy" :
+  "Standard",
+
     price: parseFloat(rate.rate),
-    deliveryTime,
+    // you can keep this simple; ShippingSelection has its own transit-time logic
+    deliveryTime: getDeliveryTime(rate.package, rawCountry),
+
+
     rating: 4.5,
-    description: `Duty Paid service for ${formData.country}`,
-  };
-});
+    description: `Duty Paid service for ${rawCountry}`,
+  }));
 
-
-    setAvailableRates(formattedRates);
-  };
+  setAvailableRates(formattedRates);
+};
 
   // Helper
   const addBestPackageRates = (rates, bestRates) => {
