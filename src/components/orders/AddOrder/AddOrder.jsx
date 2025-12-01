@@ -180,6 +180,7 @@
 
   // EXPRESS always 5–6 business days regardless of country
   if (p.includes("express")) return "5 - 6 business days";
+   if(p.includes("self")) return "8 - 12 buisness days"
 
   // USA logic
   if (c === "usa" || c === "united states" || c === "us") {
@@ -187,6 +188,7 @@
       return "15 - 17 business days";
     if (p.includes("super save")) return "17 - 20 business days";
     if (p.includes("first class")) return "13 - 16 business days";
+   
     return "15 - 17 business days"; // fallback for USA
   }
 

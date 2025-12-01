@@ -150,7 +150,7 @@ const OrderReview = ({
               <div>
                 
                 <p className="font-semibold">{selectedShippingPartner?.name}</p>
-                <p className="text-sm text-gray-600">{selectedShippingPartner?.deliveryTime}</p>
+                {/* <p className="text-sm text-gray-600">{selectedShippingPartner?.deliveryTime}</p> */}
               </div>
               ₹{selectedShippingPartner?.finalPrice || selectedShippingPartner?.price}
 
