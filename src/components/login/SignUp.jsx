@@ -3,237 +3,213 @@ import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
-import { 
-    Mail, Lock, User, ArrowRight, ArrowLeft, ShieldCheck, 
-    CheckCircle, AlertCircle, FileText, Upload 
+import {
+  Mail, Lock, User, ArrowRight, ArrowLeft, ShieldCheck,
+  CheckCircle, AlertCircle, FileText, Upload
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const SignUp = ({ onToggleToLogin }) => {
-    const [signupStep, setSignupStep] = useState(1); // 1: Basic Details, 2: Document Details, 3: Document Upload
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [fullname, setFullname] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [aadharNumber, setAadharNumber] = useState('');
-    const [panNumber, setPanNumber] = useState('');
-    const [gstNumber, setGstNumber] = useState('');
-    const [iecNumber, setIecNumber] = useState('');
-    const [aadharProof, setAadharProof] = useState(null);
-    const [panProof, setPanProof] = useState(null);
-    const [gstProof, setGstProof] = useState(null);
-    const [iecProof, setIecProof] = useState(null);
-    const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signupStep, setSignupStep] = useState(1);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullname, setFullname] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [aadharNumber, setAadharNumber] = useState('');
+  const [panNumber, setPanNumber] = useState('');
+  const [gstNumber, setGstNumber] = useState('');
+  const [iecNumber, setIecNumber] = useState('');
+  const [aadharProof, setAadharProof] = useState(null);
+  const [panProof, setPanProof] = useState(null);
+  const [gstProof, setGstProof] = useState(null);
+  const [iecProof, setIecProof] = useState(null);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const router = useRouter();
+  const router = useRouter();
 
-    const resetForm = () => {
-        setEmail('');
-        setPassword('');
-        setFullname('');
-        setConfirmPassword('');
-        setAadharNumber('');
-        setPanNumber('');
-        setGstNumber('');
-        setIecNumber('');
-        setAadharProof(null);
-        setPanProof(null);
-        setGstProof(null);
-        setIecProof(null);
-        setError('');
-        setMessage('');
-        setSignupStep(1);
-    };
-
-    const handleBasicDetailsNext = (e) => {
-        e.preventDefault();
-        
-        // Validate basic details
-        if (!fullname || !email || !password || !confirmPassword) {
-            setError('All fields are required');
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long');
-            return;
-        }
-
-        // Clear any previous errors and move to next step
-        setError('');
-        setSignupStep(2);
-    };
-
-    const handleDocumentDetailsNext = (e) => {
-        e.preventDefault();
-        
-        // Validate document details
-        if (!aadharNumber || !panNumber || !gstNumber || !iecNumber) {
-            setError('All document numbers are required');
-            return;
-        }
-
-        // Validate document number formats
-        if (aadharNumber.length !== 12) {
-            setError('Aadhar number must be 12 digits');
-            return;
-        }
-
-        if (panNumber.length !== 10) {
-            setError('PAN number must be 10 characters');
-            return;
-        }
-
-        if (gstNumber.length !== 15) {
-            setError('GST number must be 15 characters');
-            return;
-        }
-
-        if (iecNumber.length !== 10) {
-            setError('IEC number must be 10 characters');
-            return;
-        }
-
-        // Clear any previous errors and move to next step
-        setError('');
-        setSignupStep(3);
-    };
-    
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-
-        // Validate all required files
-        if (!aadharProof || !panProof || !gstProof || !iecProof) {
-            setError('All document proofs are required');
-            setIsSubmitting(false);
-            return;
-        }
-        
-        try {
-            // Create FormData for file uploads
-            const formData = new FormData();
-            formData.append('fullname', fullname);
-            formData.append('email', email);
-            formData.append('password', password);
-            formData.append('confirmPassword', confirmPassword);
-            formData.append('aadharNumber', aadharNumber);
-            formData.append('panNumber', panNumber);
-            formData.append('gstNumber', gstNumber);
-            formData.append('iecNumber', iecNumber);
-            formData.append('aadharProof', aadharProof);
-            formData.append('panProof', panProof);
-            formData.append('gstProof', gstProof);
-            formData.append('iecProof', iecProof);
-
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/user/registerUser`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-    
-            setMessage(response.data.message);
-            setError('');
-            
-          // Slight delay before refresh for better UX
-setTimeout(() => {
-  window.location.reload();
-}, 200);
-
-
-            toast.info('Please Log in once to very credentials')
-
-    
-       } catch (err) {
-    console.error('Registration error:', err);
-    setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    setMessage('');
-
-    // 🧹 Clear all uploaded files when error occurs
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setFullname('');
+    setConfirmPassword('');
+    setAadharNumber('');
+    setPanNumber('');
+    setGstNumber('');
+    setIecNumber('');
     setAadharProof(null);
     setPanProof(null);
     setGstProof(null);
     setIecProof(null);
-} finally {
-    setIsSubmitting(false);
-}
-
-    };
-
-    const handleFileUpload = (file, setFileState, fileType) => {
-  if (file) {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
-
-    const fileExtension = file.name.slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2).toLowerCase();
-
-    const isTypeValid = allowedTypes.includes(file.type);
-    const isExtensionValid = allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
-
-    if (!isTypeValid && !isExtensionValid) {
-      setError('Please upload only JPG, PNG, or PDF files');
-      return false;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File size should be less than 5MB');
-      return false;
-    }
-
-    setFileState(file);
     setError('');
-    return true;
-  }
-  return false;
-};
+    setMessage('');
+    setSignupStep(1);
+  };
 
+  const handleBasicDetailsNext = (e) => {
+    e.preventDefault();
 
-    const formVariants = {
-        hidden: { opacity: 0, x: 50 },
-        visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
-        exit: { opacity: 0, x: -50, transition: { duration: 0.3 } }
-    };
+    if (!fullname || !email || !password || !confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
 
-    const inputVariants = {
-        focus: { scale: 1.02, transition: { duration: 0.2 } },
-        blur: { scale: 1, transition: { duration: 0.2 } }
-    };
+    setError('');
+    setSignupStep(2);
+  };
 
-    const renderProgressIndicator = () => (
-        <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center space-x-4">
-                {/* Step 1 */}
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    signupStep >= 1 ? 'bg-emerald-400 text-emerald-900' : 'bg-white/20 text-white/60'
-                } text-sm font-semibold`}>
-                    {signupStep > 1 ? <CheckCircle className="w-5 h-5" /> : '1'}
-                </div>
-                <div className={`w-12 h-1 ${signupStep > 1 ? 'bg-emerald-400' : 'bg-white/20'} rounded`} />
-                
-                {/* Step 2 */}
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    signupStep >= 2 ? 'bg-emerald-400 text-emerald-900' : 'bg-white/20 text-white/60'
-                } text-sm font-semibold`}>
-                    {signupStep > 2 ? <CheckCircle className="w-5 h-5" /> : '2'}
-                </div>
-                <div className={`w-12 h-1 ${signupStep > 2 ? 'bg-emerald-400' : 'bg-white/20'} rounded`} />
-                
-                {/* Step 3 */}
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    signupStep >= 3 ? 'bg-emerald-400 text-emerald-900' : 'bg-white/20 text-white/60'
-                } text-sm font-semibold`}>
-                    3
-                </div>
-            </div>
+  // 🔥 Updated as per your requirements
+  const handleDocumentDetailsNext = (e) => {
+    e.preventDefault();
+
+    if (!aadharNumber || !panNumber) {
+      setError("Aadhar and PAN number are required");
+      return;
+    }
+
+    if (aadharNumber && aadharNumber.length !== 12) {
+      setError("Aadhar number must be 12 digits");
+      return;
+    }
+
+    if (panNumber && panNumber.length !== 10) {
+      setError("PAN number must be 10 characters");
+      return;
+    }
+
+    if (gstNumber && gstNumber.length !== 15) {
+      setError("GST number must be 15 characters");
+      return;
+    }
+
+    if (iecNumber && iecNumber.length !== 10) {
+      setError("IEC number must be 10 characters");
+      return;
+    }
+
+    setError('');
+    setSignupStep(3);
+  };
+
+  // 🔥 Updated — Only Aadhar + PAN proofs required
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (!aadharProof || !panProof) {
+      setError('Aadhar and PAN proofs are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('fullname', fullname);
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('confirmPassword', confirmPassword);
+      formData.append('aadharNumber', aadharNumber);
+      formData.append('panNumber', panNumber);
+      formData.append('gstNumber', gstNumber);
+      formData.append('iecNumber', iecNumber);
+      formData.append('aadharProof', aadharProof);
+      formData.append('panProof', panProof);
+
+      if (gstProof) formData.append('gstProof', gstProof);
+      if (iecProof) formData.append('iecProof', iecProof);
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/user/registerUser`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setMessage(response.data.message);
+      setError('');
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 200);
+
+      toast.info('Please log in once to verify credentials');
+
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setMessage('');
+      setAadharProof(null);
+      setPanProof(null);
+      setGstProof(null);
+      setIecProof(null);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileUpload = (file, setFileState, fileType) => {
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+
+      const isTypeValid = allowedTypes.includes(file.type);
+      const isExtensionValid = allowedExtensions.some(ext =>
+        file.name.toLowerCase().endsWith(ext)
+      );
+
+      if (!isTypeValid && !isExtensionValid) {
+        setError('Please upload only JPG, PNG, or PDF files');
+        return false;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size should be less than 5MB');
+        return false;
+      }
+
+      setFileState(file);
+      setError('');
+      return true;
+    }
+    return false;
+  };
+
+  const formVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+    exit: { opacity: 0, x: -50, transition: { duration: 0.3 } }
+  };
+
+  const inputVariants = {
+    focus: { scale: 1.02, transition: { duration: 0.2 } },
+    blur: { scale: 1, transition: { duration: 0.2 } }
+  };
+
+  const renderProgressIndicator = () => (
+    <div className="flex items-center justify-center mb  -6">
+      <div className="flex items-center space-x-4">
+        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${signupStep >= 1 ? 'bg-emerald-400 text-emerald-900' : 'bg-white/20 text-white/60'} text-sm font-semibold`}>
+          {signupStep > 1 ? <CheckCircle className="w-5 h-5" /> : '1'}
         </div>
-    );
+        <div className={`w-12 h-1 ${signupStep > 1 ? 'bg-emerald-400' : 'bg-white/20'} rounded`} />
+
+        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${signupStep >= 2 ? 'bg-emerald-400 text-emerald-900' : 'bg-white/20 text-white/60'} text-sm font-semibold`}>
+          {signupStep > 2 ? <CheckCircle className="w-5 h-5" /> : '2'}
+        </div>
+        <div className={`w-12 h-1 ${signupStep > 2 ? 'bg-emerald-400' : 'bg-white/20'} rounded`} />
+
+        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${signupStep >= 3 ? 'bg-emerald-400 text-emerald-900' : 'bg-white/20 text-white/60'} text-sm font-semibold`}>
+          3
+        </div>
+      </div>
+    </div>
+  );
 
     const renderBasicDetailsForm = () => (
         <motion.div
@@ -402,7 +378,7 @@ setTimeout(() => {
                         value={gstNumber}
                         onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
                         maxLength="15"
-                        required
+                        
                     />
                 </motion.div>
 
@@ -421,7 +397,7 @@ setTimeout(() => {
                         value={iecNumber}
                         onChange={(e) => setIecNumber(e.target.value.toUpperCase())}
                         maxLength="10"
-                        required
+                        
                     />
                 </motion.div>
 
@@ -553,7 +529,7 @@ setTimeout(() => {
                                 }
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                            required
+                            
                         />
                         <div className={`w-full ${gstProof ? 'bg-emerald-500/20 border-emerald-400/50' : 'bg-white/10 border-white/30'} border rounded-xl px-10 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all cursor-pointer flex items-center justify-between`}>
                             <span className={gstProof ? 'text-emerald-200' : 'text-white/60'}>
@@ -587,7 +563,7 @@ setTimeout(() => {
                                 }
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                            required
+                            
                         />
                         <div className={`w-full ${iecProof ? 'bg-emerald-500/20 border-emerald-400/50' : 'bg-white/10 border-white/30'} border rounded-xl px-10 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-all cursor-pointer flex items-center justify-between`}>
                             <span className={iecProof ? 'text-emerald-200' : 'text-white/60'}>
