@@ -796,9 +796,10 @@
                   handleRemoveProductItem={handleRemoveProductItem}
                   handleAddProductItem={handleAddProductItem}
                   handleContinueToShipping={handleContinueFromItems}
+                  currency = {formData.invoiceCurrency}
                 />
               )}
-
+  
               {/* Step 5: Shipping Selection */}
               {currentStep === 5 && (
                 console.log("Discount Percent before passing to ShippingSelection:", discountPercent),

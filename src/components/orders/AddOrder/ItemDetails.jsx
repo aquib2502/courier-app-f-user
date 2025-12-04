@@ -8,7 +8,8 @@ const ItemDetails = ({
   handleProductItemChange, 
   handleRemoveProductItem, 
   handleAddProductItem, 
-  handleContinueToShipping 
+  handleContinueToShipping,
+  currency
 }) => {
 
   return (
@@ -55,7 +56,10 @@ const ItemDetails = ({
                 {errors[`productQuantity_${index}`] && <p className="text-red-500 text-sm mt-1">{errors[`productQuantity_${index}`]}</p>}
               </div>
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Price (₹) *</label>
+               <label className="block text-gray-700 font-medium mb-2">
+  Price ({currency}) *
+</label>
+
                 <input
                   placeholder="Enter price"
                   value={item.productPrice}
