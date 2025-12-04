@@ -137,7 +137,9 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
   onChange={(state) => handleInputChange("state", state)}
   disabled={!formData.country}
   error={errors.state}
+  includeNotApplicable={true}   // ← IMPORTANT
 />
+
 
     
         <div>
