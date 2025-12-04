@@ -1,6 +1,22 @@
 // components/orders/AddOrder/BuyerDetails.jsx
 import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+import { Button } from "@/components/ui/button"
+import { ChevronDown } from "lucide-react"
+import SearchableSelect from '@/components/SearchableSelect';
+
 
 const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputChange, handleContinueShipment,countryStateMap }) => {
     // ✅ Get states based on selected country
@@ -102,66 +118,26 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
         </div>
 
  {/* Country Dropdown */}
-      <div>
-        <label className="block text-gray-700 font-medium mb-2">
-          Country *
-        </label>
-        <select
-          value={formData.country}
-          onChange={(e) => {
-            const selectedCountry = e.target.value;
-            handleInputChange("country", selectedCountry);
-            handleInputChange("state", ""); // reset state when country changes
-          }}
-          className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-            errors.country ? "border-red-300" : "border-gray-300"
-          }`}
-        >
-          <option value="">Select Country</option>
-          {countries.map((country) => (
-            <option key={country.code} value={country.name}>
-              {country.name}
-            </option>
-          ))}
-        </select>
-        {errors.country && (
-          <p className="text-red-500 text-sm mt-1">{errors.country}</p>
-        )}
-      </div>
+     <SearchableSelect
+  label="Country *"
+  options={countries.map(c => c.name)}
+  value={formData.country}
+  onChange={(country) => {
+    handleInputChange("country", country);
+    handleInputChange("state", "");
+  }}
+  error={errors.country}
+/>
 
       {/* State Dropdown */}
-      {/* State Dropdown */}
-<div>
-  <label className="block text-gray-700 font-medium mb-2">
-    State *
-  </label>
-  <select
-    value={formData.state}
-    onChange={(e) => handleInputChange("state", e.target.value)}
-    className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-      errors.state ? "border-red-300" : "border-gray-300"
-    }`}
-    disabled={!formData.country}
-  >
-    <option value="">
-      {formData.country ? "Select State" : "Select Country First"}
-    </option>
-
-    <option value="Not Applicable">Not Applicable</option>
-
-    {formData.country && states.length > 0 &&
-      states.map((st) => (
-        <option key={st.code} value={st.name}>
-          {st.name}
-        </option>
-      ))}
-  </select>
-
-  {errors.state && (
-    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
-  )}
-</div>
-
+<SearchableSelect
+  label="State *"
+  options={states.map((s) => s.name)}
+  value={formData.state}
+  onChange={(state) => handleInputChange("state", state)}
+  disabled={!formData.country}
+  error={errors.state}
+/>
 
     
         <div>
