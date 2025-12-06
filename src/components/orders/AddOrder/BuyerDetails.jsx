@@ -18,12 +18,11 @@ import { ChevronDown } from "lucide-react"
 import SearchableSelect from '@/components/SearchableSelect';
 
 
-const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputChange, handleContinueShipment,countryStateMap }) => {
+const BuyerDetails = ({ formData, errors, pickupAddress,countries,states,  handleInputChange, handleContinueShipment,countryStateMap }) => {
     // ✅ Get states based on selected country
     // ✅ Dynamically derive states for selected country
-  const states = formData.country && countryStateMap[formData.country]
-    ? countryStateMap[formData.country]
-    : [];
+
+
     
   return (
     <div>
@@ -122,8 +121,11 @@ const BuyerDetails = ({ formData, errors, pickupAddress,countries,  handleInputC
   label="Country *"
   options={countries.map(c => c.name)}
   value={formData.country}
-  onChange={(country) => {
-    handleInputChange("country", country);
+  onChange={(countryName) => {
+    const selected = countries.find(c => c.name === countryName);
+
+    handleInputChange("country", countryName);
+    handleInputChange("countryCode", selected?.code || ""); // <-- IMPORTANT
     handleInputChange("state", "");
   }}
   error={errors.country}

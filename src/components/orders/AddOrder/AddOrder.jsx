@@ -27,6 +27,7 @@
     const [pickupAddress , setPickupAddress] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [packageDiscounts, setPackageDiscounts] = useState({});
+    const [states, setStates] = useState([]);
 
 
     const [productItems, setProductItems] = useState([
@@ -275,58 +276,58 @@
 
     
   //Fetch countries and States
- useEffect(() => {
-  const fetchCountriesAndStates = async () => {
+// Load countries once
+useEffect(() => {
+  const fetchCountries = async () => {
     try {
-      const headers = { "X-CSCAPI-KEY":"ZUVLUHhxTURNaHI4RU9WRmplUVhaaU9WeFVmbFNrVjltSUk5bFN0Mg==" };
+      const headers = { "X-CSCAPI-KEY": "ZUVLUHhxTURNaHI4RU9WRmplUVhaaU9WeFVmbFNrVjltSUk5bFN0Mg==" };
 
-      // Fetch countries
-      const countryRes = await axios.get(
-        "https://api.countrystatecity.in/v1/countries",
-        { headers }
-      );
+      const countryRes = await axios.get("https://api.countrystatecity.in/v1/countries", { headers });
 
-      const countryList = countryRes.data;
+      const countriesArray = countryRes.data
+        .map(c => ({ name: c.name, code: c.iso2 }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
-      // Build dropdown array
-      const countriesArray = countryList.map(c => ({
-        name: c.name,
-        code: c.iso2
-      }));
-
-      countriesArray.sort((a, b) => a.name.localeCompare(b.name));
       setCountries(countriesArray);
-
-      // Fetch states for each country
-      const stateRequests = countryList.map(c =>
-        axios.get(
-          `https://api.countrystatecity.in/v1/countries/${c.iso2}/states`,
-          { headers }
-        )
-      );
-
-      const stateResponses = await Promise.all(stateRequests);
-
-      const stateMap = {};
-
-      stateResponses.forEach((res, index) => {
-        const country = countryList[index];
-        const states = res.data;
-
-        stateMap[country.name] = states.map(s => ({
-          name: s.name,   // "Ghazni"
-          code: s.iso2    // "GHA"
-        }));
-      });
-
-      setCountryStateMap(stateMap);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  fetchCountriesAndStates();
+  fetchCountries();
 }, []);
+
+
+useEffect(() => {
+  if (!formData.countryCode) return; // Wait until ISO2 is available
+
+  const fetchStates = async () => {
+    try {
+      const headers = { 
+        "X-CSCAPI-KEY": "ZUVLUHhxTURNaHI4RU9WRmplUVhaaU9WeFVmbFNrVjltSUk5bFN0Mg==" 
+      };
+
+      const res = await axios.get(
+        `https://api.countrystatecity.in/v1/countries/${formData.countryCode}/states`,
+        { headers }
+      );
+
+      const stateList = res.data.map((s) => ({
+        name: s.name,
+        code: s.iso2,
+      }));
+
+      setStates(stateList);
+      console.log("States loaded:", stateList);
+    } catch (err) {
+      console.error("Failed to fetch states:", err);
+    }
+  };
+
+  fetchStates();
+}, [formData.countryCode]);  // IMPORTANT
+
+
 
 
   useEffect(() => {
@@ -762,6 +763,7 @@
                   handleInputChange={handleInputChange}
                   handleContinueShipment={handleContinueFromBuyer}
                   countries={countries}
+                  states={states} 
                   countryStateMap={countryStateMap}
                 />
               )}
