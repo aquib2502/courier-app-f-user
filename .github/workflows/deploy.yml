@@ -1,4 +1,4 @@
-name: Deploy User Frontend
+name: Deploy Frontend User (Docker Compose)
 
 on:
   push:
@@ -7,36 +7,29 @@ on:
 
 jobs:
   deploy:
-    name: Deploy Frontend to Server
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Deploy via SSH
-      - name: SSH and Deploy
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: 69.62.73.169
           username: deployer
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "🚀 Starting frontend deployment..."
-
-            # Navigate to frontend directory
+            echo "🚀 Pulling latest code..."
             cd /home/deployer/courier-app-f-user
-
-            # Reset and pull latest code
             git reset --hard
             git pull origin main
 
-            # Install dependencies and build
-            npm install
-            npm run build
+            echo "📦 Rebuilding Docker service..."
+            cd /home/deployer
+            docker compose build frontend-user
 
-            # Restart frontend PM2 process
-            pm2 restart courier-f-user || pm2 start npm --name "courier-f-user" -- start
+            echo "🔁 Restarting container..."
+            docker compose up -d frontend-user
 
-            echo "✅ Frontend deployment completed!"
+            echo "✅ Deployment completed!"
