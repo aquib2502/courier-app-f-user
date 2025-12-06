@@ -32,4 +32,10 @@ jobs:
             echo "🔁 Restarting container..."
             docker compose up -d frontend-user
 
+            echo "🔗 Ensuring NPM network connection..."
+            docker network connect nginx-proxy-manager_default frontend-user || true
+
+            echo "♻ Restarting NPM to refresh DNS..."
+            docker restart nginx-proxy-manager-npm-1
+
             echo "✅ Deployment completed!"
