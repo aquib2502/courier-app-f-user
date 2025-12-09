@@ -557,13 +557,13 @@ useEffect(() => {
   }, 0);
 
   // Rule 1: If weight ≤ 100g and currency = INR, product value cannot exceed 1000
-  if (Number(formData.weight) <= 0.1 && formData.currency === "INR" && totalProductValue > 1000) {
+  if (Number(formData.weight) <= 0.1 && formData.invoiceCurrency === "INR" && totalProductValue > 1000) {
     newErrors.totalProductValue =
       "For shipments with weight ≤ 100g, the total product value cannot exceed ₹1000.";
   }
 
   // Rule 2: If currency = USD, value cannot exceed $11.25
-  if (formData.currency === "USD" && totalProductValue > 11.25) {
+  if (formData.invoiceCurrency === "USD" && totalProductValue > 11.25) {
     newErrors.totalProductValueUSD =
       "Total invoice value cannot exceed $11.25 for USD currency shipments.";
   }
