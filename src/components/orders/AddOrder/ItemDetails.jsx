@@ -86,6 +86,13 @@ const ItemDetails = ({
         </div>
       )}
 
+      {errors.totalProductValueUSD && (
+  <div className="mt-4 text-red-500 text-sm font-medium">
+    {errors.totalProductValueUSD}
+  </div>
+)}
+
+
       <button
         onClick={handleContinueToShipping}
         className="mt-8 w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center space-x-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
