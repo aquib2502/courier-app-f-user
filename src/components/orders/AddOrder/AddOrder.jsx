@@ -539,35 +539,43 @@ useEffect(() => {
     };
 
     // Step 4: Item Details validation and navigation
-    const handleContinueFromItems = () => {
-      const newErrors = {};
+   const handleContinueFromItems = () => {
+  const newErrors = {};
 
-      productItems.forEach((item, index) => {
-        if (!item.productName)
-          newErrors[`productName_${index}`] = "Product name is required";
-        if (!item.productQuantity)
-          newErrors[`productQuantity_${index}`] = "Product Quantity is required";
-        if (!item.productPrice)
-          newErrors[`productPrice_${index}`] = "Product Price is required";
-      });
+  productItems.forEach((item, index) => {
+    if (!item.productName)
+      newErrors[`productName_${index}`] = "Product name is required";
+    if (!item.productQuantity)
+      newErrors[`productQuantity_${index}`] = "Product Quantity is required";
+    if (!item.productPrice)
+      newErrors[`productPrice_${index}`] = "Product Price is required";
+  });
 
-      // ✅ Additional Constraint: If weight <= 100g, total product value cannot exceed 1000
-    const totalProductValue = productItems.reduce((total, item) => {
-      return total + Number(item.productQuantity) * Number(item.productPrice);
-    }, 0);
+  // Calculate total product value
+  const totalProductValue = productItems.reduce((total, item) => {
+    return total + Number(item.productQuantity) * Number(item.productPrice);
+  }, 0);
 
-    if (Number(formData.weight) <= 0.1 && totalProductValue > 1000) {
-      newErrors.totalProductValue =
-        "For shipments with weight ≤ 100g, the total product value cannot exceed ₹1000.";
-    }
+  // Rule 1: If weight ≤ 100g and currency = INR, product value cannot exceed 1000
+  if (Number(formData.weight) <= 0.1 && formData.currency === "INR" && totalProductValue > 1000) {
+    newErrors.totalProductValue =
+      "For shipments with weight ≤ 100g, the total product value cannot exceed ₹1000.";
+  }
 
-      setErrors(newErrors);
+  // Rule 2: If currency = USD, value cannot exceed $11.25
+  if (formData.currency === "USD" && totalProductValue > 11.25) {
+    newErrors.totalProductValueUSD =
+      "Total invoice value cannot exceed $11.25 for USD currency shipments.";
+  }
 
-      if (Object.keys(newErrors).length === 0) {
-        calculateShippingRates(); // Calculate rates when moving to shipping selection
-        setCurrentStep(5);
-      }
-    };
+  setErrors(newErrors);
+
+  if (Object.keys(newErrors).length === 0) {
+    calculateShippingRates();
+    setCurrentStep(5);
+  }
+};
+
 
     // Step 5: Shipping Selection validation and navigation
     const handleContinueFromShipping = () => {
