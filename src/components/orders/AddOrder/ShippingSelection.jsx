@@ -188,13 +188,7 @@ const { basePrice, gstAmount, discountAmount, finalPrice } =
 
       {errors.shippingPartner && <p className="text-red-500 text-sm mt-1">{errors.shippingPartner}</p>}
 
-      <button 
-        onClick={handleContinueToPlaceOrder}
-        className="mt-8 w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center space-x-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <span>Review Order</span>
-        <ChevronRight size={20} />
-      </button>
+      
     </div>
   );
 };

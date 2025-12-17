@@ -1,12 +1,12 @@
 // components/orders/AddOrder/ShipmentDetails.jsx
 import React from 'react';
-import { Box, ChevronRight } from 'lucide-react';
+import { Box } from 'lucide-react';
 
-const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOrder }) => {
+const ShipmentDetails = ({ formData, errors, handleInputChange }) => {
   return (
-    <div className="mt-8">
-      <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-        <Box className="mr-3 text-emerald-600" size={28} />
+    <div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center border-b pb-3">
+        <Box className="mr-3 text-emerald-600" size={24} />
         Shipment Information
       </h3>
       
@@ -28,7 +28,7 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
           ))}
         </div>
 
-         {/* New Product Radio Buttons */}
+        {/* Product Radio Buttons */}
         <h4 className="text-lg font-semibold text-gray-800 mt-6 mb-4">Product</h4>
         <div className="flex space-x-6">
           {[
@@ -48,7 +48,6 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
             </label>
           ))}
         </div>
-      
       </div>
 
       <div>
@@ -57,9 +56,11 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
           <div>
             <label className="block text-gray-700 font-medium mb-2">Actual Weight (kg) *</label>
             <input
+              name="weight"
               placeholder="Enter weight"
               value={formData.weight}
               onChange={(e) => handleInputChange("weight", e.target.value)}
+              autoComplete="on"
               className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
                 errors.weight ? 'border-red-300' : 'border-gray-300'
               }`}
@@ -69,9 +70,11 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
           <div>
             <label className="block text-gray-700 font-medium mb-2">Length (cm) *</label>
             <input 
+              name="length"
               placeholder="Enter length"
               value={formData.length}
               onChange={(e) => handleInputChange("length", e.target.value)}
+              autoComplete="on"
               className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
                 errors.length ? 'border-red-300' : 'border-gray-300'
               }`}
@@ -81,9 +84,11 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
           <div>
             <label className="block text-gray-700 font-medium mb-2">Width (cm) *</label>
             <input
+              name="width"
               placeholder="Enter width"
               value={formData.width}
               onChange={(e) => handleInputChange("width", e.target.value)}
+              autoComplete="on"
               className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
                 errors.width ? 'border-red-300' : 'border-gray-300'
               }`}
@@ -93,9 +98,11 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
           <div>
             <label className="block text-gray-700 font-medium mb-2">Height (cm) *</label>
             <input
+              name="height"
               placeholder="Enter height"
               value={formData.height}
               onChange={(e) => handleInputChange("height", e.target.value)}
+              autoComplete="on"
               className={`w-full p-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
                 errors.height ? 'border-red-300' : 'border-gray-300'
               }`}
@@ -104,14 +111,6 @@ const ShipmentDetails = ({ formData, errors, handleInputChange, handleContinueOr
           </div>
         </div>
       </div>
-
-      <button
-        onClick={handleContinueOrder}
-        className="mt-8 w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 flex items-center justify-center space-x-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <span>Continue to Order Details</span>
-        <ChevronRight size={20} />
-      </button>
     </div>
   );
 };
