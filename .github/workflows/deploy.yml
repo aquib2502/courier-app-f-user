@@ -1,4 +1,4 @@
-name: Deploy Frontend User (Docker Compose)
+name: Deploy to Production
 
 on:
   push:
@@ -10,32 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Start SSH Agent and Load Key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: 69.62.73.169
-          username: deployer
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "🚀 Pulling latest code..."
-            cd /home/deployer/courier-app-f-user
-            git reset --hard
-            git pull origin main
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-            echo "📦 Rebuilding Docker service..."
-            cd /home/deployer
-            docker compose build frontend-user
-
-            echo "🔁 Restarting container..."
-            docker compose up -d frontend-user
-
-            echo "🔗 Ensuring NPM network connection..."
-            docker network connect nginx-proxy-manager_default frontend-user || true
-
-            echo "♻ Restarting NPM to refresh DNS..."
-            docker restart nginx-proxy-manager-npm-1
-
-            echo "✅ Deployment completed!"
+      - name: Deploy to Production Server
+        run: |
+          ssh -p 2223 -o StrictHostKeyChecking=no \
+            deploy@69.62.73.169 \
+            "${{ github.event.repository.name }}"
