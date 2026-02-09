@@ -163,6 +163,7 @@ const [  showStateDropdown, setShowStateDropdown ] = useState(false);
     <SearchableSelect
       label="State *"
       options={states.map(s => s.name)}
+      includeNotApplicable={true}
       value={formData.state}
       onChange={(val) => handleInputChange("state", val)}
       disabled={!formData.countryCode}
