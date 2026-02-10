@@ -47,6 +47,10 @@ const Packed = () => {
   const [serialNumber, setSerialNumber] = useState('');
   const barcodeRef = useRef(null);
   
+  // Bulk print state variables
+  const [selectedOrders, setSelectedOrders] = useState([]);
+  const [isBulkPrinting, setIsBulkPrinting] = useState(false);
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -384,6 +388,276 @@ const Packed = () => {
     }
   };
 
+  // Handle bulk print
+  const handleBulkPrint = () => {
+    if (selectedOrders.length === 0) {
+      alert("Please select at least one order to print");
+      return;
+    }
+
+    setIsBulkPrinting(true);
+
+    try {
+      const printWindow = window.open('', '_blank');
+      
+      if (!printWindow) {
+        alert("Please allow pop-ups to print the labels");
+        setIsBulkPrinting(false);
+        return;
+      }
+
+      // Generate HTML for all selected orders
+      let allLabelsHTML = '';
+      
+      selectedOrders.forEach((order, index) => {
+        const tempCanvas = document.createElement('canvas');
+        JsBarcode(tempCanvas, order.invoiceNo, {
+          format: "CODE128",
+          width: 3.5,
+          height: 80,
+          displayValue: true,
+          fontSize: 20,
+          textMargin: 10,
+          margin: 40,
+          background: "#ffffff",
+          lineColor: "#000000"
+        });
+        
+        const barcodeDataURL = tempCanvas.toDataURL();
+        
+        allLabelsHTML += `
+          <div class="label-page" ${index < selectedOrders.length - 1 ? 'style="page-break-after: always;"' : ''}>
+            <table
+              class="border-collapse border border-gray-300 text-xs"
+              style="width: 96%; margin: 0 auto;"
+            >
+              <thead>
+                <tr>
+                  <th colSpan="2" class="text-center py-2 bg-gray-100">
+                    <div style="font-size: 16px; font-weight: bold; letter-spacing: 1px;">
+                      THE TRACE EXPRESS
+                    </div>
+                    <div style="font-size: 13px; margin-top: 3px; font-weight: 600;">
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td colSpan="2" class="text-center py-3">
+                    <img src="${barcodeDataURL}" style="display: block; margin: 0 auto; max-width: 90%; height: 65px;" />
+                    <div style="margin-top: 5px; font-size: 12px; font-weight: bold; letter-spacing: 1px;">
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan="2" class="border-t border-gray-300 p-3">
+                    <strong>FROM:</strong>
+                    <div>${order.user.fullname}</div>
+                    <div>${order.pickupAddress}</div>
+                    <div>Mobile: ${order.mobile}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan="2" class="border-t border-gray-300 p-3">
+                    <strong>TO:</strong>
+                    <div>${order.firstName}${order.lastName}</div>
+                    <div>${order.address1.split(",")[0]}</div>
+                    <div>${order.country}, ${order.state}</div>
+                    <div>${order.pincode}</div>
+                    <div>Mobile: ${order.mobile}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan="2" class="border-t border-gray-300 p-3">
+                    <div>Invoice Name: ${order.invoiceName}</div>
+                    <div>HSN Code: ${order.HSNCode}</div>
+                    <div>Shipment Type: ${order.shipmentType}</div>
+                    <div>Invoice Date: ${formatDate(order.invoiceDate)}</div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan="2" class="border-t border-gray-300 p-3">
+                    <div class="flex justify-between text-xs">
+                      <span>
+                        Weight: ${order.weight} KG | 
+                        Dim: ${order.length}×${order.width}×${order.height} cm
+                      </span>
+                      <span>${order.paymentStatus}</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan="2" class="border-t border-gray-300 p-3">
+                    <strong>Products:</strong>
+                    ${order.productItems.map((item) => `
+                      <div class="flex justify-between text-xs mt-1">
+                        <span>
+                          ${item.productName} (Qty: ${item.productQuantity})
+                        </span>
+                        <span>
+                          Rs ${item.productPrice}  
+                        </span>
+                      </div>
+                    `).join('')}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      });
+
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Bulk Shipping Labels</title>
+            <style>
+              @page { 
+                size: 101.6mm 152.4mm;
+                margin: 0;
+              }
+
+              body {
+                width: 101.6mm;
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                font-size: 11px;
+                line-height: 1.3;
+                background: #fff;
+              }
+
+              .label-page {
+                width: 101.6mm;
+                height: 152.4mm;
+                padding: 6px;
+                box-sizing: border-box;
+              }
+
+              table {
+                width: 96%;
+                margin: 0 auto;
+                border-collapse: collapse;
+              }
+
+              td, th {
+                border: 1px solid #000;
+                padding: 5px;
+                vertical-align: top;
+              }
+
+              strong {
+                font-size: 11px;
+              }
+              
+              .header { 
+                font-weight: bold; 
+                background-color: #f9f9f9; 
+                font-size: 10px;
+              }
+              .barcode-container { 
+                text-align: center; 
+                padding: 5px 0; 
+              }
+              .company-logo {
+                font-size: 11px;
+                font-weight: bold;
+                color: #1e40af;
+              }
+              .serial-number {
+                font-size: 12px;
+                font-weight: bold;
+                color: #dc2626;
+                text-align: center;
+                padding: 3px;
+                background-color: #fef2f2;
+              }
+              .flex {
+                display: flex;
+              }
+              .justify-between {
+                justify-content: space-between;
+              }
+            </style>
+          </head>
+          <body>
+            ${allLabelsHTML}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                };
+              };
+            </script>
+          </body>
+        </html>
+      `);
+
+      const checkPrintWindowClosed = setInterval(() => {
+        if (printWindow.closed) {
+          clearInterval(checkPrintWindowClosed);
+          setIsBulkPrinting(false);
+          setSelectedOrders([]);
+          
+          // Show success notification
+          const notificationDiv = document.createElement('div');
+          notificationDiv.className = 'fixed top-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded shadow-md z-50';
+          notificationDiv.innerHTML = `
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              Labels printed successfully!
+            </div>
+          `;
+          document.body.appendChild(notificationDiv);
+          setTimeout(() => {
+            document.body.removeChild(notificationDiv);
+          }, 3000);
+        }
+      }, 500);
+
+    } catch (error) {
+      console.error("Error printing bulk labels:", error);
+      setIsBulkPrinting(false);
+      alert("There was an error printing. Please try again.");
+    }
+  };
+
+  // Toggle individual order selection
+  const toggleOrderSelection = (order) => {
+    setSelectedOrders(prev => {
+      const isSelected = prev.some(o => o._id === order._id);
+      if (isSelected) {
+        return prev.filter(o => o._id !== order._id);
+      } else {
+        return [...prev, order];
+      }
+    });
+  };
+
+  // Toggle select all orders on current page
+  const toggleSelectAll = () => {
+    if (selectedOrders.length === currentOrders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders([...currentOrders]);
+    }
+  };
+
+  // Check if order is selected
+  const isOrderSelected = (order) => {
+    return selectedOrders.some(o => o._id === order._id);
+  };
+
   // Handle export to CSV
   const exportToCsv = () => {
     console.log("Exporting to CSV");
@@ -463,7 +737,29 @@ const Packed = () => {
               <span className="font-medium">Filters</span>
             </button>
             
-           
+            {selectedOrders.length > 0 && (
+              <button 
+                onClick={handleBulkPrint}
+                disabled={isBulkPrinting}
+                className={`flex items-center py-2 px-4 rounded-lg transition-all duration-300 ${
+                  isBulkPrinting
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {isBulkPrinting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <span className="font-medium">Printing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Printer className="w-4 h-4 mr-2" />
+                    <span className="font-medium">Bulk Print ({selectedOrders.length})</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -608,6 +904,14 @@ const Packed = () => {
               <table className="w-full table-auto">
                 <thead>
                   <tr className="bg-gradient-to-r from-emerald-50 to-teal-50 text-left">
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={selectedOrders.length === currentOrders.length && currentOrders.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500"
+                      />
+                    </th>
                     <th className="px-4 py-3 text-xs font-semibold text-gray-600">Date</th>
                     <th className="px-4 py-3 text-xs font-semibold text-gray-600">Order ID</th>
                     <th className="px-4 py-3 text-xs font-semibold text-gray-600">Customer Details</th>
@@ -621,6 +925,14 @@ const Packed = () => {
                   {currentOrders.length > 0 ? (
                     currentOrders.map((order) => (
                       <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={isOrderSelected(order)}
+                            onChange={() => toggleOrderSelection(order)}
+                            className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500"
+                          />
+                        </td>
                         <td className="px-4 py-3 text-sm text-gray-700">{formatDate(order.invoiceDate)}</td>
                         <td className="px-4 py-3 text-sm font-medium text-emerald-700">{order.invoiceNo}</td>
                         <td className="px-4 py-3">
@@ -695,7 +1007,7 @@ const Packed = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-4 py-12 text-center">
+                      <td colSpan="8" className="px-4 py-12 text-center">
                         <div className="flex flex-col items-center justify-center">
                           <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                             <Package className="h-8 w-8 text-gray-400" />
