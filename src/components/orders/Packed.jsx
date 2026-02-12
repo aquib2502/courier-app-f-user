@@ -2,18 +2,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import JsBarcode from "jsbarcode";
-import { 
-  Filter, 
-  Download, 
-  FilePlus, 
-  Search, 
-  RefreshCw, 
-  ExternalLink, 
-  Truck, 
-  Package, 
-  Printer, 
-  X, 
-  Check, 
+import {
+  Filter,
+  Download,
+  FilePlus,
+  Search,
+  RefreshCw,
+  ExternalLink,
+  Truck,
+  Package,
+  Printer,
+  X,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -33,12 +33,12 @@ const Packed = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [lastUpdated, setLastUpdated] = useState('');
   const [activeActionOrder, setActiveActionOrder] = useState(null);
-  
+
   // Filter state variables
   const [orderDate, setOrderDate] = useState('');
   const [orderId, setOrderId] = useState('');
   const [customerName, setCustomerName] = useState('');
-  
+
   // Modal state variables
   const [showBarcodeModal, setShowBarcodeModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -46,11 +46,11 @@ const Packed = () => {
   const [printSuccess, setPrintSuccess] = useState(false);
   const [serialNumber, setSerialNumber] = useState('');
   const barcodeRef = useRef(null);
-  
+
   // Bulk print state variables
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [isBulkPrinting, setIsBulkPrinting] = useState(false);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -66,9 +66,9 @@ const Packed = () => {
         setActiveActionOrder(null);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -79,7 +79,7 @@ const Packed = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Get userId from the JWT token stored in localStorage
       const token = localStorage.getItem('userToken');
       if (!token) {
@@ -100,12 +100,12 @@ const Packed = () => {
 
       // Make the API request to fetch orders
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/orders/${userId}`);
-      
+
       // Filter for only packed orders
       const packedOrders = response.data.data.filter(order => order.orderStatus === 'Packed');
       setOrders(packedOrders);
       setFilteredOrders(packedOrders);
-      
+
       // Set last updated time
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (error) {
@@ -124,7 +124,7 @@ const Packed = () => {
   // Filter orders based on search query
   useEffect(() => {
     if (searchQuery) {
-      const filtered = orders.filter(order => 
+      const filtered = orders.filter(order =>
         order.invoiceNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         `${order.firstName || ''} ${order.lastName || ''}`.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -151,15 +151,16 @@ const Packed = () => {
         // Generate barcode using the serial number
         JsBarcode(barcodeRef.current, selectedOrder.invoiceNo, {
           format: "CODE128",
-          width: 3.5,
-          height: 80,
+          width: 5,          // increased thickness
+          height: 130,       // increased height
           displayValue: true,
-          fontSize: 20,
-          textMargin: 10,
-          margin: 40,
+          fontSize: 24,
+          textMargin: 12,
+          margin: 20,
           background: "#ffffff",
           lineColor: "#000000"
         });
+
       } catch (error) {
         console.error("Error generating barcode:", error);
       }
@@ -177,7 +178,7 @@ const Packed = () => {
     }
 
     if (orderId) {
-      filtered = filtered.filter((order) => 
+      filtered = filtered.filter((order) =>
         order.invoiceNo?.toLowerCase().includes(orderId.toLowerCase())
       );
     }
@@ -208,13 +209,165 @@ const Packed = () => {
     setCurrentPage(1);
   }, [searchQuery, orderDate, orderId, customerName, rowsPerPage]);
 
+
   // Handle Print Label - Show modal with the barcode
   const handlePrintLabel = (order) => {
-    setSelectedOrder(order);
-    setShowBarcodeModal(true);
-    setPrintSuccess(false);
-    setIsPrinting(false);
+    const printWindow = window.open('', '_blank');
+
+    if (!printWindow) {
+      alert("Please allow pop-ups to print the label");
+      return;
+    }
+
+    const tempCanvas = document.createElement('canvas');
+
+    JsBarcode(tempCanvas, order.invoiceNo, {
+      format: "CODE128",
+      width: 5,
+      height: 130,
+      displayValue: true,
+      fontSize: 24,
+      textMargin: 12,
+      margin: 10,
+    });
+
+    const barcodeDataURL = tempCanvas.toDataURL();
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Shipping Label</title>
+        <style>
+          @page {
+            size: 101.6mm 152.4mm;
+            margin: 0;
+          }
+
+          body {
+            width: 101.6mm;
+            height: 152.4mm;
+            margin: 0;
+            font-family: Arial, sans-serif;
+          }
+
+          .label-container {
+            height: 152.4mm;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #000;
+          }
+
+          .header {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 6px 0;
+            border-bottom: 1px solid #000;
+          }
+
+          .barcode-section {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #000;
+          }
+
+          .barcode-section img {
+            width: 100%;
+            height: 120px;
+          }
+
+          .barcode-text {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+          }
+
+          .content-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .section {
+            padding: 8px 0;
+            border-bottom: 1px solid #000;
+          }
+
+          .section:last-child {
+            border-bottom: none;
+          }
+
+          .grow {
+            flex: 1;
+          }
+
+          .product-line {
+            margin-top: 4px;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="label-container">
+
+          <div class="header">
+            THE TRACE EXPRESS
+          </div>
+
+          <div class="barcode-section">
+            <img src="${barcodeDataURL}" />
+            
+          </div>
+
+          <div class="content-section">
+
+            <div class="section">
+              <strong>FROM:</strong><br/>
+              ${order.user.fullname}<br/>
+              ${order.pickupAddress}<br/>
+              Mobile: ${order.mobile}
+            </div>
+
+            <div class="section">
+              <strong>TO:</strong><br/>
+              ${order.firstName} ${order.lastName}<br/>
+              ${order.address1}<br/>
+              ${order.country}, ${order.state}<br/>
+              ${order.pincode}<br/>
+              Mobile: ${order.mobile}
+            </div>
+
+            <div class="section grow">
+              <strong>Products:</strong>
+              ${order.productItems.map(item => `
+                <div class="product-line">
+                  ${item.productName} (Qty: ${item.productQuantity})
+                  - ${order.invoiceCurrency} ${item.productPrice}
+                </div>
+              `).join('')}
+            </div>
+
+          </div>
+
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() {
+              window.close();
+            };
+          };
+        </script>
+
+      </body>
+    </html>
+  `);
   };
+
+
 
   // Toggle view actions dropdown
   const toggleActions = (orderId) => {
@@ -275,84 +428,96 @@ const Packed = () => {
   // Print the barcode label
   const printBarcode = () => {
     if (isPrinting) return;
-    
+
     setIsPrinting(true);
-    
+
     try {
       const printContents = document.getElementById('barcode-print-area').innerHTML;
       const printWindow = window.open('', '_blank');
-      
+
       if (!printWindow) {
         alert("Please allow pop-ups to print the label");
         setIsPrinting(false);
         return;
       }
-      
+
       printWindow.document.write(`
         <html>
           <head>
             <title>Shipping Label - ${serialNumber}</title>
             <style>
-              @page { 
-                size: 101.6mm 152.4mm;
-                margin: 0;
-              }
+             @page {
+  size: 101.6mm 152.4mm;
+  margin: 0;
+}
 
-              body {
-                width: 101.6mm;
-                height: 152.4mm;
-                margin: 0;
-                padding: 6px;
-                font-family: Arial, sans-serif;
-                font-size: 11px;
-                line-height: 1.3;
-                background: #fff;
-                box-sizing: border-box;
-              }
+body {
+  width: 101.6mm;
+  height: 152.4mm;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
 
-              table {
-                width: 96%;
-                margin: 0 auto;
-                border-collapse: collapse;
-              }
+.label-container {
+  height: 152.4mm;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+}
 
-              td, th {
-                border: 1px solid #000;
-                padding: 5px;
-                vertical-align: top;
-              }
+.header {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 6px 0;
+  border-bottom: 1px solid #000;
+}
 
-              strong {
-                font-size: 11px;
-              }
+.barcode-section {
+  text-align: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #000;
+}
 
-              svg {
-                margin-top: 4px;
-              }
-              
-              .header { 
-                font-weight: bold; 
-                background-color: #f9f9f9; 
-                font-size: 10px;
-              }
-              .barcode-container { 
-                text-align: center; 
-                padding: 5px 0; 
-              }
-              .company-logo {
-                font-size: 11px;
-                font-weight: bold;
-                color: #1e40af;
-              }
-              .serial-number {
-                font-size: 12px;
-                font-weight: bold;
-                color: #dc2626;
-                text-align: center;
-                padding: 3px;
-                background-color: #fef2f2;
-              }
-            </style>
+.barcode-section img {
+  width: 100%;
+  height: 120px;
+}
+
+.barcode-text {
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.content-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.section {
+  padding: 8px 0;
+  border-bottom: 1px solid #000;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.grow {
+  flex: 1;
+}
+
+.product-line {
+  margin-top: 4px;
+  font-size: 12px;
+}
+  </style>
+
           </head>
           <body>
             <div class="print-container">
@@ -369,7 +534,7 @@ const Packed = () => {
           </body>
         </html>
       `);
-      
+
       const checkPrintWindowClosed = setInterval(() => {
         if (printWindow.closed) {
           clearInterval(checkPrintWindowClosed);
@@ -380,7 +545,7 @@ const Packed = () => {
           }, 3000);
         }
       }, 500);
-      
+
     } catch (error) {
       console.error("Error printing:", error);
       setIsPrinting(false);
@@ -399,7 +564,7 @@ const Packed = () => {
 
     try {
       const printWindow = window.open('', '_blank');
-      
+
       if (!printWindow) {
         alert("Please allow pop-ups to print the labels");
         setIsBulkPrinting(false);
@@ -408,23 +573,23 @@ const Packed = () => {
 
       // Generate HTML for all selected orders
       let allLabelsHTML = '';
-      
+
       selectedOrders.forEach((order, index) => {
         const tempCanvas = document.createElement('canvas');
         JsBarcode(tempCanvas, order.invoiceNo, {
           format: "CODE128",
-          width: 3.5,
-          height: 80,
+          width: 5,
+          height: 130,
           displayValue: true,
-          fontSize: 20,
-          textMargin: 10,
-          margin: 40,
+          fontSize: 24,
+          textMargin: 12,
+          margin: 20,
           background: "#ffffff",
           lineColor: "#000000"
         });
-        
+
         const barcodeDataURL = tempCanvas.toDataURL();
-        
+
         allLabelsHTML += `
           <div class="label-page" ${index < selectedOrders.length - 1 ? 'style="page-break-after: always;"' : ''}>
             <table
@@ -502,7 +667,8 @@ const Packed = () => {
                           ${item.productName} (Qty: ${item.productQuantity})
                         </span>
                         <span>
-                          Rs ${item.productPrice}  
+                          ${order.invoiceCurrency || ''} ${item.productPrice}
+
                         </span>
                       </div>
                     `).join('')}
@@ -606,7 +772,7 @@ const Packed = () => {
           clearInterval(checkPrintWindowClosed);
           setIsBulkPrinting(false);
           setSelectedOrders([]);
-          
+
           // Show success notification
           const notificationDiv = document.createElement('div');
           notificationDiv.className = 'fixed top-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded shadow-md z-50';
@@ -687,7 +853,7 @@ const Packed = () => {
   const getPageNumbers = () => {
     const pages = [];
     const showPages = 5;
-    
+
     if (totalPages <= showPages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -709,7 +875,7 @@ const Packed = () => {
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -727,25 +893,24 @@ const Packed = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Packed Orders</h2>
             <p className="text-sm text-gray-500">Manage your packed orders ready for manifesting</p>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
-            <button 
+            <button
               onClick={toggleFilters}
               className="flex items-center text-emerald-700 hover:text-emerald-800 bg-emerald-50 py-2 px-4 rounded-lg transition-all duration-300 hover:bg-emerald-100"
             >
               <Filter className="w-4 h-4 mr-2" />
               <span className="font-medium">Filters</span>
             </button>
-            
+
             {selectedOrders.length > 0 && (
-              <button 
+              <button
                 onClick={handleBulkPrint}
                 disabled={isBulkPrinting}
-                className={`flex items-center py-2 px-4 rounded-lg transition-all duration-300 ${
-                  isBulkPrinting
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                className={`flex items-center py-2 px-4 rounded-lg transition-all duration-300 ${isBulkPrinting
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
               >
                 {isBulkPrinting ? (
                   <>
@@ -777,11 +942,11 @@ const Packed = () => {
               placeholder="Search by order ID, customer name..."
             />
           </div>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Last updated: {lastUpdated || 'Never'}</span>
-            <button 
-              onClick={fetchOrders} 
+            <button
+              onClick={fetchOrders}
               className="p-2 text-emerald-600 hover:text-emerald-800 rounded-full hover:bg-emerald-50"
             >
               <RefreshCw className="w-4 h-4" />
@@ -794,7 +959,7 @@ const Packed = () => {
           <div className="mb-6 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-100 shadow-sm">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter Orders</h3>
-              
+
               {/* Rows Per Page Selector */}
               <div className="flex items-center space-x-3 mb-4">
                 <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
@@ -814,7 +979,7 @@ const Packed = () => {
                   Showing {startIndex + 1}-{Math.min(endIndex, filteredOrders.length)} of {filteredOrders.length}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="orderDate" className="block text-xs font-medium text-gray-600 mb-1">
@@ -828,7 +993,7 @@ const Packed = () => {
                     className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="orderId" className="block text-xs font-medium text-gray-600 mb-1">
                     Order ID
@@ -842,7 +1007,7 @@ const Packed = () => {
                     placeholder="Enter Order ID"
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="customerDetails" className="block text-xs font-medium text-gray-600 mb-1">
                     Customer Name
@@ -858,7 +1023,7 @@ const Packed = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end">
               <button
                 onClick={clearFilters}
@@ -888,7 +1053,7 @@ const Packed = () => {
         {error && !loading && (
           <div className="bg-red-50 rounded-xl shadow-sm border border-red-200 p-8 text-center">
             <p className="text-red-600">{error}</p>
-            <button 
+            <button
               onClick={fetchOrders}
               className="mt-4 bg-red-600 text-white py-2 px-4 rounded-md text-sm hover:bg-red-700"
             >
@@ -959,7 +1124,7 @@ const Packed = () => {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center space-x-2">
-                            <button 
+                            <button
                               onClick={() => handlePrintLabel(order)}
                               className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center"
                             >
@@ -972,9 +1137,9 @@ const Packed = () => {
                                 className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center"
                               >
                                 View
-                                
+
                               </button>
-                              
+
                               {activeActionOrder === order._id && (
                                 <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                                   <div className="py-1">
@@ -1066,11 +1231,10 @@ const Packed = () => {
                       <button
                         key={page}
                         onClick={() => goToPage(page)}
-                        className={`px-3 py-1 rounded-lg font-medium transition-colors ${
-                          currentPage === page
-                            ? 'bg-emerald-600 text-white'
-                            : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
-                        }`}
+                        className={`px-3 py-1 rounded-lg font-medium transition-colors ${currentPage === page
+                          ? 'bg-emerald-600 text-white'
+                          : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
+                          }`}
                       >
                         {page}
                       </button>
@@ -1124,7 +1288,7 @@ const Packed = () => {
       {/* Enhanced Barcode Modal with Serial Number and A7 Optimization */}
       <AnimatePresence>
         {showBarcodeModal && selectedOrder && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
             initial={{ opacity: 0 }}
@@ -1132,7 +1296,7 @@ const Packed = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden"
               style={{ maxHeight: '98vh', overflowY: 'auto' }}
               initial={{ scale: 0.9, y: 20 }}
@@ -1146,22 +1310,22 @@ const Packed = () => {
                   <Printer className="w-5 h-5 mr-2" />
                   A7 Shipping Label
                 </h3>
-                <button 
+                <button
                   onClick={closeBarcodeModal}
                   className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              
+
               {/* Order Summary */}
               <div className="px-6 pt-4 bg-gray-50">
                 <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
-                  <span className="font-medium text-gray-700">Order:</span> 
+                  <span className="font-medium text-gray-700">Order:</span>
                   <span className="text-blue-600 font-semibold">{selectedOrder.invoiceNo}</span>
                   <span className="mx-1 text-gray-300">•</span>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 mb-3">
                   <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center">
                     <Package className="w-3 h-3 mr-1" />
@@ -1173,7 +1337,7 @@ const Packed = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Barcode Print Area - Optimized for A7 */}
               <div className="px-4 py-2">
                 <div id="barcode-print-area" style={{ padding: "8px" }}>
@@ -1204,7 +1368,7 @@ const Packed = () => {
                               display: "block",
                               margin: "0 auto",
                               maxWidth: "90%",
-                              height: "65px",
+                              height: "110px",
                             }}
                           ></svg>
                           <div
@@ -1256,7 +1420,7 @@ const Packed = () => {
                         <td colSpan="2" className="border-t border-gray-300 p-3">
                           <div className="flex justify-between text-xs">
                             <span>
-                              Weight: {selectedOrder.weight} KG | 
+                              Weight: {selectedOrder.weight} KG |
                               Dim: {selectedOrder.length}×{selectedOrder.width}×{selectedOrder.height} cm
                             </span>
                             <span>{selectedOrder.paymentStatus}</span>
@@ -1274,7 +1438,8 @@ const Packed = () => {
                                 {item.productName} (Qty: {item.productQuantity})
                               </span>
                               <span>
-                                Rs {item.productPrice}  
+                                {selectedOrder.invoiceCurrency} {item.productPrice}
+
                               </span>
                             </div>
                           ))}
@@ -1284,16 +1449,16 @@ const Packed = () => {
                   </table>
                 </div>
               </div>
-              
+
               {/* Modal Footer */}
               <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
                 <div className="text-xs text-gray-500">
                   A7 Label (74×105mm)
                 </div>
-                
+
                 <div className="flex gap-2">
                   {printSuccess ? (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className="bg-green-100 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm font-medium"
@@ -1302,14 +1467,13 @@ const Packed = () => {
                       Printed!
                     </motion.div>
                   ) : (
-                    <button 
-                      onClick={printBarcode} 
+                    <button
+                      onClick={printBarcode}
                       disabled={isPrinting}
-                      className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        isPrinting 
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
-                      }`}
+                      className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${isPrinting
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+                        }`}
                     >
                       {isPrinting ? (
                         <>

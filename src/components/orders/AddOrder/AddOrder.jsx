@@ -37,6 +37,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    fullName: "",
     mobile: "",
     email: "",
     pickupAddress: "",
@@ -134,8 +135,14 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
           `https://api.countrystatecity.in/v1/countries/${formData.countryCode}/states`,
           { headers }
         );
-        const stateList = res.data.map((s) => ({ name: s.name, code: s.iso2 }));
+        const stateList = res.data.map((s) => ({
+          label: `${s.iso2} - ${s.name}`, // what dropdown shows
+          name: s.name,
+          code: s.iso2,                  // what we store
+        }));
+
         setStates(stateList);
+
       } catch (err) {
         console.error("Failed to fetch states:", err);
       }
@@ -276,16 +283,16 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
       type: rate.package.toLowerCase().includes("premium self")
         ? "Recommended"
         : rate.package.toLowerCase().includes("premium")
-        ? "Premium"
-        : rate.package.toLowerCase().includes("express")
-        ? "Express"
-        : rate.package.toLowerCase().includes("firstclass")
-        ? "Standard"
-        : rate.package.toLowerCase().includes("worldwide")
-        ? "Standard"
-        : rate.package.toLowerCase().includes("direct")
-        ? "Economy"
-        : "Standard",
+          ? "Premium"
+          : rate.package.toLowerCase().includes("express")
+            ? "Express"
+            : rate.package.toLowerCase().includes("firstclass")
+              ? "Standard"
+              : rate.package.toLowerCase().includes("worldwide")
+                ? "Standard"
+                : rate.package.toLowerCase().includes("direct")
+                  ? "Economy"
+                  : "Standard",
       price: parseFloat(rate.rate),
       deliveryTime: getDeliveryTime(rate.package, rawCountry),
       rating: 4.5,
@@ -350,8 +357,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
 
     // Buyer validation
     if (!formData.pickupAddress) newErrors.pickupAddress = "Pickup address is required";
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
     if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
     if (!formData.address1.trim()) newErrors.address1 = "Address 1 is required";
     if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
@@ -414,8 +420,19 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
         throw new Error("User ID not found. Please log in again.");
       }
 
+      // Split full name
+      const nameParts = formData.fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+      // Clean pincode (remove spaces + special characters)
+      const cleanedPincode = formData.pincode.replace(/[^a-zA-Z0-9]/g, "");
+
       const payload = {
         ...formData,
+        firstName,
+        lastName,
+        pincode: cleanedPincode,
         productItems,
         user,
         paymentStatus,
@@ -423,6 +440,7 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
         totalAmount: calculateTotalAmount(),
         walletBalance,
       };
+
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/orders/create`,
@@ -456,11 +474,10 @@ const AddOrder = ({ walletBalance = 0, onOrderPayment }) => {
 
         {message && (
           <div
-            className={`mb-6 p-4 rounded-lg flex items-center space-x-3 ${
-              message.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-700 border border-red-200"
-            }`}
+            className={`mb-6 p-4 rounded-lg flex items-center space-x-3 ${message.type === "success"
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : "bg-red-50 text-red-700 border border-red-200"
+              }`}
           >
             {message.type === "success" ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
             <p>{message.text}</p>
