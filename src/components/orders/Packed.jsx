@@ -212,160 +212,260 @@ const Packed = () => {
 
   // Handle Print Label - Show modal with the barcode
   const handlePrintLabel = (order) => {
-    const printWindow = window.open('', '_blank');
+  const printWindow = window.open('', '_blank');
 
-    if (!printWindow) {
-      alert("Please allow pop-ups to print the label");
-      return;
-    }
+  if (!printWindow) {
+    alert("Please allow pop-ups to print the label");
+    return;
+  }
 
-    const tempCanvas = document.createElement('canvas');
+  const tempCanvas = document.createElement('canvas');
 
-    JsBarcode(tempCanvas, order.invoiceNo, {
-      format: "CODE128",
-      width: 5,
-      height: 130,
-      displayValue: true,
-      fontSize: 24,
-      textMargin: 12,
-      margin: 10,
-    });
+  JsBarcode(tempCanvas, order.invoiceNo, {
+    format: "CODE128",
+    width: 4,
+    height: 110,
+    displayValue: true,
+    fontSize: 22,
+    textMargin: 8,
+    margin: 5,
+  });
 
-    const barcodeDataURL = tempCanvas.toDataURL();
+  const barcodeDataURL = tempCanvas.toDataURL();
 
-    printWindow.document.write(`
-    <html>
-      <head>
-        <title>Shipping Label</title>
-        <style>
-          @page {
-            size: 101.6mm 152.4mm;
-            margin: 0;
-          }
+  printWindow.document.write(`
+  <html>
+    <head>
+      <title>Shipping Label</title>
+      <style>
+        @page {
+          size: 101.6mm 152.4mm;
+          margin: 0;
+        }
 
-          body {
-            width: 101.6mm;
-            height: 152.4mm;
-            margin: 0;
-            font-family: Arial, sans-serif;
-          }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
 
-          .label-container {
-            height: 152.4mm;
-            display: flex;
-            flex-direction: column;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #000;
-          }
+        body {
+          width: 101.6mm;
+          height: 152.4mm;
+          font-family: Arial, sans-serif;
+          font-size: 11px;
+        }
 
-          .header {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 6px 0;
-            border-bottom: 1px solid #000;
-          }
+        .label-container {
+          width: 100%;
+          height: 100%;
+          border: 2px solid #000;
+          display: flex;
+          flex-direction: column;
+        }
 
-          .barcode-section {
-            text-align: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #000;
-          }
+        .header {
+          text-align: center;
+          font-size: 20px;
+          font-weight: bold;
+          padding: 8px;
+          border-bottom: 1.5px solid #000;
+          background: #f5f5f5;
+        }
 
-          .barcode-section img {
-            width: 100%;
-            height: 120px;
-          }
+        .barcode-section {
+          text-align: center;
+          padding: 10px 4px;
+          border-bottom: 1.5px solid #000;
+        }
 
-          .barcode-text {
-            font-size: 14px;
-            font-weight: bold;
-            margin-top: 4px;
-          }
+        .barcode-section img {
+          width: 92%;
+          height: auto;
+        }
 
-          .content-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-          }
+        .info-row {
+          display: flex;
+          border-bottom: 1px solid #000;
+        }
 
-          .section {
-            padding: 8px 0;
-            border-bottom: 1px solid #000;
-          }
+        .info-cell {
+          flex: 1;
+          padding: 5px 8px;
+          border-right: 1px solid #ccc;
+          font-size: 10px;
+        }
 
-          .section:last-child {
-            border-bottom: none;
-          }
+        .info-cell:last-child {
+          border-right: none;
+        }
 
-          .grow {
-            flex: 1;
-          }
+        .info-label {
+          font-weight: bold;
+          font-size: 9px;
+          color: #555;
+        }
 
-          .product-line {
-            margin-top: 4px;
-            font-size: 12px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="label-container">
+        .info-value {
+          font-size: 11px;
+          margin-top: 2px;
+        }
 
-          <div class="header">
-            THE TRACE EXPRESS
-          </div>
+        .invoice-section {
+          padding: 6px 8px;
+          border-bottom: 1px solid #000;
+          font-size: 11px;
+        }
 
-          <div class="barcode-section">
-            <img src="${barcodeDataURL}" />
-            
-          </div>
+        .invoice-label {
+          font-weight: bold;
+          font-size: 10px;
+          color: #555;
+        }
 
-          <div class="content-section">
+        .ship-to {
+          padding: 8px 10px;
+          border-bottom: 1.5px solid #000;
+          flex-shrink: 0;
+        }
 
-            <div class="section">
-              <strong>FROM:</strong><br/>
-              ${order.user.fullname}<br/>
-              ${order.pickupAddress}<br/>
-              Mobile: ${order.mobile}
-            </div>
+        .ship-to-title {
+          font-weight: bold;
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
 
-            <div class="section">
-              <strong>TO:</strong><br/>
-              ${order.firstName} ${order.lastName}<br/>
-              ${order.address1}<br/>
-              ${order.country}, ${order.state}<br/>
-              ${order.pincode}<br/>
-              Mobile: ${order.mobile}
-            </div>
+        .ship-to-name {
+          font-weight: bold;
+          font-size: 13px;
+          margin-bottom: 3px;
+        }
 
-            <div class="section grow">
-              <strong>Products:</strong>
-              ${order.productItems.map(item => `
-                <div class="product-line">
-                  ${item.productName} (Qty: ${item.productQuantity})
-                  - ${order.invoiceCurrency} ${item.productPrice}
-                </div>
-              `).join('')}
-            </div>
+        .ship-to-line {
+          font-size: 11px;
+          line-height: 1.4;
+        }
 
-          </div>
+        .products {
+          flex: 1;
+          padding: 8px 10px;
+          overflow: hidden;
+        }
 
+        .products-title {
+          font-weight: bold;
+          font-size: 12px;
+          margin-bottom: 4px;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 3px;
+        }
+
+        .product-item {
+          display: flex;
+          justify-content: space-between;
+          font-size: 10px;
+          padding: 3px 0;
+          line-height: 1.4;
+          border-bottom: 1px dotted #ddd;
+        }
+
+        .product-item:last-child {
+          border-bottom: none;
+        }
+
+        .product-name {
+          flex: 1;
+          padding-right: 6px;
+        }
+
+        .product-price {
+          font-weight: bold;
+          white-space: nowrap;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="label-container">
+        
+        <!-- Header -->
+        <div class="header">THE TRACE EXPRESS</div>
+
+        <!-- Barcode -->
+        <div class="barcode-section">
+          <img src="${barcodeDataURL}" alt="Barcode" />
         </div>
 
-        <script>
-          window.onload = function() {
-            window.print();
-            window.onafterprint = function() {
-              window.close();
-            };
-          };
-        </script>
+        <!-- Order Info Grid -->
+        <div class="info-row">
+          <div class="info-cell">
+            <div class="info-label">HSN Code</div>
+            <div class="info-value">${order.HSNCode}</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-label">Shipment</div>
+            <div class="info-value">${order.shipmentType}</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-label">Date</div>
+            <div class="info-value">${formatDate(order.invoiceDate)}</div>
+          </div>
+        </div>
 
-      </body>
-    </html>
-  `);
-  };
+        <div class="info-row">
+          <div class="info-cell">
+            <div class="info-label">Weight</div>
+            <div class="info-value">${order.weight} KG</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-label">Dimensions</div>
+            <div class="info-value">${order.length}×${order.width}×${order.height} cm</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-label">AWB</div>
+            <div class="info-value">${order.lastMileAWB || 'N/A'}</div>
+          </div>
+        </div>
+
+        <!-- Invoice Name -->
+        <div class="invoice-section">
+          <span class="invoice-label">Invoice Name:</span> ${order.invoiceName}
+        </div>
+
+        <!-- Ship To -->
+        <div class="ship-to">
+          <div class="ship-to-title">SHIP TO:</div>
+          <div class="ship-to-name">${order.firstName} ${order.lastName}</div>
+          <div class="ship-to-line">${order.address1}</div>
+          <div class="ship-to-line">${order.city}, ${order.state} ${order.pincode}</div>
+          <div class="ship-to-line">${order.country}</div>
+          <div class="ship-to-line">Ph: ${order.mobile}</div>
+        </div>
+
+        <!-- Products -->
+        <div class="products">
+          <div class="products-title">PRODUCTS</div>
+          ${order.productItems.map(item => `
+            <div class="product-item">
+              <span class="product-name">${item.productName} (Qty: ${item.productQuantity})</span>
+              <span class="product-price">${order.invoiceCurrency} ${item.productPrice}</span>
+            </div>
+          `).join('')}
+        </div>
+
+      </div>
+
+      <script>
+        window.onload = function() {
+          window.print();
+          window.onafterprint = function() {
+            window.close();
+          };
+        };
+      </script>
+    </body>
+  </html>
+`);
+};
 
 
 
