@@ -155,12 +155,21 @@ const BuyerDetails = ({
               options={states.map(s => s.label)}
               includeNotApplicable={true}
               value={
-                states.find(s => s.code === formData.state)?.label || ""
+                formData.state === "NA"
+                  ? "Not Applicable"
+                  : states.find(s => s.code === formData.state)?.label || ""
               }
+
               onChange={(val) => {
+                if (val === "Not Applicable") {
+                  handleInputChange("state", "NA");
+                  return;
+                }
+
                 const selected = states.find(s => s.label === val);
                 handleInputChange("state", selected?.code || "");
               }}
+
               disabled={!formData.countryCode}
               error={errors.state}
             />
