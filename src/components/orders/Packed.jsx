@@ -422,7 +422,7 @@ const Packed = () => {
           </div>
           <div class="info-cell">
             <div class="info-label">AWB</div>
-            <div class="info-value">${order.lastMileAWB || 'N/A'}</div>
+            <div class="info-value">${order.shipmentDetails.trackingNumber || 'N/A'}</div>
           </div>
         </div>
 
