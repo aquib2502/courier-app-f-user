@@ -103,7 +103,7 @@ const Dispatched = () => {
       const filtered = orders.filter(order => 
         order.invoiceNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         `${order.firstName || ''} ${order.lastName || ''}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.lastMileAWB?.toLowerCase().includes(searchQuery.toLowerCase())
+        order.shipmentDetails.trackingNumber?.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredOrders(filtered);
     } else {
@@ -236,7 +236,7 @@ const Dispatched = () => {
   // Handle Track Shipment
   const handleTrackShipment = (order) => {
     // In a real application, you would redirect to the courier's tracking page
-    const trackingUrl = `https://track.courier.com/track/${order.lastMileAWB || order.invoiceNo}`;
+    const trackingUrl = `https://track.courier.com/track/${order.shipmentDetails.trackingNumber || order.invoiceNo}`;
     window.open(trackingUrl, '_blank');
     toast.info(`Opening tracking for ${order.invoiceNo}`);
   };
@@ -535,7 +535,7 @@ const Dispatched = () => {
                         <td className="px-4 py-3">
                           <div>
                             <p className="text-xs text-gray-600">AWB:</p>
-                            <p className="text-sm font-medium text-gray-900">{order.lastMileAWB || "Pending"}</p>
+                            <p className="text-sm font-medium text-gray-900">{order.shipmentDetails.trackingNumber || "Pending"}</p>
                             <p className="text-xs text-gray-500 mt-1">
                               Partner: The Trace Express
                             </p>

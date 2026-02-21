@@ -62,7 +62,7 @@ const CreateManifest = ({ orders, selectedPickupData, onBack }) => {
         ],
         manifestStatus: "open",
         orderStatus: "Packed",
-        lastMileAWB: "US",
+        shipmentDetails.trackingNumber: "US",
         selected: false,
       }));
     }
@@ -593,7 +593,7 @@ const manifestPayload = {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
-                          {order.lastMileAWB || "US"}
+                          {order.shipmentDetails.trackingNumber || "US"}
                         </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex justify-center gap-2">
@@ -761,7 +761,7 @@ const manifestPayload = {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.lastMileAWB || "US"}
+                        {order.shipmentDetails.trackingNumber || "US"}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex justify-center gap-2">

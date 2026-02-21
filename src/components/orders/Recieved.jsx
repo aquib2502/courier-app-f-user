@@ -102,7 +102,7 @@ const Received = () => {
         (order) =>
           order.invoiceNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           `${order.firstName} ${order.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.lastMileAWB?.toLowerCase().includes(searchQuery.toLowerCase())
+          order.shipmentDetails.trackingNumber?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -522,7 +522,7 @@ const Received = () => {
                                 </span>
                               </div>
                               <p className="text-xs text-gray-500">
-                                AWB: {order.lastMileAWB || "US" + order.invoiceNo?.slice(-6)}
+                                AWB: {order.shipmentDetails.trackingNumber || "US" + order.invoiceNo?.slice(-6)}
                               </p>
                             </div>
                           </td>
@@ -739,7 +739,7 @@ const Received = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">AWB Number:</span>
-                        <span className="font-medium">{selectedOrder.lastMileAWB || "US" + selectedOrder.invoiceNo?.slice(-6)}</span>
+                        <span className="font-medium">{selectedOrder.shipmentDetails.trackingNumber || "US" + selectedOrder.invoiceNo?.slice(-6)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Delivered By:</span>
