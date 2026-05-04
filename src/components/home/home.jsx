@@ -22,6 +22,7 @@ import AddOrder from "../orders/AddOrder/AddOrder";
 import Draft from "../orders/Drafts";
 import Ready from "../orders/Ready";
 import Packed from "../orders/Packed";
+import Clubbed from "../orders/Clubbed";
 import Manifested from "../orders/Manifested/Manifested.jsx";
 import Dispatched from "../orders/Dispatched";
 import Received from "../orders/Recieved";
@@ -241,6 +242,7 @@ const HomePage = () => {
                         "Drafts",
                         "Ready",
                         "Packed",
+                        "Clubbed",
                         "Manifested",
                         "Dispatched",
                         "Received",
@@ -644,6 +646,8 @@ const HomePage = () => {
               {activeTab === "drafts" && <Draft />}
               {activeTab === "ready" && <Ready />}
               {activeTab === "packed" && <Packed />}
+              {activeTab === "clubbed" && <Clubbed />}
+
               {activeTab === "manifested" && <Manifested /> }
               {activeTab === "dispatched" && <Dispatched />}
               {activeTab === "received" && <Received />}
