@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, Suspense, useCallback, useMemo} from "react";
+import React, { useEffect, useState, useRef, Suspense, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import {
@@ -105,30 +105,30 @@ const HomePage = () => {
   }, [router, searchParams]);
 
 
- const handleActiveTab = useCallback((tab) => {
-  setActiveTab(tab);
-  router.push(`?tab=${tab}`, { shallow: true });
+  const handleActiveTab = useCallback((tab) => {
+    setActiveTab(tab);
+    router.push(`?tab=${tab}`, { shallow: true });
 
-  // Only close sidebar if on mobile
-  if (window.innerWidth < 1024) {
-    setIsSidebarOpen(false);
-  }
+    // Only close sidebar if on mobile
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
 
-  // Don't toggle dropdowns here — leave them as is
-}, [router]);
+    // Don't toggle dropdowns here — leave them as is
+  }, [router]);
 
   // Improved dropdown animation variants with smoother transitions
   const dropdownVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       height: 0,
       transition: {
         duration: 0.2,
         ease: "easeInOut"
       }
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       height: "auto",
       transition: {
         duration: 0.25,
@@ -139,14 +139,14 @@ const HomePage = () => {
 
   // Improved sidebar animation variants
   const sidebarVariants = {
-    hidden: { 
+    hidden: {
       x: "-100%",
       transition: {
         duration: 0.3,
         ease: "easeInOut"
       }
     },
-    visible: { 
+    visible: {
       x: 0,
       transition: {
         duration: 0.3,
@@ -189,17 +189,16 @@ const HomePage = () => {
 
           <ul className="space-y-2 px-4 lg:px-0">
             {/* Dashboard Link */}
-            <motion.li 
+            <motion.li
               variants={itemHoverVariants}
               whileHover="hover"
             >
               <div
                 onClick={() => handleActiveTab("dashboard")}
                 className={`flex items-center space-x-4 py-3 px-4 cursor-pointer rounded-lg transition-all duration-200
-                  ${
-                    activeTab === "dashboard"
-                      ? "bg-emerald-700/90 text-white shadow-md"
-                      : "text-white hover:bg-emerald-800/50"
+                  ${activeTab === "dashboard"
+                    ? "bg-emerald-700/90 text-white shadow-md"
+                    : "text-white hover:bg-emerald-800/50"
                   }`}
               >
                 <BarChart2 className="w-5 h-5" />
@@ -208,7 +207,7 @@ const HomePage = () => {
             </motion.li>
 
             {/* Orders Dropdown */}
-            <motion.li 
+            <motion.li
               variants={itemHoverVariants}
               whileHover="hover"
             >
@@ -251,8 +250,8 @@ const HomePage = () => {
                         <motion.li
                           key={item}
                           initial={{ opacity: 0, x: -10 }}
-                          animate={{ 
-                            opacity: 1, 
+                          animate={{
+                            opacity: 1,
                             x: 0,
                             transition: {
                               delay: index * 0.03,
@@ -270,17 +269,16 @@ const HomePage = () => {
                                 item.toLowerCase().replace(" ", "-")
                               )
                             }
-                            className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${
-                              activeTab ===
-                              item.toLowerCase().replace(" ", "-")
+                            className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${activeTab ===
+                                item.toLowerCase().replace(" ", "-")
                                 ? "bg-emerald-600/80 text-white"
                                 : "text-gray-200 hover:bg-emerald-700/30"
-                            }`}
+                              }`}
                           >
                             <span
                               className={
                                 activeTab ===
-                                item.toLowerCase().replace(" ", "-")
+                                  item.toLowerCase().replace(" ", "-")
                                   ? "font-medium"
                                   : ""
                               }
@@ -295,9 +293,9 @@ const HomePage = () => {
                 )}
               </AnimatePresence>
             </motion.li>
-           
+
             {/* Manifested Dropdown */}
-            <motion.li 
+            <motion.li
               variants={itemHoverVariants}
               whileHover="hover"
             >
@@ -330,8 +328,8 @@ const HomePage = () => {
                         <motion.li
                           key={item}
                           initial={{ opacity: 0, x: -10 }}
-                          animate={{ 
-                            opacity: 1, 
+                          animate={{
+                            opacity: 1,
                             x: 0,
                             transition: {
                               delay: index * 0.03,
@@ -349,17 +347,16 @@ const HomePage = () => {
                                 item.toLowerCase().replace(" ", "-")
                               )
                             }
-                            className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${
-                              activeTab ===
-                              item.toLowerCase().replace(" ", "-")
+                            className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${activeTab ===
+                                item.toLowerCase().replace(" ", "-")
                                 ? "bg-emerald-600/80 text-white"
                                 : "text-gray-200 hover:bg-emerald-700/30"
-                            }`}
+                              }`}
                           >
                             <span
                               className={
                                 activeTab ===
-                                item.toLowerCase().replace(" ", "-")
+                                  item.toLowerCase().replace(" ", "-")
                                   ? "font-medium"
                                   : ""
                               }
@@ -374,19 +371,18 @@ const HomePage = () => {
                 )}
               </AnimatePresence>
             </motion.li>
-           
+
             {/* Rate Calculator Tab */}
-            <motion.li 
+            <motion.li
               variants={itemHoverVariants}
               whileHover="hover"
             >
               <div
                 onClick={() => handleActiveTab("rate-calculator")}
                 className={`flex items-center space-x-4 py-3 px-4 cursor-pointer rounded-lg transition-all duration-200
-                  ${
-                    activeTab === "rate-calculator"
-                      ? "bg-emerald-700/90 text-white shadow-md"
-                      : "text-white hover:bg-emerald-800/50"
+                  ${activeTab === "rate-calculator"
+                    ? "bg-emerald-700/90 text-white shadow-md"
+                    : "text-white hover:bg-emerald-800/50"
                   }`}
               >
                 <Calculator className="w-5 h-5" />
@@ -395,7 +391,7 @@ const HomePage = () => {
             </motion.li>
 
             {/* Wallet Dropdown */}
-            <motion.li 
+            <motion.li
               variants={itemHoverVariants}
               whileHover="hover"
             >
@@ -425,11 +421,11 @@ const HomePage = () => {
                   >
                     <ul className="space-y-1 py-1">
                       {["Recharge Wallet", "Transactions", "Invoice"].map((item, index) => (
-                        <motion.li 
-                          key={item} 
+                        <motion.li
+                          key={item}
                           initial={{ opacity: 0, x: -10 }}
-                          animate={{ 
-                            opacity: 1, 
+                          animate={{
+                            opacity: 1,
                             x: 0,
                             transition: {
                               delay: index * 0.03,
@@ -445,11 +441,10 @@ const HomePage = () => {
                             onClick={() =>
                               handleActiveTab(item.toLowerCase().replace(" ", "-"))
                             }
-                            className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${
-                              activeTab === item.toLowerCase().replace(" ", "-")
+                            className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${activeTab === item.toLowerCase().replace(" ", "-")
                                 ? "bg-emerald-600/80 text-white"
                                 : "text-gray-200 hover:bg-emerald-700/30"
-                            }`}
+                              }`}
                           >
                             <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>
                               {item}
@@ -464,7 +459,7 @@ const HomePage = () => {
             </motion.li>
 
             {/* Settings Dropdown */}
-            <motion.li 
+            <motion.li
               variants={itemHoverVariants}
               whileHover="hover"
             >
@@ -495,11 +490,11 @@ const HomePage = () => {
                     <ul className="space-y-1 py-1">
                       {["Profile", "Pickup Addresses", "KYC Details"].map(
                         (item, index) => (
-                          <motion.li 
-                            key={item} 
+                          <motion.li
+                            key={item}
                             initial={{ opacity: 0, x: -10 }}
-                            animate={{ 
-                              opacity: 1, 
+                            animate={{
+                              opacity: 1,
                               x: 0,
                               transition: {
                                 delay: index * 0.03,
@@ -515,11 +510,10 @@ const HomePage = () => {
                               onClick={() =>
                                 handleActiveTab(item.toLowerCase().replace(" ", "-"))
                               }
-                              className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${
-                                activeTab === item.toLowerCase().replace(" ", "-")
+                              className={`flex items-center w-full py-2 px-3 rounded-md text-sm transition-all duration-150 ${activeTab === item.toLowerCase().replace(" ", "-")
                                   ? "bg-emerald-600/80 text-white"
                                   : "text-gray-200 hover:bg-emerald-700/30"
-                              }`}
+                                }`}
                             >
                               <span className={activeTab === item.toLowerCase().replace(" ", "-") ? "font-medium" : ""}>
                                 {item}
@@ -553,7 +547,7 @@ const HomePage = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <Navbar balance={balance} />
       </Suspense>
-      
+
       <div className="flex flex-grow relative">
         {/* Mobile Sidebar Toggle Button - Fixed to bottom right */}
         <motion.button
@@ -561,7 +555,7 @@ const HomePage = () => {
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15 }}
           onClick={toggleSidebar}
-          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-emerald-600 text-white rounded-full shadow-2xl hover:bg-emerald-700 transition-all duration-200"
+          className="lg:hidden fixed bottom-6 left-6 z-50 p-4 bg-emerald-600 text-white rounded-full shadow-2xl hover:bg-emerald-700 transition-all duration-200"
         >
           <motion.div
             animate={{ rotate: isSidebarOpen ? 90 : 0 }}
@@ -578,52 +572,52 @@ const HomePage = () => {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="hidden lg:block w-72 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white p-6 shadow-xl"
         >
-{SidebarContent}
+          {SidebarContent}
         </motion.div>
 
         {/* Mobile Sidebar Overlay */}
-<AnimatePresence>
-  {isSidebarOpen && (
-    <>
-      {/* Overlay */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="lg:hidden fixed inset-0 bg-opacity-40 backdrop-blur-sm z-40"
-        onClick={() => setIsSidebarOpen(false)}
-      />
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <>
+              {/* Overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="lg:hidden fixed inset-0 bg-opacity-40 backdrop-blur-sm z-40"
+                onClick={() => setIsSidebarOpen(false)}
+              />
 
-      {/* Sidebar */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={sidebarVariants}
-        className="lg:hidden fixed left-0 top-0 bottom-0 w-64 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white z-50 shadow-2xl overflow-y-auto"
-      >
-        <div className="p-4 h-full flex flex-col">
-          {/* Close Button */}
-          <div className="flex justify-end mb-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              onClick={() => setIsSidebarOpen(false)}
-              className="p-2 rounded-full bg-emerald-700/30 hover:bg-emerald-700/50 transition-all duration-200"
-            >
-              <X className="w-5 h-5" />
-            </motion.button>
-          </div>
+              {/* Sidebar */}
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                variants={sidebarVariants}
+                className="lg:hidden fixed left-0 top-0 bottom-0 w-64 bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white z-50 shadow-2xl overflow-y-auto"
+              >
+                <div className="p-4 h-full flex flex-col">
+                  {/* Close Button */}
+                  <div className="flex justify-end mb-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      onClick={() => setIsSidebarOpen(false)}
+                      className="p-2 rounded-full bg-emerald-700/30 hover:bg-emerald-700/50 transition-all duration-200"
+                    >
+                      <X className="w-5 h-5" />
+                    </motion.button>
+                  </div>
 
-          {/* Sidebar Content */}
-          {SidebarContent}
-        </div>
-      </motion.div>
-    </>
-  )}
-</AnimatePresence>
+                  {/* Sidebar Content */}
+                  {SidebarContent}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Main Content */}
         <motion.div
@@ -648,11 +642,11 @@ const HomePage = () => {
               {activeTab === "packed" && <Packed />}
               {activeTab === "clubbed" && <Clubbed />}
 
-              {activeTab === "manifested" && <Manifested /> }
+              {activeTab === "manifested" && <Manifested />}
               {activeTab === "dispatched" && <Dispatched />}
               {activeTab === "received" && <Received />}
               {activeTab === "cancelled" && <Cancelled />}
-              {activeTab === "disputed" && <Dispute />} 
+              {activeTab === "disputed" && <Dispute />}
               {activeTab === "rate-calculator" && <RateCalculator />}
               {activeTab === "recharge-wallet" && (
                 <RechargeWallet onRecharge={handleRecharge} />
@@ -664,12 +658,12 @@ const HomePage = () => {
               {activeTab === "pickup-request" && <PickupRequest />}
               {activeTab === "profile" && <MyProfile />}
               {activeTab === "pickup-addresses" && <PickupAddresses />}
-              {activeTab === "kyc-details" && <KYCDetails />} 
+              {activeTab === "kyc-details" && <KYCDetails />}
             </motion.div>
           </AnimatePresence>
         </motion.div>
       </div>
-      
+
       <Footer />
     </div>
   );
